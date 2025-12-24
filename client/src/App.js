@@ -5,7 +5,7 @@ import { useAuth } from './context/authContext';
 import Login from './components/Login';
 import Register from './components/Register';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
