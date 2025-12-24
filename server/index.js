@@ -13,18 +13,35 @@ const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
   'http://localhost:3000',
-  process.env.FRONTEND_URL // We'll set this later
-];
+  'https://elysium-rho-navy.vercel.app',
+  process.env.FRONTEND_URL
+].filter(Boolean); // Remove any undefined values
+
+console.log('Allowed origins:', allowedOrigins); // Debug log
 
 app.use(cors({
   origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      return callback(new Error('CORS not allowed'), false);
+    
+    // Check if origin is in allowed list
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      // Remove trailing slash for comparison
+      const normalizedAllowed = allowedOrigin.replace(/\/$/, '');
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      return normalizedAllowed === normalizedOrigin;
+    });
+    
+    if (isAllowed) {
+      return callback(null, true);
     }
-    return callback(null, true);
+    
+    console.log('CORS blocked origin:', origin); // Debug log
+    return callback(new Error('Not allowed by CORS'), false);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
