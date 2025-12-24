@@ -51,25 +51,34 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
+// Health check endpoint
 app.get('/', (req, res) => {
-  res.json({ message: 'Book Library API is running!' });
+  res.json({ 
+    message: 'Book Library API is running!',
+    allowedOrigins: allowedOrigins 
+  });
 });
 
+// ===== AUTH ROUTES =====
+
+// Register
 app.post('/api/auth/register', async (req, res) => {
   try {
+    console.log('Register request received:', req.body);
     const { username, email, password } = req.body;
 
-    // Check if user exists
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'Please provide all required fields' });
+    }
+
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    // Create new user
     const user = new User({ username, email, password });
     await user.save();
 
-    // Create empty library for user
     const library = new Library({
       userId: user._id,
       toRead: [],
@@ -78,7 +87,6 @@ app.post('/api/auth/register', async (req, res) => {
     });
     await library.save();
 
-    // Create token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: '7d'
     });
@@ -97,23 +105,22 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+// Login
 app.post('/api/auth/login', async (req, res) => {
   try {
+    console.log('Login request received:', req.body);
     const { email, password } = req.body;
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Create token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: '7d'
     });
@@ -132,6 +139,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Get current user
 app.get('/api/auth/me', auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId).select('-password');
