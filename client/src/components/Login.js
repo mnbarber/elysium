@@ -25,11 +25,11 @@ function Login({ onSwitchToRegister }) {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Login to Book Library</h2>
+        <h2>login to elysium</h2>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Email</label>
+            <label>email</label>
             <input
               type="email"
               value={email}
@@ -38,7 +38,7 @@ function Login({ onSwitchToRegister }) {
             />
           </div>
           <div className="form-group">
-            <label>Password</label>
+            <label>password</label>
             <input
               type="password"
               value={password}
@@ -47,7 +47,7 @@ function Login({ onSwitchToRegister }) {
             />
           </div>
           <button type="submit" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Logging in...' : 'login'}
           </button>
         </form>
         <p className="switch-auth">

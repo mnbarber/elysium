@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import './App.css';
 import axios from 'axios';
 import { useAuth } from './context/authContext';
 import Login from './components/Login';
 import Register from './components/Register';
+import Profile from './components/Profile';
+import EditProfile from './components/EditProfile';
+import UserSearch from './components/UserSearch';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
-function App() {
+function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [libraries, setLibraries] = useState({
@@ -17,9 +21,7 @@ function App() {
   });
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('search');
-  const [showRegister, setShowRegister] = useState(false);
-
-  const { user, logout, loading: authLoading } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -95,28 +97,8 @@ function App() {
     }
   };
 
-  if (authLoading) {
-    return <div className="loading-screen">Loading...</div>;
-  }
-
-  if (!user) {
-    return showRegister ? (
-      <Register onSwitchToLogin={() => setShowRegister(false)} />
-    ) : (
-      <Login onSwitchToRegister={() => setShowRegister(true)} />
-    );
-  }
-
   return (
-    <div className="App">
-      <header>
-        <h1>📚 My Book Library</h1>
-        <div className="user-info">
-          <span>Welcome, {user.username}!</span>
-          <button onClick={logout} className="logout-btn">Logout</button>
-        </div>
-      </header>
-
+    <div className="home-page">
       <nav className="tabs">
         <button 
           className={activeTab === 'search' ? 'active' : ''}
@@ -204,14 +186,14 @@ function App() {
                           defaultValue=""
                         >
                           <option value="" disabled>Move to...</option>
-                          {Object.keys(libraries).map((lib) => (
-                            lib !== libraryName && (
+                          {Object.keys(libraries)
+                            .filter(lib => lib !== libraryName)
+                            .map(lib => (
                               <option key={lib} value={lib}>
                                 {lib.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                               </option>
-                            )
-                          ))}
-                          <option value="remove">Remove from Library</option>
+                            ))}
+                          <option value="remove">Remove</option>
                         </select>
                       </div>
                     </div>
@@ -223,6 +205,52 @@ function App() {
         </div>
       )}
     </div>
+  );
+}
+
+function App() {
+  const { user, logout, loading: authLoading } = useAuth();
+  const [showRegister, setShowRegister] = useState(false);
+
+  if (authLoading) {
+    return <div className="loading-screen">Loading...</div>;
+  }
+
+  if (!user) {
+    return showRegister ? (
+      <Register onSwitchToLogin={() => setShowRegister(false)} />
+    ) : (
+      <Login onSwitchToRegister={() => setShowRegister(true)} />
+    );
+  }
+
+  return (
+    <Router>
+      <div className="App">
+        <header>
+          <Link to="/" className="logo">
+            <h1>elysium</h1>
+          </Link>
+          <nav className="header-nav">
+            <Link to="/users">Find Users</Link>
+            <Link to={`/profile/${user.username}`}>My Profile</Link>
+            <Link to="/edit-profile">Edit Profile</Link>
+          </nav>
+          <div className="user-info">
+            <span>Welcome, {user.username}!</span>
+            <button onClick={logout} className="logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/profile/:username" element={<Profile />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/users" element={<UserSearch />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

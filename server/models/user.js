@@ -21,6 +21,24 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  profile: {
+    displayName: {
+      type: String,
+      default: ''
+    },
+    bio: {
+      type: String,
+      default: ''
+    },
+    avatarUrl: {
+      type: String,
+      default: ''
+    },
+    isPublic: {
+      type: Boolean,
+      default: true
+    }
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -40,5 +58,15 @@ userSchema.pre('save', async function() {
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Method to get public profile
+userSchema.methods.getPublicProfile = function() {
+  return {
+    username: this.username,
+    displayName: this.profile.displayName || this.username,
+    bio: this.profile.bio,
+    avatarUrl: this.profile.avatarUrl
+  };
+}
 
 module.exports = mongoose.model('User', userSchema);

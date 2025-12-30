@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:3001',
   'https://elysium-rho-navy.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean); // Remove any undefined values
@@ -149,6 +150,9 @@ app.get('/api/auth/me', auth, async (req, res) => {
   }
 });
 
+// ===== BOOK & LIBRARY ROUTES =====
+
+// search books with Open Library API
 app.get('/api/books/search', async (req, res) => {
     try {
         const { q } = req.query;
@@ -159,6 +163,7 @@ app.get('/api/books/search', async (req, res) => {
     }
 });
 
+// Get user's libraries
 app.get('/api/libraries', auth, async (req, res) => {
   try {
     let library = await Library.findOne({ userId: req.userId });
@@ -184,6 +189,7 @@ app.get('/api/libraries', auth, async (req, res) => {
   }
 });
 
+// Add book to library
 app.post('/api/libraries/:libraryName', auth, async (req, res) => {
   try {
     const { libraryName } = req.params;
@@ -228,6 +234,7 @@ app.post('/api/libraries/:libraryName', auth, async (req, res) => {
   }
 });
 
+// Remove book from library
 app.delete('/api/libraries/:libraryName/:bookKey', auth, async (req, res) => {
   try {
     const { libraryName, bookKey } = req.params;
@@ -266,6 +273,7 @@ app.delete('/api/libraries/:libraryName/:bookKey', auth, async (req, res) => {
   }
 });
 
+// Move book between libraries
 app.post('/api/libraries/move', auth, async (req, res) => {
   try {
     const { book, fromLibrary, toLibrary } = req.body;
@@ -306,6 +314,98 @@ app.post('/api/libraries/move', auth, async (req, res) => {
   } catch (error) {
     console.error('Error moving book:', error);
     res.status(500).json({ error: 'Error moving book' });
+  }
+});
+
+// ====== PROFILE ROUTES ======
+
+// get public profile by username
+app.get('/api/profile/:username', async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    //get user's libraries
+    const library = await Library.findOne({ userId: user._id });
+
+    res.json({
+      profile: user.getPublicProfile(),
+      stats: {
+        toReadCount: library ? library.toRead.length : 0,
+        currentlyReadingCount: library ? library.currentlyReading.length : 0,
+        readCount: library ? library.read.length : 0
+      },
+      libraries: user.profile.isPublic ? {
+        'to-read': library ? library.toRead : [],
+        'currently-reading': library ? library.currentlyReading : [],
+        'read': library ? library.read : []
+      } : null
+    });
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    res.status(500).json({ error: 'Error fetching profile' });
+  }
+});
+
+// update profile
+app.put('/api/profile', auth, async (req, res) => {
+  try {
+    const { displayName, bio, avatarUrl, isPublic } = req.body;
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.profile.displayName = displayName || user.profile.displayName;
+    user.profile.bio = bio || user.profile.bio;
+    user.profile.avatarUrl = avatarUrl || user.profile.avatarUrl;
+    if (typeof isPublic === 'boolean') {
+      user.profile.isPublic = isPublic;
+    }
+
+    await user.save();
+
+    res.json({ message: 'Profile updated successfully', profile: user.getPublicProfile() });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ error: 'Error updating profile' });
+  }
+});
+
+// get own profile
+app.get('/api/profile', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ profile: user.getPublicProfile() });
+  } catch (error) {
+    console.error('Error fetching own profile:', error);
+    res.status(500).json({ error: 'Error fetching profile' });
+  }
+});
+
+// search users by username
+app.get('/api/users/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim() === '') {
+      return res.json({ users: [] });
+    }
+
+    const regex = new RegExp(q, 'i'); // case-insensitive search
+    const users = await User.find({ username: regex }).select('username profile.displayName profile.avatarUrl');
+
+    res.json({ users: users.map(user => user.getPublicProfile()) });
+  } catch (error) {
+    console.error('Error searching users:', error);
+    res.status(500).json({ error: 'Error searching users' });
   }
 });
 
