@@ -312,3 +312,33 @@ header {
     grid-template-columns: 1fr;
   }
 }
+
+.rating-section {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.rating-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.rating-hint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.book-rating {
+  margin: 10px 0;
+}
+
+.library-book-card .book-rating {
+  padding: 8px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}

@@ -8,6 +8,7 @@ import Register from './components/Register';
 import Profile from './components/Profile';
 import EditProfile from './components/EditProfile';
 import UserSearch from './components/UserSearch';
+import StarRating from './components/StarRating';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -66,7 +67,8 @@ function HomePage() {
         coverUrl: book.cover_i 
           ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
           : null,
-        firstPublishYear: book.first_publish_year
+        firstPublishYear: book.first_publish_year,
+        rating: 0
       };
 
       await axios.post(`${API_URL}/libraries/${libraryName}`, bookData);
@@ -74,6 +76,41 @@ function HomePage() {
       alert('Book added successfully!');
     } catch (error) {
       alert(error.response?.data?.error || 'Error adding book');
+    }
+  };
+
+  const rateBook = async (book, rating) => {
+    try {
+      const bookData = {
+        key: book.key,
+        title: book.title,
+        author: book.author_name?.[0] || 'Unknown',
+        coverUrl: book.cover_i 
+          ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+          : null,
+        firstPublishYear: book.first_publish_year
+      };
+
+      const response = await axios.post(`${API_URL}/books/rate`, {
+        book: bookData,
+        rating
+      });
+
+      setLibraries(response.data.libraries);
+      alert(response.data.message);
+    } catch (error) {
+      console.error('Error rating book:', error);
+    }
+  };
+
+  const updateRating = async (bookKey, rating) => {
+    try {
+      await axios.put(`${API_URL}/books/rate/${encodeURIComponent(bookKey)}`, {
+        rating: rating
+      });
+      await fetchLibraries();
+    } catch (error) {
+      console.error('Error updating rating:', error);
     }
   };
 
@@ -143,6 +180,16 @@ function HomePage() {
                   <h3>{book.title}</h3>
                   <p>by {book.author_name?.[0] || 'Unknown'}</p>
                   <p className="year">{book.first_publish_year}</p>
+
+                  <div className="rating-section">
+                    <p className="rating-label">Rate this book:</p>
+                    <StarRating
+                      rating={0}
+                      onRate={(rating) => rateBook(book, rating)}
+                      size="medium"
+                    />
+                  </div>
+
                   <div className="button-group">
                     <button onClick={() => addToLibrary(book, 'to-read')}>
                       To Read
@@ -187,6 +234,17 @@ function HomePage() {
                       <div className="book-info">
                         <h4>{book.title}</h4>
                         <p>by {book.author}</p>
+
+                        {libraryName === 'read' && (
+                          <div className="book-rating">
+                            <StarRating
+                              rating={book.rating || 0}
+                              onRate={(rating) => updateRating(book.key, rating)}
+                              size="small"
+                            />
+                          </div>
+                        )}
+
                         <select
                           onChange={(e) => {
                             if (e.target.value === 'remove') {

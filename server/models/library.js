@@ -12,6 +12,12 @@ const bookSchema = new mongoose.Schema({
   author: String,
   coverUrl: String,
   firstPublishYear: Number,
+  rating: {
+    type: Number,
+    min: 0,
+    max: 5,
+    default: 0
+  },
   addedAt: {
     type: Date,
     default: Date.now

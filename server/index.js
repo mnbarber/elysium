@@ -351,6 +351,135 @@ app.post('/api/libraries/move', auth, async (req, res) => {
   }
 });
 
+// rate a book -- adds to 'read' if not already in a library
+app.post('/api/books/rate', auth, async (req, res) => {
+  try {
+    const { book, rating } = req.body;
+  
+    if(!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+  
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+  
+    // Check if book is already in any library
+    const allLibraries = ['toRead', 'currentlyReading', 'read', 'paused', 'dnf'];
+    let bookFound = false;
+    let bookLibrary = null;
+  
+    for (const lib of allLibraries) {
+      const bookIndex = library[lib].findIndex(b => b.key === book.key);
+      if (bookIndex !== -1) {
+        bookFound = true;
+        bookLibrary = lib;
+        // Update rating if in 'read' library
+        if (lib === 'read') {
+          library[lib][bookIndex].rating = rating;
+          await library.save();
+
+          return res.json({
+            message: 'Book rating updated successfully',
+            book: library[lib][bookIndex],
+            libraries: {
+              'to-read': library.toRead || [],
+              'currently-reading': library.currentlyReading || [],
+              'read': library.read || [],
+              'paused': library.paused || [],
+              'dnf': library.dnf || []
+            }
+          });
+        }
+
+        // if book is in another library, move it to 'read' with rating
+        const bookToMove = library[lib][bookIndex];
+        bookToMove.rating = rating;
+        library[lib].splice(bookIndex, 1);
+        library.read.push(bookToMove);
+        await library.save();
+
+        return res.json({
+          message: 'Book moved to Read library with rating',
+          book: bookToMove,
+          libraries: {
+            'to-read': library.toRead || [],
+            'currently-reading': library.currentlyReading || [],
+            'read': library.read || [],
+            'paused': library.paused || [],
+            'dnf': library.dnf || []
+          }
+        });
+      }
+    }
+  
+    // If book not found in any library, add to 'read' with rating
+    const newBook = {
+      ...book,
+      rating: rating
+    };
+    library.read.push(newBook);
+    await library.save();
+  
+    res.json({
+      message: 'Book added to Read library with rating',
+      book: newBook,
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+  } catch (error) {
+    console.error('Error rating book:', error);
+    res.status(500).json({ error: 'Error rating book' });
+  }
+});
+
+// update rating for a book already in 'read'
+app.put('/api/books/rate/:bookKey', auth, async (req, res) => {
+  try {
+    const { bookKey } = req.params;
+    const { rating } = req.body;
+    const decodedKey = decodeURIComponent(bookKey);
+
+    if(!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    const bookIndex = library.read.findIndex(b => b.key === decodedKey);
+    if (bookIndex === -1) {
+      return res.status(404).json({ error: 'Book not found in Read library' });
+    }
+
+    library.read[bookIndex].rating = rating;
+    await library.save();
+
+    res.json({
+      message: 'Book rating updated successfully',
+      book: library.read[bookIndex],
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+  } catch (error) {
+    console.error('Error updating book rating:', error);
+    res.status(500).json({ error: 'Error updating book rating' });
+  }
+});
+
 // ====== PROFILE ROUTES ======
 
 // get public profile by username

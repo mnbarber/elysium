@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
+import StarRating from './StarRating';
 import './Profile.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -138,6 +139,11 @@ function Profile() {
                     <div className="book-details">
                       <h4>{book.title}</h4>
                       <p>{book.author}</p>
+                      {activeTab === 'read' && book.rating > 0 && (
+                        <div className="book-rating-display">
+                          <StarRating rating={book.rating} readonly size="small" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
