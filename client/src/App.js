@@ -17,7 +17,9 @@ function HomePage() {
   const [libraries, setLibraries] = useState({
     'to-read': [],
     'currently-reading': [],
-    'read': []
+    'read': [],
+    'paused': [],
+    'dnf': []
   });
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('search');
@@ -151,6 +153,12 @@ function HomePage() {
                     <button onClick={() => addToLibrary(book, 'read')}>
                       Read
                     </button>
+                    <button onClick={() => addToLibrary(book, 'paused')}>
+                      Paused
+                    </button>
+                    <button onClick={() => addToLibrary(book, 'dnf')}>
+                      DNF
+                    </button>
                   </div>
                 </div>
               </div>
@@ -163,7 +171,12 @@ function HomePage() {
         <div className="libraries-section">
           {Object.entries(libraries).map(([libraryName, books]) => (
             <div key={libraryName} className="library">
-              <h2>{libraryName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</h2>
+              <h2>
+                {libraryName === 'dnf' 
+                  ? 'DNF (Did Not Finish)' 
+                  : libraryName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                }
+              </h2>
               <div className="library-books">
                 {books.length === 0 ? (
                   <p className="empty">No books in this library yet</p>
@@ -190,7 +203,10 @@ function HomePage() {
                             .filter(lib => lib !== libraryName)
                             .map(lib => (
                               <option key={lib} value={lib}>
-                                {lib.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                                {lib === 'dnf' 
+                                  ? 'DNF (Did Not Finish)' 
+                                  : lib.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                                }
                               </option>
                             ))}
                           <option value="remove">Remove</option>

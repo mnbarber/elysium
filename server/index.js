@@ -173,7 +173,9 @@ app.get('/api/libraries', auth, async (req, res) => {
         userId: req.userId,
         toRead: [],
         currentlyReading: [],
-        read: []
+        read: [],
+        paused: [],
+        dnf: []
       });
       await library.save();
     }
@@ -181,7 +183,9 @@ app.get('/api/libraries', auth, async (req, res) => {
     res.json({
       'to-read': library.toRead,
       'currently-reading': library.currentlyReading,
-      'read': library.read
+      'read': library.read,
+      'paused': library.paused,
+      'dnf': library.dnf
     });
   } catch (error) {
     console.error('Error fetching libraries:', error);
@@ -203,12 +207,19 @@ app.post('/api/libraries/:libraryName', auth, async (req, res) => {
     const fieldMap = {
       'to-read': 'toRead',
       'currently-reading': 'currentlyReading',
-      'read': 'read'
+      'read': 'read',
+      'paused': 'paused',
+      'dnf': 'dnf'
     };
 
     const field = fieldMap[libraryName];
     if (!field) {
       return res.status(400).json({ error: 'Invalid library name' });
+    }
+
+    // Initialize field if it doesn't exist
+    if (!library[field]) {
+      library[field] = [];
     }
 
     // Check if book already exists
@@ -223,9 +234,11 @@ app.post('/api/libraries/:libraryName', auth, async (req, res) => {
     res.json({
       message: 'Book added successfully',
       libraries: {
-        'to-read': library.toRead,
-        'currently-reading': library.currentlyReading,
-        'read': library.read
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
       }
     });
   } catch (error) {
@@ -248,12 +261,19 @@ app.delete('/api/libraries/:libraryName/:bookKey', auth, async (req, res) => {
     const fieldMap = {
       'to-read': 'toRead',
       'currently-reading': 'currentlyReading',
-      'read': 'read'
+      'read': 'read',
+      'paused': 'paused',
+      'dnf': 'dnf'
     };
 
     const field = fieldMap[libraryName];
     if (!field) {
       return res.status(400).json({ error: 'Invalid library name' });
+    }
+
+     // Initialize field if it doesn't exist
+    if (!library[field]) {
+      library[field] = [];
     }
 
     library[field] = library[field].filter(book => book.key !== decodedKey);
@@ -262,9 +282,11 @@ app.delete('/api/libraries/:libraryName/:bookKey', auth, async (req, res) => {
     res.json({
       message: 'Book removed successfully',
       libraries: {
-        'to-read': library.toRead,
-        'currently-reading': library.currentlyReading,
-        'read': library.read
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
       }
     });
   } catch (error) {
@@ -286,19 +308,29 @@ app.post('/api/libraries/move', auth, async (req, res) => {
     const fieldMap = {
       'to-read': 'toRead',
       'currently-reading': 'currentlyReading',
-      'read': 'read'
+      'read': 'read',
+      'paused': 'paused',
+      'dnf': 'dnf'
     };
 
     // Remove from old library
     if (fromLibrary && fieldMap[fromLibrary]) {
       const fromField = fieldMap[fromLibrary];
+      if (!library[fromField]) {
+        library[fromField] = [];
+      }
       library[fromField] = library[fromField].filter(b => b.key !== book.key);
     }
 
     // Add to new library
     const toField = fieldMap[toLibrary];
-    if (toField && !library[toField].some(b => b.key === book.key)) {
-      library[toField].push(book);
+    if (toField) {
+      if (!library[toField]) {
+        library[toField] = [];
+      }
+      if (!library[toField].some(b => b.key === book.key)) {
+        library[toField].push(book);
+      }
     }
 
     await library.save();
@@ -306,9 +338,11 @@ app.post('/api/libraries/move', auth, async (req, res) => {
     res.json({
       message: 'Book moved successfully',
       libraries: {
-        'to-read': library.toRead,
-        'currently-reading': library.currentlyReading,
-        'read': library.read
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
       }
     });
   } catch (error) {
@@ -336,12 +370,16 @@ app.get('/api/profile/:username', async (req, res) => {
       stats: {
         toReadCount: library ? library.toRead.length : 0,
         currentlyReadingCount: library ? library.currentlyReading.length : 0,
-        readCount: library ? library.read.length : 0
+        readCount: library ? library.read.length : 0,
+        pausedCount: library ? library.paused.length : 0,
+        dnfCount: library ? library.dnf.length : 0
       },
       libraries: user.profile.isPublic ? {
         'to-read': library ? library.toRead : [],
         'currently-reading': library ? library.currentlyReading : [],
-        'read': library ? library.read : []
+        'read': library ? library.read : [],
+        'paused': library ? library.paused : [],
+        'dnf': library ? library.dnf : []
       } : null
     });
   } catch (error) {

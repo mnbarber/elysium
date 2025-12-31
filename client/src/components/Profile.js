@@ -80,6 +80,14 @@ function Profile() {
           <div className="stat-number">{stats.readCount}</div>
           <div className="stat-label">Read</div>
         </div>
+        <div className="stat">
+          <div className="stat-number">{stats.pausedCount}</div>
+          <div className="stat-label">Paused</div>
+        </div>
+        <div className="stat">
+          <div className="stat-number">{stats.dnfCount}</div>
+          <div className="stat-label">DNF</div>
+        </div>
       </div>
 
       {libraries && (
@@ -102,6 +110,18 @@ function Profile() {
               onClick={() => setActiveTab('read')}
             >
               Read ({stats.readCount})
+            </button>
+            <button
+              className={activeTab === 'paused' ? 'active' : ''}
+              onClick={() => setActiveTab('paused')}
+            >
+              Paused ({stats.pausedCount})
+            </button>
+            <button
+              className={activeTab === 'dnf' ? 'active' : ''}
+              onClick={() => setActiveTab('dnf')}
+            >
+              DNF ({stats.dnfCount})
             </button>
           </div>
 

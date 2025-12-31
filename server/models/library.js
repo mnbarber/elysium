@@ -26,7 +26,9 @@ const librarySchema = new mongoose.Schema({
   },
   toRead: [bookSchema],
   currentlyReading: [bookSchema],
-  read: [bookSchema]
+  read: [bookSchema],
+  paused: [bookSchema],
+  dnf: [bookSchema]
 }, {
   timestamps: true
 });
