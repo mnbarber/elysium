@@ -236,6 +236,102 @@ app.get('/api/libraries', auth, async (req, res) => {
   }
 });
 
+// Move book between libraries
+console.log('Moving book route loading');
+app.post('/api/libraries/move', auth, async (req, res) => {
+  try {
+    console.log('move request received:', req.body);
+    const { book, fromLibrary, toLibrary } = req.body;
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    const fieldMap = {
+      'to-read': 'toRead',
+      'currently-reading': 'currentlyReading',
+      'read': 'read',
+      'paused': 'paused',
+      'dnf': 'dnf'
+    };
+
+    // Find the book in the source library
+    let bookToMove = null;
+    if (fromLibrary && fieldMap[fromLibrary]) {
+      const fromField = fieldMap[fromLibrary];
+      if (!library[fromField]) {
+        library[fromField] = [];
+      }
+      const bookIndex = library[fromField].findIndex(b => b.key === book.key);
+      if (bookIndex !== -1) {
+        bookToMove = library[fromField][bookIndex];
+        library[fromField].splice(bookIndex, 1);
+      }
+    }
+
+    // If moving to 'read' library, increment readCount
+    if (toLibrary === 'read' && bookToMove) {
+      bookToMove.readCount = (bookToMove.readCount || 0) + 1;
+    }
+
+    // Add to new library
+    const toField = fieldMap[toLibrary];
+    if (toField) {
+      if (!library[toField]) {
+        library[toField] = [];
+      }
+      // Use bookToMove if we found it, otherwise use the book from request
+      const bookData = bookToMove || book;
+      if (!library[toField].some(b => b.key === bookData.key)) {
+        library[toField].push(bookData);
+      }
+    }
+
+    await library.save();
+
+    // Create activity
+    if (toLibrary === 'read') {
+      const activityBook = bookToMove || book;
+      await createActivity(req.userId, 'finished_book', {
+        book: {
+          key: activityBook.key,
+          title: activityBook.title,
+          author: activityBook.author,
+          coverUrl: activityBook.coverUrl
+        }
+      });
+    } else {
+      const activityBook = bookToMove || book;
+      await createActivity(req.userId, 'moved_book', {
+        book: {
+          key: activityBook.key,
+          title: activityBook.title,
+          author: activityBook.author,
+          coverUrl: activityBook.coverUrl,
+          readCount: activityBook.readCount || 0
+        },
+        fromLibrary: fromLibrary,
+        toLibrary: toLibrary
+      });
+    }
+
+    res.json({
+      message: 'Book moved successfully',
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+  } catch (error) {
+    console.error('Error moving book:', error);
+    res.status(500).json({ error: 'Error moving book' });
+  }
+});
+
 // Add book to library
 app.post('/api/libraries/:libraryName', auth, async (req, res) => {
   try {
@@ -348,100 +444,7 @@ app.delete('/api/libraries/:libraryName/:bookKey', auth, async (req, res) => {
   }
 });
 
-// Move book between libraries
-app.post('/api/libraries/move', auth, async (req, res) => {
-  try {
-    console.log('move request received:', req.body);
-    const { book, fromLibrary, toLibrary } = req.body;
 
-    const library = await Library.findOne({ userId: req.userId });
-    if (!library) {
-      return res.status(404).json({ error: 'Library not found' });
-    }
-
-    const fieldMap = {
-      'to-read': 'toRead',
-      'currently-reading': 'currentlyReading',
-      'read': 'read',
-      'paused': 'paused',
-      'dnf': 'dnf'
-    };
-
-    // Find the book in the source library
-    let bookToMove = null;
-    if (fromLibrary && fieldMap[fromLibrary]) {
-      const fromField = fieldMap[fromLibrary];
-      if (!library[fromField]) {
-        library[fromField] = [];
-      }
-      const bookIndex = library[fromField].findIndex(b => b.key === book.key);
-      if (bookIndex !== -1) {
-        bookToMove = library[fromField][bookIndex];
-        library[fromField].splice(bookIndex, 1);
-      }
-    }
-
-    // If moving to 'read' library, increment readCount
-    if (toLibrary === 'read' && bookToMove) {
-      bookToMove.readCount = (bookToMove.readCount || 0) + 1;
-    }
-
-    // Add to new library
-    const toField = fieldMap[toLibrary];
-    if (toField) {
-      if (!library[toField]) {
-        library[toField] = [];
-      }
-      // Use bookToMove if we found it, otherwise use the book from request
-      const bookData = bookToMove || book;
-      if (!library[toField].some(b => b.key === bookData.key)) {
-        library[toField].push(bookData);
-      }
-    }
-
-    await library.save();
-
-    // Create activity
-    if (toLibrary === 'read') {
-      const activityBook = bookToMove || book;
-      await createActivity(req.userId, 'finished_book', {
-        book: {
-          key: activityBook.key,
-          title: activityBook.title,
-          author: activityBook.author,
-          coverUrl: activityBook.coverUrl
-        }
-      });
-    } else {
-      const activityBook = bookToMove || book;
-      await createActivity(req.userId, 'moved_book', {
-        book: {
-          key: activityBook.key,
-          title: activityBook.title,
-          author: activityBook.author,
-          coverUrl: activityBook.coverUrl,
-          readCount: activityBook.readCount || 0
-        },
-        fromLibrary: fromLibrary,
-        toLibrary: toLibrary
-      });
-    }
-
-    res.json({
-      message: 'Book moved successfully',
-      libraries: {
-        'to-read': library.toRead || [],
-        'currently-reading': library.currentlyReading || [],
-        'read': library.read || [],
-        'paused': library.paused || [],
-        'dnf': library.dnf || []
-      }
-    });
-  } catch (error) {
-    console.error('Error moving book:', error);
-    res.status(500).json({ error: 'Error moving book' });
-  }
-});
 
 console.log('7. rating routes loading');
 
