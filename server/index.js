@@ -6,7 +6,23 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const User = require('./models/user');
 const Library = require('./models/library');
+const Friend = require('./models/friend');
+const Activity = require('./models/activity');
 const auth = require('./middleware/auth');
+
+// create activity
+const createActivity = async (userId, activityType, data) => {
+  try {
+    const activity = new Activity({
+      userId,
+      activityType,
+      ...data
+    });
+    await activity.save();
+  } catch (error) {
+    console.error('Error creating activity:', error);
+  }
+};
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -231,6 +247,16 @@ app.post('/api/libraries/:libraryName', auth, async (req, res) => {
     library[field].push(book);
     await library.save();
 
+    await createActivity(req.userId, 'added_book', {
+      book: {
+        key: book.key,
+        title: book.title,
+        author: book.author,
+        coverUrl: book.coverUrl
+      },
+      libraryName: libraryName
+    });
+
     res.json({
       message: 'Book added successfully',
       libraries: {
@@ -335,6 +361,28 @@ app.post('/api/libraries/move', auth, async (req, res) => {
 
     await library.save();
 
+    if (toLibrary === 'read') {
+      await createActivity(req.userId, 'finished_book', {
+        book: {
+          key: book.key,
+          title: book.title,
+          author: book.author,
+          coverUrl: book.coverUrl
+        }
+      });
+    } else {
+      await createActivity(req.userId, 'moved_book', {
+        book: {
+          key: book.key,
+          title: book.title,
+          author: book.author,
+          coverUrl: book.coverUrl
+        },
+        fromLibrary: fromLibrary,
+        toLibrary: toLibrary
+      });
+    }
+
     res.json({
       message: 'Book moved successfully',
       libraries: {
@@ -380,6 +428,16 @@ app.post('/api/books/rate', auth, async (req, res) => {
           library[lib][bookIndex].rating = rating;
           await library.save();
 
+          await createActivity(req.userId, 'rated_book', {
+            book: {
+              key: book.key,
+              title: library.read[bookIndex].title,
+              author: library.read[bookIndex].author,
+              coverUrl: library.read[bookIndex].coverUrl
+            },
+            rating: rating
+          });
+
           return res.json({
             message: 'Book rating updated successfully',
             book: library[lib][bookIndex],
@@ -399,6 +457,25 @@ app.post('/api/books/rate', auth, async (req, res) => {
         library[lib].splice(bookIndex, 1);
         library.read.push(bookToMove);
         await library.save();
+
+        await createActivity(req.userId, 'finished_book', {
+          book: {
+            key: bookToMove.key,
+            title: bookToMove.title,
+            author: bookToMove.author,
+            coverUrl: bookToMove.coverUrl
+          }
+        });
+
+        await createActivity(req.userId, 'rated_book', {
+          book: {
+            key: bookToMove.key,
+            title: bookToMove.title,
+            author: bookToMove.author,
+            coverUrl: bookToMove.coverUrl
+          },
+          rating: rating
+        });
 
         return res.json({
           message: 'Book moved to Read library with rating',
@@ -421,6 +498,26 @@ app.post('/api/books/rate', auth, async (req, res) => {
     };
     library.read.push(newBook);
     await library.save();
+
+    await createActivity(req.userId, 'added_book', {
+      book: {
+        key: newBook.key,
+        title: newBook.title,
+        author: newBook.author,
+        coverUrl: newBook.coverUrl
+      },
+      libraryName: 'read'
+    });
+
+    await createActivity(req.userId, 'rated_book', {
+      book: {
+        key: newBook.key,
+        title: newBook.title,
+        author: newBook.author,
+        coverUrl: newBook.coverUrl
+      },
+      rating: rating
+    });
   
     res.json({
       message: 'Book added to Read library with rating',
@@ -573,6 +670,252 @@ app.get('/api/users/search', async (req, res) => {
   } catch (error) {
     console.error('Error searching users:', error);
     res.status(500).json({ error: 'Error searching users' });
+  }
+});
+
+// ======= FRIEND ROUTES =======
+
+// send friend request
+app.post('/api/friends/request/:username', auth, async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // find the user to be friended
+    const friendUser = await User.findOne({ username });
+    if (!friendUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // prevent sending request to self
+    if (friendUser._id.equals(req.userId)) {
+      return res.status(400).json({ error: 'Cannot send friend request to yourself' });
+    }
+
+    // check if you're already friends
+    const existingFriend = await Friend.findOne({
+      $or: [
+        { userId: req.userId, friendId: friendUser._id },
+        { userId: friendUser._id, friendId: req.userId }
+      ],
+    });
+
+    if (existingFriend) {
+      if (existingFriend.status === 'accepted') {
+        return res.status(400).json({ error: 'You are already friends' });
+      } else if (existingFriend.status === 'pending') {
+        return res.status(400).json({ error: 'Friend request already pending' });
+      }
+    }
+
+    // create new friend request
+    const friendRequest = new Friend({
+      userId: req.userId,
+      friendId: friendUser._id,
+      status: 'pending'
+    });
+
+    await friendRequest.save();
+
+    res.json({ message: 'Friend request sent successfully' });
+  } catch (error) {
+    console.error('Error sending friend request:', error);
+    res.status(500).json({ error: 'Error sending friend request' });
+  }
+});
+
+// get incoming friend requests
+app.get('/api/friends/requests', auth, async (req, res) => {
+  try {
+    const requests = await Friend.find({ friendId: req.userId, status: 'pending' })
+      .populate('userId', 'username profile.displayName profile.avatarUrl');
+
+    res.json({
+      requests: requests.map(req => ({
+        id: req._id,
+        user: {
+          id: req.userId._id,
+          username: req.userId.username,
+          displayName: req.userId.profile.displayName || req.userId.username,
+        },
+        createdAt: req.createdAt
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching friend requests:', error);
+    res.status(500).json({ error: 'Error fetching friend requests' });
+  }
+});
+
+// accept friend request
+app.post('/api/friends/accept/:requestId', auth, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+
+    const friendRequest = await Friend.findById(requestId);
+    if (!friendRequest || !friendRequest.friendId.equals(req.userId) || friendRequest.status !== 'pending') {
+      return res.status(404).json({ error: 'Friend request not found' });
+    }
+
+    friendRequest.status = 'accepted';
+    await friendRequest.save();
+
+    res.json({ message: 'Friend request accepted' });
+  } catch (error) {
+    console.error('Error accepting friend request:', error);
+    res.status(500).json({ error: 'Error accepting friend request' });
+  }
+});
+
+// reject friend request
+app.post('/api/friends/reject/:requestId', auth, async (req, res) => {
+  try {
+    const { requestId } = req.params;
+
+    const friendRequest = await Friend.findById(requestId);
+    if (!friendRequest || !friendRequest.friendId.equals(req.userId) || friendRequest.status !== 'pending') {
+      return res.status(404).json({ error: 'Friend request not found' });
+    }
+
+    await Friend.findByIdAndDelete(requestId);
+
+    res.json({ message: 'Friend request rejected' });
+  } catch (error) {
+    console.error('Error rejecting friend request:', error);
+    res.status(500).json({ error: 'Error rejecting friend request' });
+  }
+});
+
+// get friends list
+app.get('/api/friends', auth, async (req, res) => {
+  try {
+    const friends = await Friend.find({
+      $or: [
+        { userId: req.userId, status: 'accepted' },
+        { friendId: req.userId, status: 'accepted' }
+      ]
+    }).populate('userId friendId', 'username profile.displayName profile.avatarUrl');
+
+    const friendList = friends.map(f => {
+      const friend = f.userId._id.equals(req.userId) ? f.friendId : f.userId;
+      return {
+        id: friend._id,
+        username: friend.username,
+        displayName: friend.profile.displayName || friend.username,
+        avatarUrl: friend.profile.avatarUrl
+      };
+    });
+
+    res.json({ friends: friendList });
+  } catch (error) {
+    console.error('Error fetching friends list:', error);
+    res.status(500).json({ error: 'Error fetching friends list' });
+  }
+});
+
+// remove friend
+app.delete('/api/friends/:friendId', auth, async (req, res) => {
+  try {
+    const { friendId } = req.params;
+
+    await Friend.findOneAndDelete({
+      $or: [
+        { userId: req.userId, friendId },
+        { userId: friendId, friendId: req.userId }
+      ],
+    });
+
+    res.json({ message: 'Friend removed successfully' });
+  } catch (error) {
+    console.error('Error removing friend:', error);
+    res.status(500).json({ error: 'Error removing friend' });
+  }
+});
+
+// check friendship status
+app.get('/api/friends/status/:username', auth, async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const otherUser = await User.findOne({ username });
+    if (!otherUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const friendship = await Friend.findOne({
+      $or: [
+        { userId: req.userId, friendId: otherUser._id },
+        { userId: otherUser._id, friendId: req.userId }
+      ],
+    });
+
+    let status = 'none';
+    if (friendship) {
+      status = friendship.status;
+      if (friendship.status === 'pending') {
+        status = friendship.userId.equals(req.userId) ? 'request_sent' : 'request_received';
+      }
+    }
+
+    res.json({ status });
+  } catch (error) {
+    console.error('Error checking friendship status:', error);
+    res.status(500).json({ error: 'Error checking friendship status' });
+  }
+});
+
+// activity feed-- friends' activity
+app.get('/api/activities/feed', auth, async (req, res) => {
+  try {
+    // get friends' ids
+    const friends = await Friend.find({
+      $or: [
+        { userId: req.userId, status: 'accepted' },
+        { friendId: req.userId, status: 'accepted' }
+      ]
+    });
+
+    const friendIds = friends.map(f => f.userId.equals(req.userId) ? f.friendId : f.userId);
+
+    // get recent activities
+    const activities = await Activity.find({ userId: { $in: friendIds } })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate('userId', 'username profile.displayName profile.avatarUrl');
+
+    const formattedActivities = activities.map(act => ({
+      id: act._id,
+      user: {
+        username: act.userId.username,
+        displayName: act.userId.profile.displayName || act.userId.username,
+        avatarUrl: act.userId.profile.avatarUrl
+      },
+      activityType: act.activityType,
+      book: act.book,
+      libraryName: act.libraryName,
+      rating: act.rating,
+      fromLibrary: act.fromLibrary,
+      toLibrary: act.toLibrary,
+      createdAt: act.createdAt
+    }));
+
+    res.json({ activities: formattedActivities });
+  } catch (error) {
+    console.error('Error fetching activity feed:', error);
+    res.status(500).json({ error: 'Error fetching activity feed' });
+  }
+});
+
+// get own activities
+app.get('/api/activities/me', auth, async (req, res) => {
+  try {
+    const activities = await Activity.find({ userId: req.userId })
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    res.json({ activities });
+  } catch (error) {
+    console.error('Error fetching own activities:', error);
+    res.status(500).json({ error: 'Error fetching own activities' });
   }
 });
 

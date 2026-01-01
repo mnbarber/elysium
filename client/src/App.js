@@ -8,6 +8,8 @@ import Register from './components/Register';
 import Profile from './components/Profile';
 import EditProfile from './components/EditProfile';
 import UserSearch from './components/UserSearch';
+import Friends from './components/Friends';
+import ActivityFeed from './components/ActivityFeed';
 import StarRating from './components/StarRating';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -306,6 +308,9 @@ function App() {
             <h1>elysium</h1>
           </Link>
           <nav className="header-nav">
+            <Link to="/">Search</Link>
+            <Link to="/feed">Friend Feed</Link>
+            <Link to="/friends">Your Friends</Link>
             <Link to="/users">Find Users</Link>
             <Link to={`/profile/${user.username}`}>My Profile</Link>
             <Link to="/edit-profile">Edit Profile</Link>
@@ -318,6 +323,8 @@ function App() {
 
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/feed" element={<ActivityFeed />} />
+          <Route path="/friends" element={<Friends />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/users" element={<UserSearch />} />

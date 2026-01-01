@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
 import StarRating from './StarRating';
 import './Profile.css';
 
@@ -8,14 +9,19 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 function Profile() {
   const { username } = useParams();
+  const { user } = useAuth();
   const [profileData, setProfileData] = useState(null);
+  const [friendshipStatus, setFriendshipStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('to-read');
 
   useEffect(() => {
     fetchProfile();
-  }, [username]);
+    if (user && user.username !== username) {
+      fetchFriendshipStatus();
+    }
+  }, [username, user]);
 
   const fetchProfile = async () => {
     try {
@@ -27,6 +33,87 @@ function Profile() {
       setError(err.response?.data?.error || 'Failed to load profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFriendshipStatus = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/friends/status/${username}`);
+      setFriendshipStatus(response.data);
+    } catch (err) {
+      console.error('Error fetching friendship status:', err);
+    }
+  };
+
+  const sendFriendRequest = async () => {
+    try {
+      await axios.post(`${API_URL}/friends/request/${username}`);
+      alert('Friend request sent!');
+      fetchFriendshipStatus();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error sending friend request');
+    }
+  };
+
+  const acceptFriendRequest = async () => {
+    try {
+      await axios.post(`${API_URL}/friends/accept/${friendshipStatus.requestId}`);
+      alert('Friend request accepted!');
+      fetchFriendshipStatus();
+    } catch (err) {
+      alert('Error accepting friend request');
+    }
+  };
+
+  const removeFriend = async () => {
+    if (!window.confirm('Are you sure you want to remove this friend?')) {
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_URL}/profile/${username}`);
+      const friendUserId = response.data.profile.username;
+      
+      await axios.delete(`${API_URL}/friends/${friendUserId}`);
+      alert('Friend removed');
+      fetchFriendshipStatus();
+    } catch (err) {
+      alert('Error removing friend');
+    }
+  };
+
+  const renderFriendButton = () => {
+    if (!friendshipStatus || friendshipStatus.status === 'self') {
+      return null;
+    }
+
+    switch (friendshipStatus.status) {
+      case 'none':
+        return (
+          <button className="btn-add-friend" onClick={sendFriendRequest}>
+            Add Friend
+          </button>
+        );
+      case 'pending_sent':
+        return (
+          <button className="btn-pending" disabled>
+            Request Sent
+          </button>
+        );
+      case 'pending_received':
+        return (
+          <button className="btn-accept-friend" onClick={acceptFriendRequest}>
+            Accept Friend Request
+          </button>
+        );
+      case 'friends':
+        return (
+          <button className="btn-remove-friend" onClick={removeFriend}>
+            Remove Friend
+          </button>
+        );
+      default:
+        return null;
     }
   };
 
@@ -62,8 +149,13 @@ function Profile() {
           )}
         </div>
         <div className="profile-info">
-          <h1>{profile.displayName}</h1>
-          <p className="username">@{profile.username}</p>
+          <div className="profile-title-row">
+            <div>
+              <h1>{profile.displayName}</h1>
+              <p className="username">@{profile.username}</p>
+            </div>
+            {renderFriendButton()}
+          </div>
           {profile.bio && <p className="bio">{profile.bio}</p>}
         </div>
       </div>
