@@ -242,6 +242,13 @@ function Profile() {
                             <StarRating rating={book.rating} readonly size="small" />
                           </div>
                         )}
+                        <div className="book-title-row">
+                          {activeTab === 'currently-reading' && book.readCount > 0 && (
+                            <span className="reread-badge">
+                              {book.readCount === 1 ? 'Re-read' : `Re-read (${book.readCount}x)`}
+                            </span>
+                          )}
+                        </div>
                         {activeTab === 'read' && book.review && (
                           <div className="profile-book-review">
                             <p className="review-label">Review:</p>
