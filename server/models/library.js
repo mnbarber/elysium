@@ -18,6 +18,15 @@ const bookSchema = new mongoose.Schema({
     max: 5,
     default: 0
   },
+  review: {
+    type: String,
+    default: ''
+  },
+  readCount: {
+    type: Number,
+    default: 0,
+    required: false
+  },
   addedAt: {
     type: Date,
     default: Date.now

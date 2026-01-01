@@ -8,17 +8,19 @@ const activitySchema = new mongoose.Schema({
     },
     activityType: {
         type: String,
-        enum: ['added_book', 'rated_book', 'moved_book', 'finished_book'],
+        enum: ['added_book', 'rated_book', 'moved_book', 'finished_book', 'reviewed_book'],
         required: true
     },
     book: {
         key: String,
         title: String,
         author: String,
-        coverUrl: String
+        coverUrl: String,
+        readCount: Number
     },
     libraryName: String,
     rating: Number,
+    review: String,
     fromLibrary: String,
     toLibrary: String,
     createdAt: {

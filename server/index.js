@@ -10,22 +10,12 @@ const Friend = require('./models/friend');
 const Activity = require('./models/activity');
 const auth = require('./middleware/auth');
 
-// create activity
-const createActivity = async (userId, activityType, data) => {
-  try {
-    const activity = new Activity({
-      userId,
-      activityType,
-      ...data
-    });
-    await activity.save();
-  } catch (error) {
-    console.error('Error creating activity:', error);
-  }
-};
+console.log('1. imports loaded');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+console.log('2. app initialized');
 
 const allowedOrigins = [
   'http://localhost:3000',
@@ -64,9 +54,26 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+console.log('3. middleware configured');
+
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
+
+
+// create activity
+const createActivity = async (userId, activityType, data) => {
+  try {
+    const activity = new Activity({
+      userId,
+      activityType,
+      ...data
+    });
+    await activity.save();
+  } catch (error) {
+    console.error('Error creating activity:', error);
+  }
+};
 
 // Health check endpoint
 app.get('/', (req, res) => {
@@ -76,7 +83,11 @@ app.get('/', (req, res) => {
   });
 });
 
+console.log('4. routes setup starting');
+
 // ===== AUTH ROUTES =====
+
+console.log('5. auth routes loaded');
 
 // Register
 app.post('/api/auth/register', async (req, res) => {
@@ -168,6 +179,8 @@ app.get('/api/auth/me', auth, async (req, res) => {
 
 // ===== BOOK & LIBRARY ROUTES =====
 
+console.log('6. book & library routes loaded');
+
 // search books with Open Library API
 app.get('/api/books/search', async (req, res) => {
     try {
@@ -177,6 +190,20 @@ app.get('/api/books/search', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch books from Open Library' });
     }
+});
+
+// browse books by genre using Open Library API
+app.get('/api/books/browse/:genre', async (req, res) => {
+  try {
+    const { genre } = req.params;
+    const { limit = 20, offset = 0 } = req.query;
+
+    const formattedGenre = genre.toLowerCase().replace(/\s+/g, '_');
+    const response = await axios.get(`https://openlibrary.org/subjects/${formattedGenre}.json?limit=${limit}&offset=${offset}`);
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch books by genre' });
+  }
 });
 
 // Get user's libraries
@@ -324,6 +351,7 @@ app.delete('/api/libraries/:libraryName/:bookKey', auth, async (req, res) => {
 // Move book between libraries
 app.post('/api/libraries/move', auth, async (req, res) => {
   try {
+    console.log('move request received:', req.body);
     const { book, fromLibrary, toLibrary } = req.body;
 
     const library = await Library.findOne({ userId: req.userId });
@@ -339,13 +367,23 @@ app.post('/api/libraries/move', auth, async (req, res) => {
       'dnf': 'dnf'
     };
 
-    // Remove from old library
+    // Find the book in the source library
+    let bookToMove = null;
     if (fromLibrary && fieldMap[fromLibrary]) {
       const fromField = fieldMap[fromLibrary];
       if (!library[fromField]) {
         library[fromField] = [];
       }
-      library[fromField] = library[fromField].filter(b => b.key !== book.key);
+      const bookIndex = library[fromField].findIndex(b => b.key === book.key);
+      if (bookIndex !== -1) {
+        bookToMove = library[fromField][bookIndex];
+        library[fromField].splice(bookIndex, 1);
+      }
+    }
+
+    // If moving to 'read' library, increment readCount
+    if (toLibrary === 'read' && bookToMove) {
+      bookToMove.readCount = (bookToMove.readCount || 0) + 1;
     }
 
     // Add to new library
@@ -354,29 +392,35 @@ app.post('/api/libraries/move', auth, async (req, res) => {
       if (!library[toField]) {
         library[toField] = [];
       }
-      if (!library[toField].some(b => b.key === book.key)) {
-        library[toField].push(book);
+      // Use bookToMove if we found it, otherwise use the book from request
+      const bookData = bookToMove || book;
+      if (!library[toField].some(b => b.key === bookData.key)) {
+        library[toField].push(bookData);
       }
     }
 
     await library.save();
 
+    // Create activity
     if (toLibrary === 'read') {
+      const activityBook = bookToMove || book;
       await createActivity(req.userId, 'finished_book', {
         book: {
-          key: book.key,
-          title: book.title,
-          author: book.author,
-          coverUrl: book.coverUrl
+          key: activityBook.key,
+          title: activityBook.title,
+          author: activityBook.author,
+          coverUrl: activityBook.coverUrl
         }
       });
     } else {
+      const activityBook = bookToMove || book;
       await createActivity(req.userId, 'moved_book', {
         book: {
-          key: book.key,
-          title: book.title,
-          author: book.author,
-          coverUrl: book.coverUrl
+          key: activityBook.key,
+          title: activityBook.title,
+          author: activityBook.author,
+          coverUrl: activityBook.coverUrl,
+          readCount: activityBook.readCount || 0
         },
         fromLibrary: fromLibrary,
         toLibrary: toLibrary
@@ -398,6 +442,8 @@ app.post('/api/libraries/move', auth, async (req, res) => {
     res.status(500).json({ error: 'Error moving book' });
   }
 });
+
+console.log('7. rating routes loading');
 
 // rate a book -- adds to 'read' if not already in a library
 app.post('/api/books/rate', auth, async (req, res) => {
@@ -577,7 +623,222 @@ app.put('/api/books/rate/:bookKey', auth, async (req, res) => {
   }
 });
 
+// ====== REVIEW ROUTES ======
+
+console.log('8. review routes loading');
+
+// add or update a review for a book
+app.post('/api/books/review', auth, async (req, res) => {
+  console.log('review route hit');
+  try {
+    const { book, review } = req.body;
+
+    if (!review || review.trim() === '') {
+      return res.status(400).json({ error: 'Review cannot be empty' });
+    }
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    const allLibraries = ['toRead', 'currentlyReading', 'read', 'paused', 'dnf'];
+    let bookFound = false;
+    let bookLibrary = null;
+
+    for (const lib of allLibraries) {
+      const bookIndex = library[lib].findIndex(b => b.key === book.key);
+      if (bookIndex !== -1) {
+        bookFound = true;
+        bookLibrary = lib;
+        
+        if (lib === 'read') {
+          library.read[bookIndex].review = review;
+          library.read[bookIndex].updatedAt = new Date();
+          await library.save();
+
+          await createActivity(req.userId, 'reviewed_book', {
+            book: {
+              key: book.key,
+              title: library.read[bookIndex].title,
+              author: library.read[bookIndex].author,
+              coverUrl: library.read[bookIndex].coverUrl
+            },
+            review: review
+          });
+
+          return res.json({
+            message: 'Book review updated successfully',
+            book: library.read[bookIndex],
+            libraries: {
+              'to-read': library.toRead || [],
+              'currently-reading': library.currentlyReading || [],
+              'read': library.read || [],
+              'paused': library.paused || [],
+              'dnf': library.dnf || []
+            }
+          });
+        }
+
+        // if book is in another library, move it to 'read' with review
+        const bookToMove = library[lib][bookIndex];
+        bookToMove.review = review;
+        bookToMove.updatedAt = new Date();
+        library[lib].splice(bookIndex, 1);
+        library.read.push(bookToMove);
+        await library.save();
+
+        await createActivity(req.userId, 'finished_book', {
+          book: {
+            key: book.key,
+            title: bookToMove.title,
+            author: bookToMove.author,
+            coverUrl: bookToMove.coverUrl
+          },
+          review: review
+        });
+
+        await createActivity(req.userId, 'reviewed_book', {
+          book: {
+            key: bookToMove.key,
+            title: bookToMove.title,
+            author: bookToMove.author,
+            coverUrl: bookToMove.coverUrl
+          },
+          review: review
+        });
+
+        return res.json({
+          message: 'Book review updated successfully',
+          book: library.read[library.read.length - 1],
+          libraries: {
+            'to-read': library.toRead || [],
+            'currently-reading': library.currentlyReading || [],
+            'read': library.read || [],
+            'paused': library.paused || [],
+            'dnf': library.dnf || []
+          }
+        });
+      }
+    }
+
+    // If book not found in any library, add to 'read' with review
+    const newBook = {
+      ...book,
+      review: review,
+      updatedAt: new Date()
+    };
+    library.read.push(newBook);
+    await library.save();
+
+    await createActivity(req.userId, 'added_book', {
+      book: {
+        key: newBook.key,
+        title: newBook.title,
+        author: newBook.author,
+        coverUrl: newBook.coverUrl
+      },
+      libraryName: 'read'
+    });
+
+    await createActivity(req.userId, 'reviewed_book', {
+      book: {
+        key: newBook.key,
+        title: newBook.title,
+        author: newBook.author,
+        coverUrl: newBook.coverUrl
+      },
+      review: review
+    });
+
+    return res.json({
+      message: 'Book review added successfully',
+      book: newBook,
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+
+  } catch (error) {
+    console.error('Error updating book review:', error);
+    res.status(500).json({ error: 'Error updating book review' });
+  }
+});
+
+// get review for a book
+app.get('/api/books/review/:bookKey', auth, async (req, res) => {
+  try {
+    const { bookKey } = req.params;
+    const decodedKey = decodeURIComponent(bookKey);
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    // Find the book in all libraries
+    let book = null;
+    for (const lib of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+      book = library[lib].find(b => b.key === decodedKey);
+      if (book) break;
+    }
+
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found in any library' });
+    }
+
+    // Return the review if it exists
+    if (book.review) {
+      return res.json({ review: book.review });
+    } else {
+      return res.status(404).json({ error: 'No review found for this book' });
+    }
+  } catch (error) {
+    console.error('Error fetching book review:', error);
+    res.status(500).json({ error: 'Error fetching book review' });
+  }
+});
+
+// delete a review
+app.delete('/api/books/review/:bookKey', auth, async (req, res) => {
+  try {
+    const { bookKey } = req.params;
+    const decodedKey = decodeURIComponent(bookKey);
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    // Find the book in all libraries
+    let book = null;
+    for (const lib of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+      book = library[lib].find(b => b.key === decodedKey);
+      if (book) break;
+    }
+
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found in any library' });
+    }
+
+    // Remove the review from the book
+    book.review = null;
+    await library.save();
+
+    return res.json({ message: 'Review deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    res.status(500).json({ error: 'Error deleting review' });
+  }
+});
+
 // ====== PROFILE ROUTES ======
+
+console.log('9. profile routes loading');
 
 // get public profile by username
 app.get('/api/profile/:username', async (req, res) => {
@@ -674,6 +935,8 @@ app.get('/api/users/search', async (req, res) => {
 });
 
 // ======= FRIEND ROUTES =======
+
+console.log('10. friend routes loading');
 
 // send friend request
 app.post('/api/friends/request/:username', auth, async (req, res) => {
@@ -863,6 +1126,8 @@ app.get('/api/friends/status/:username', auth, async (req, res) => {
   }
 });
 
+console.log('11. activity routes loading');
+
 // activity feed-- friends' activity
 app.get('/api/activities/feed', auth, async (req, res) => {
   try {
@@ -920,5 +1185,5 @@ app.get('/api/activities/me', auth, async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`12. Server running on port ${PORT}`);
 });

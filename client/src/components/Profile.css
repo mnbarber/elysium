@@ -241,3 +241,44 @@
 .btn-remove-friend:hover {
   background: #c82333;
 }
+
+.profile-book-review {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.profile-book-review .review-label {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #667eea;
+  margin-bottom: 6px;
+}
+
+.profile-book-review .review-text {
+  color: #333;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.btn-edit-profile {
+  padding: 10px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.3s;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.btn-edit-profile:hover {
+  background: #5568d3;
+}

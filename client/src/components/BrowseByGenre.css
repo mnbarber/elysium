@@ -1,0 +1,138 @@
+.browse-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.browse-container h1 {
+  margin-bottom: 30px;
+}
+
+.genre-selector {
+  margin-bottom: 30px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.genre-selector label {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.genre-selector select {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.genre-selector select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.loading-text {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #666;
+}
+
+.browse-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.browse-book-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  gap: 15px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.browse-book-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.browse-book-card img {
+  width: 80px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.browse-book-card .book-info {
+  flex: 1;
+}
+
+.browse-book-card h3 {
+  margin-bottom: 8px;
+  font-size: 18px;
+  color: #333;
+}
+
+.browse-book-card p {
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.browse-book-card .year {
+  font-size: 14px;
+  color: #999;
+}
+
+.browse-book-card .rating-section {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.browse-book-card .rating-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.browse-book-card .button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.browse-book-card .button-group button {
+  padding: 8px;
+  border: none;
+  background: #28a745;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.browse-book-card .button-group button:hover {
+  background: #218838;
+}
+
+.browse-book-card .btn-review {
+  background: #17a2b8;
+}
+
+.browse-book-card .btn-review:hover {
+  background: #138496;
+}

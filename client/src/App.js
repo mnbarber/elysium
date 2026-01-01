@@ -11,6 +11,8 @@ import UserSearch from './components/UserSearch';
 import Friends from './components/Friends';
 import ActivityFeed from './components/ActivityFeed';
 import StarRating from './components/StarRating';
+import ReviewModal from './components/ReviewModal';
+import BrowseByGenre from './components/BrowseByGenre';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -26,6 +28,9 @@ function HomePage() {
   });
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('search');
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [existingReview, setExistingReview] = useState('');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -70,7 +75,9 @@ function HomePage() {
           ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
           : null,
         firstPublishYear: book.first_publish_year,
-        rating: 0
+        rating: 0,
+        review: '',
+        readCount: 0
       };
 
       await axios.post(`${API_URL}/libraries/${libraryName}`, bookData);
@@ -127,14 +134,82 @@ function HomePage() {
 
   const moveBook = async (book, fromLibrary, toLibrary) => {
     try {
+      const bookData = {
+        key: book.key,
+        title: book.title,
+        author: book.author,
+        coverUrl: book.coverUrl,
+        firstPublishYear: book.firstPublishYear,
+        rating: book.rating || 0,
+        review: book.review || '',
+        readCount: book.readCount || 0
+      };
+
+      console.log('Moving book:', bookData, 'from', fromLibrary, 'to', toLibrary);
+
       await axios.post(`${API_URL}/libraries/move`, {
-        book,
-        fromLibrary,
-        toLibrary
+        book: bookData,
+        fromLibrary: fromLibrary,
+        toLibrary: toLibrary
       });
+
+      console.log('Move successful, fetching libraries...');
+      
       await fetchLibraries();
     } catch (error) {
       console.error('Error moving book:', error);
+    }
+  };
+
+  const openReviewModal = (book, review = '') => {
+    setSelectedBook(book);
+    setExistingReview(review);
+    setShowReviewModal(true);
+  };
+
+  const closeReviewModal = () => {
+    setShowReviewModal(false);
+    setSelectedBook(null);
+    setExistingReview('');
+  };
+
+  const submitReview = async (review) => {
+    console.log('submitReview called with review:', review);
+    console.log('for book:', selectedBook);
+    try {
+      const bookData = {
+        key: selectedBook.key,
+        title: selectedBook.title,
+        author: selectedBook.author_name?.[0] || 'Unknown',
+        coverUrl: selectedBook.coverUrl
+      };
+
+      console.log('Sending request to:', `${API_URL}/books/review`);
+      console.log('Book data:', bookData);
+      console.log('Review:', review);
+
+      const response = await axios.post(`${API_URL}/books/review`, {
+        book: bookData,
+        review: review
+      });
+
+      console.log('Response received:', response.data);
+
+      setLibraries(response.data.libraries);
+      closeReviewModal();
+      alert(response.data.message);
+    } catch (error) {
+      console.error('Error submitting review:', error);
+    }
+  };
+
+  const deleteReview = async (bookKey) => {
+    try {
+      await axios.delete(`${API_URL}/books/review/${encodeURIComponent(bookKey)}`);
+      await fetchLibraries();
+      alert('Review deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting review:', error);
     }
   };
 
@@ -193,6 +268,20 @@ function HomePage() {
                   </div>
 
                   <div className="button-group">
+                    <button
+                      className="btn-review"
+                      onClick={() => openReviewModal({
+                        key: book.key,
+                        title: book.title,
+                        author: book.author_name?.[0] || 'Unknown',
+                        coverUrl: book.cover_i
+                          ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+                          : null,
+                        firstPublishYear: book.first_publish_year
+                      })}
+                    >
+                      Write Review
+                    </button>
                     <button onClick={() => addToLibrary(book, 'to-read')}>
                       To Read
                     </button>
@@ -234,7 +323,14 @@ function HomePage() {
                     <div key={book.key} className="library-book-card">
                       {book.coverUrl && <img src={book.coverUrl} alt={book.title} />}
                       <div className="book-info">
-                        <h4>{book.title}</h4>
+                        <div className="book-title-row">
+                          <h4>{book.title}</h4>
+                          {libraryName === 'currently-reading' && book.readCount > 0 && (
+                            <span className="reread-badge">
+                              {book.readCount === 1 ? 'Re-read' : `Re-read (${book.readCount}x)`}
+                            </span>
+                          )}
+                        </div>
                         <p>by {book.author}</p>
 
                         {libraryName === 'read' && (
@@ -245,6 +341,47 @@ function HomePage() {
                               size="small"
                             />
                           </div>
+                        )}
+
+                        {libraryName === 'read' && book.readCount > 0 && (
+                          <p className="read-count-text">
+                            📖 Read {book.readCount} {book.readCount === 1 ? 'time' : 'times'}
+                          </p>
+                        )}
+
+                        {book.review && (
+                          <div className="book-review-preview">
+                            <p className="review-label">Your Review:</p>
+                            <p className="review-text">
+                              {book.review.length > 150
+                                ? `${book.review.substring(0, 150)}...`
+                                : book.review
+                              }
+                            </p>
+                            <div className="review-actions">
+                              <button
+                                className="btn-edit-review"
+                                onClick={() => openReviewModal(book, book.review)}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className="btn-delete-review"
+                                onClick={() => deleteReview(book.key)}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {!book.review && (
+                          <button
+                            className="btn-write-review"
+                            onClick={() => openReviewModal(book)}
+                          >
+                            Write Review
+                          </button>
                         )}
 
                         <select
@@ -280,6 +417,14 @@ function HomePage() {
           ))}
         </div>
       )}
+    {showReviewModal && (
+        <ReviewModal
+          book={selectedBook}
+          existingReview={existingReview}
+          onClose={closeReviewModal}
+          onSubmit={submitReview}
+        />
+      )}
     </div>
   );
 }
@@ -309,11 +454,11 @@ function App() {
           </Link>
           <nav className="header-nav">
             <Link to="/">Search</Link>
+            <Link to="/browse">Browse</Link>
             <Link to="/feed">Friend Feed</Link>
             <Link to="/friends">Your Friends</Link>
             <Link to="/users">Find Users</Link>
             <Link to={`/profile/${user.username}`}>My Profile</Link>
-            <Link to="/edit-profile">Edit Profile</Link>
           </nav>
           <div className="user-info">
             <span>Welcome, {user.username}!</span>
@@ -323,6 +468,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/browse" element={<BrowseByGenre />} />
           <Route path="/feed" element={<ActivityFeed />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/profile/:username" element={<Profile />} />

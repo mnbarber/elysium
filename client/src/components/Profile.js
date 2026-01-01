@@ -154,7 +154,13 @@ function Profile() {
               <h1>{profile.displayName}</h1>
               <p className="username">@{profile.username}</p>
             </div>
-            {renderFriendButton()}
+            {user && user.username === username ? (
+              <Link to="/edit-profile" className="btn-edit-profile">
+                Edit Profile
+              </Link>
+            ) : (
+              renderFriendButton()
+            )}
           </div>
           {profile.bio && <p className="bio">{profile.bio}</p>}
         </div>
@@ -222,24 +228,35 @@ function Profile() {
             {libraries[activeTab].length === 0 ? (
               <p className="empty-library">No books in this library</p>
             ) : (
-              <div className="books-grid">
-                {libraries[activeTab].map((book) => (
-                  <div key={book.key} className="book-card-mini">
-                    {book.coverUrl && (
-                      <img src={book.coverUrl} alt={book.title} />
-                    )}
-                    <div className="book-details">
-                      <h4>{book.title}</h4>
-                      <p>{book.author}</p>
-                      {activeTab === 'read' && book.rating > 0 && (
-                        <div className="book-rating-display">
-                          <StarRating rating={book.rating} readonly size="small" />
-                        </div>
+                <div className="books-grid">
+                  {libraries[activeTab].map((book) => (
+                    <div key={book.key} className="book-card-mini">
+                      {book.coverUrl && (
+                        <img src={book.coverUrl} alt={book.title} />
                       )}
+                      <div className="book-details">
+                        <h4>{book.title}</h4>
+                        <p>{book.author}</p>
+                        {activeTab === 'read' && book.rating > 0 && (
+                          <div className="book-rating-display">
+                            <StarRating rating={book.rating} readonly size="small" />
+                          </div>
+                        )}
+                        {activeTab === 'read' && book.review && (
+                          <div className="profile-book-review">
+                            <p className="review-label">Review:</p>
+                            <p className="review-text">
+                              {book.review.length > 100
+                                ? `${book.review.substring(0, 100)}...`
+                                : book.review
+                              }
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
             )}
           </div>
         </>

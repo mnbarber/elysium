@@ -9,6 +9,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 function ActivityFeed() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedReviews, setExpandedReviews] = useState({});
 
   useEffect(() => {
     fetchActivities();
@@ -25,13 +26,25 @@ function ActivityFeed() {
     }
   };
 
+  const toggleReview = (activityId) => {
+    setExpandedReviews((prev) => ({
+      ...prev,
+      [activityId]: !prev[activityId]
+    }));
+  };
+
   const getActivityMessage = (activity) => {
     switch (activity.activityType) {
       case 'added_book':
         return `added "${activity.book.title}" to ${formatLibraryName(activity.libraryName)}`;
       case 'rated_book':
         return `rated "${activity.book.title}"`;
+      case 'reviewed_book':
+        return `reviewed "${activity.book.title}"`;
       case 'moved_book':
+        if (activity.toLibrary === 'currently-reading' && activity.book?.readCount > 0) {
+        return `is re-reading "${activity.book.title}"`;
+        }
         return `moved "${activity.book.title}" to ${formatLibraryName(activity.toLibrary)}`;
       case 'finished_book':
         return `finished reading "${activity.book.title}"`;
@@ -112,9 +125,29 @@ function ActivityFeed() {
                   <div className="book-info">
                     <h4>{activity.book.title}</h4>
                     <p>by {activity.book.author}</p>
+
                     {activity.activityType === 'rated_book' && activity.rating && (
                       <div className="activity-rating">
                         <StarRating rating={activity.rating} readonly size="small" />
+                      </div>
+                    )}
+
+                    {activity.activityType === 'reviewed_book' && activity.review && (
+                      <div className="activity-review">
+                        <p className="review-text">
+                          {expandedReviews[activity.id] || activity.review.length <= 200
+                            ? activity.review
+                            : `${activity.review.substring(0, 200)}...`
+                          }
+                        </p>
+                        {activity.review.length > 200 && (
+                          <button
+                            className="btn-read-more"
+                            onClick={() => toggleReview(activity.id)}
+                          >
+                            {expandedReviews[activity.id] ? 'Show Less' : 'Read More'}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>

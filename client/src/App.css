@@ -342,3 +342,111 @@ header {
   border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
 }
+
+.btn-review {
+  background: #17a2b8;
+}
+
+.btn-review:hover {
+  background: #138496;
+}
+
+.book-review-preview {
+  margin: 12px 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.review-label {
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #667eea;
+  margin-bottom: 6px;
+}
+
+.review-text {
+  color: #333;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.review-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-edit-review, .btn-delete-review {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-edit-review {
+  background: #667eea;
+  color: white;
+}
+
+.btn-edit-review:hover {
+  background: #5568d3;
+}
+
+.btn-delete-review {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-delete-review:hover {
+  background: #c82333;
+}
+
+.btn-write-review {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  background: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-write-review:hover {
+  background: #138496;
+}
+
+.book-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reread-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.read-count-text {
+  font-size: 13px;
+  color: #667eea;
+  font-weight: 600;
+  margin-top: 8px;
+}
