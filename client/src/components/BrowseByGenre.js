@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import StarRating from './StarRating';
 import ReviewModal from './ReviewModal';
+import CompletionDateModal from './CompletionDateModal';
 import './BrowseByGenre.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -11,6 +12,8 @@ function BrowseByGenre() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [pendingLibrary, setPendingLibrary] = useState('');
   const [selectedBook, setSelectedBook] = useState(null);
 
   const genres = [
@@ -48,6 +51,12 @@ function BrowseByGenre() {
   };
 
   const addToLibrary = async (book, libraryName) => {
+    // If adding to 'read' library, open date modal
+    if (libraryName === 'read') {
+      openDateModal(book, libraryName);
+      return;
+    }
+
     try {
       const bookData = {
         key: book.key,
@@ -120,6 +129,45 @@ function BrowseByGenre() {
       alert(error.response?.data?.error || 'Error submitting review');
     }
   };
+
+  const openDateModal = (book, libraryName) => {
+  const bookData = {
+    key: book.key,
+    title: book.title,
+    author: book.authors?.[0]?.name || 'Unknown',
+    coverUrl: book.cover_id 
+      ? `https://covers.openlibrary.org/b/id/${book.cover_id}-M.jpg`
+      : null,
+    firstPublishYear: book.first_publish_year
+  };
+  setSelectedBook(bookData);
+  setPendingLibrary(libraryName);
+  setShowDateModal(true);
+};
+
+const closeDateModal = () => {
+  setShowDateModal(false);
+  setSelectedBook(null);
+  setPendingLibrary('');
+};
+
+const submitWithDate = async (completionDate) => {
+  try {
+    const bookData = {
+      ...selectedBook,
+      rating: 0,
+      review: '',
+      readCount: 0,
+      completedAt: completionDate
+    };
+
+    await axios.post(`${API_URL}/libraries/${pendingLibrary}`, bookData);
+    closeDateModal();
+    alert('Book added successfully!');
+  } catch (error) {
+    alert(error.response?.data?.error || 'Error adding book');
+  }
+};
 
   return (
     <div className="browse-container">
@@ -198,6 +246,13 @@ function BrowseByGenre() {
           existingReview=""
           onClose={closeReviewModal}
           onSubmit={submitReview}
+        />
+      )}
+      {showDateModal && (
+        <CompletionDateModal
+          book={selectedBook}
+          onClose={closeDateModal}
+          onSubmit={submitWithDate}
         />
       )}
     </div>

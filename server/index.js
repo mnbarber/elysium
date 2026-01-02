@@ -270,9 +270,10 @@ app.post('/api/libraries/move', auth, async (req, res) => {
       }
     }
 
-    // If moving to 'read' library, increment readCount
+    // If moving to 'read' library, increment readCount and set completion date
     if (toLibrary === 'read' && bookToMove) {
       bookToMove.readCount = (bookToMove.readCount || 0) + 1;
+      bookToMove.completedAt = new Date();  // Add this line
     }
 
     // Add to new library
@@ -282,7 +283,10 @@ app.post('/api/libraries/move', auth, async (req, res) => {
         library[toField] = [];
       }
       // Use bookToMove if we found it, otherwise use the book from request
-      const bookData = bookToMove || book;
+      const bookData = bookToMove || {
+        ...book,
+        completedAt: toLibrary === 'read' ? new Date() : undefined
+      };
       if (!library[toField].some(b => b.key === bookData.key)) {
         library[toField].push(bookData);
       }
@@ -474,7 +478,10 @@ app.post('/api/books/rate', auth, async (req, res) => {
         bookLibrary = lib;
         // Update rating if in 'read' library
         if (lib === 'read') {
-          library[lib][bookIndex].rating = rating;
+          library.read[bookIndex].rating = rating;
+          if (!library.read[bookIndex].completedAt) {
+            library.read[bookIndex].completedAt = new Date();
+          }
           await library.save();
 
           await createActivity(req.userId, 'rated_book', {
@@ -503,6 +510,7 @@ app.post('/api/books/rate', auth, async (req, res) => {
         // if book is in another library, move it to 'read' with rating
         const bookToMove = library[lib][bookIndex];
         bookToMove.rating = rating;
+        bookToMove.completedAt = new Date();
         library[lib].splice(bookIndex, 1);
         library.read.push(bookToMove);
         await library.save();
@@ -543,7 +551,8 @@ app.post('/api/books/rate', auth, async (req, res) => {
     // If book not found in any library, add to 'read' with rating
     const newBook = {
       ...book,
-      rating: rating
+      rating: rating,
+      completedAt: new Date()
     };
     library.read.push(newBook);
     await library.save();
@@ -934,6 +943,91 @@ app.get('/api/users/search', async (req, res) => {
   } catch (error) {
     console.error('Error searching users:', error);
     res.status(500).json({ error: 'Error searching users' });
+  }
+});
+
+// get reading stats for a user
+app.get('/api/stats/reading', auth, async (req, res) => {
+  try {
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const yearStart = new Date(currentYear, 0, 1);
+
+    // count books read this year
+    const booksThisYear = library.read.filter(book => {
+      if (!book.completedAt) return false;
+      const completedDate = new Date(book.completedAt);
+      return completedDate >= yearStart && completedDate <= now;
+    });
+
+    // calculate monthly breakdown
+    const monthlyBreakdown = {};
+    for (let i = 0; i < 12; i++) {
+      monthlyBreakdown[i] = 0;
+    }
+
+    booksThisYear.forEach(book => {
+      const month = new Date(book.completedAt).getMonth();
+      monthlyBreakdown[month]++;
+    });
+
+    // get reading streak
+    const activities = await Activity.find({
+      userId: req.userId,
+      activityType: 'finished_book'
+    }).sort({ createdAt: -1 });
+
+    res.json({
+      totalBooksRead: library.read.length,
+      booksThisYear: booksThisYear.length,
+      booksThisMonth: booksThisYear.filter(book => new Date(book.completedAt).getMonth() === now.getMonth()).length,
+      monthlyBreakdown: monthlyBreakdown,
+      currentYear: currentYear,
+      recentlyFinishedBooks: booksThisYear.slice(-5).map(book => ({
+        key: book.key,
+        title: book.title,
+        author: book.author,
+        completedAt: book.completedAt
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching reading stats:', error);
+    res.status(500).json({ error: 'Error fetching reading stats' });
+  }
+});
+
+// Update completion date for a book in read library
+app.put('/api/books/completion-date/:bookKey', auth, async (req, res) => {
+  try {
+    const { bookKey } = req.params;
+    const { completedAt } = req.body;
+    const decodedKey = decodeURIComponent(bookKey);
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    const bookIndex = library.read.findIndex(b => b.key === decodedKey);
+    if (bookIndex === -1) {
+      return res.status(404).json({ error: 'Book not found in read library' });
+    }
+
+    library.read[bookIndex].completedAt = new Date(completedAt);
+    await library.save();
+
+    res.json({
+      message: 'Completion date updated',
+      book: library.read[bookIndex]
+    });
+  } catch (error) {
+    console.error('Error updating completion date:', error);
+    res.status(500).json({ error: 'Error updating completion date' });
   }
 });
 

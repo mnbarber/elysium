@@ -450,3 +450,35 @@ header {
   font-weight: 600;
   margin-top: 8px;
 }
+
+.completion-info {
+  margin: 5px 0;
+  padding: 5px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+}
+
+.completion-date-text {
+  margin: 0;
+  font-size: 13px;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.btn-edit-date {
+  padding: 4px 10px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-edit-date:hover {
+  background: #5568d3;
+}

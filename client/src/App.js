@@ -13,6 +13,8 @@ import ActivityFeed from './components/ActivityFeed';
 import StarRating from './components/StarRating';
 import ReviewModal from './components/ReviewModal';
 import BrowseByGenre from './components/BrowseByGenre';
+import ReadingStats from './components/ReadingStats';
+import CompletionDateModal from './components/CompletionDateModal';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -29,8 +31,11 @@ function HomePage() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('search');
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showDateModal, setShowDateModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [existingReview, setExistingReview] = useState('');
+  const [pendingLibrary, setPendingLibrary] = useState('');
+  const [showEditDateModal, setShowEditDateModal] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -66,6 +71,21 @@ function HomePage() {
   };
 
   const addToLibrary = async (book, libraryName) => {
+    // If adding to 'read' library, open date modal
+    if (libraryName === 'read') {
+      const bookData = {
+        key: book.key,
+        title: book.title,
+        author: book.author_name?.[0] || book.author || 'Unknown',
+        coverUrl: book.cover_i
+          ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+          : book.coverUrl || null,
+        firstPublishYear: book.first_publish_year || book.firstPublishYear
+      };
+      openDateModal(bookData, libraryName);
+      return;
+    }
+
     try {
       const bookData = {
         key: book.key,
@@ -213,6 +233,67 @@ function HomePage() {
     }
   };
 
+  const openDateModal = (book, libraryName) => {
+  setSelectedBook(book);
+  setPendingLibrary(libraryName);
+  setShowDateModal(true);
+};
+
+const closeDateModal = () => {
+  setShowDateModal(false);
+  setSelectedBook(null);
+  setPendingLibrary('');
+};
+
+const submitWithDate = async (completionDate) => {
+  try {
+    const bookData = {
+      key: selectedBook.key,
+      title: selectedBook.title,
+      author: selectedBook.author,
+      coverUrl: selectedBook.coverUrl,
+      firstPublishYear: selectedBook.firstPublishYear,
+      rating: 0,
+      review: '',
+      readCount: 0,
+      completedAt: completionDate
+    };
+
+    await axios.post(`${API_URL}/libraries/${pendingLibrary}`, bookData);
+    await fetchLibraries();
+    closeDateModal();
+    alert('Book added successfully!');
+  } catch (error) {
+    alert(error.response?.data?.error || 'Error adding book');
+  }
+};
+
+const editCompletionDate = async (book) => {
+  const bookData = {
+    key: book.key,
+    title: book.title,
+    author: book.author,
+    coverUrl: book.coverUrl,
+    firstPublishYear: book.firstPublishYear
+  };
+  setSelectedBook(bookData);
+  setShowEditDateModal(true);
+};
+
+const updateCompletionDate = async (completionDate) => {
+  try {
+    await axios.put(`${API_URL}/books/completion-date/${encodeURIComponent(selectedBook.key)}`, {
+      completedAt: completionDate
+    });
+    await fetchLibraries();
+    setShowEditDateModal(false);
+    setSelectedBook(null);
+    alert('Completion date updated!');
+  } catch (error) {
+    alert('Error updating completion date');
+  }
+};
+
   return (
     <div className="home-page">
       <nav className="tabs">
@@ -343,6 +424,24 @@ function HomePage() {
                           </div>
                         )}
 
+                        {book.completedAt && (
+                          <div className="completion-info">
+                            <p className="completion-date-text">
+                              Finished: {new Date(book.completedAt).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric' 
+                              })}
+                            </p>
+                            <button 
+                              className="btn-edit-date"
+                              onClick={() => editCompletionDate(book)}
+                            >
+                              Edit Date
+                            </button>
+                          </div>
+                        )}
+
                         {libraryName === 'read' && book.readCount > 0 && (
                           <p className="read-count-text">
                             📖 Read {book.readCount} {book.readCount === 1 ? 'time' : 'times'}
@@ -425,6 +524,20 @@ function HomePage() {
           onSubmit={submitReview}
         />
       )}
+      {showDateModal && (
+        <CompletionDateModal
+          book={selectedBook}
+          onClose={closeDateModal}
+          onSubmit={submitWithDate}
+        />
+      )}
+      {showEditDateModal && (
+        <CompletionDateModal
+          book={selectedBook}
+          onClose={() => setShowEditDateModal(false)}
+          onSubmit={updateCompletionDate}
+        />
+      )}
     </div>
   );
 }
@@ -458,7 +571,8 @@ function App() {
             <Link to="/feed">Friend Feed</Link>
             <Link to="/friends">Your Friends</Link>
             <Link to="/users">Find Users</Link>
-            <Link to={`/profile/${user.username}`}>My Profile</Link>
+            <Link to={`/profile/${user.username}`}>Profile</Link>
+            <Link to="/stats">Your Stats</Link>
           </nav>
           <div className="user-info">
             <span>Welcome, {user.username}!</span>
@@ -473,6 +587,7 @@ function App() {
           <Route path="/friends" element={<Friends />} />
           <Route path="/profile/:username" element={<Profile />} />
           <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/stats" element={<ReadingStats />} />
           <Route path="/users" element={<UserSearch />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
