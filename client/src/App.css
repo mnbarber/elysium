@@ -19,11 +19,12 @@ body {
 
 header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
   padding: 20px;
-  background: rgb(72, 59, 121);
+  background: rgb(134, 114, 204);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
@@ -41,22 +42,23 @@ header {
 
 .header-nav {
   display: flex;
+  flex-wrap: wrap;
   gap: 25px;
   flex: 1;
   justify-content: center;
 }
 
 .header-nav a {
-  color: #333;
+  color: #0e0d0d;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: bold;
   font-size: 16px;
   transition: color 0.3s;
   white-space: nowrap;
 }
 
 .header-nav a:hover {
-  color: #667eea;
+  color: #2e31f1;
 }
 
 .user-info {
@@ -67,7 +69,7 @@ header {
 }
 
 .user-info span {
-  color: #666;
+  color: #1f1e1e;
   font-weight: 500;
 }
 
@@ -110,7 +112,7 @@ header {
 .search-section button[type="submit"] {
   padding: 12px 30px;
   background: #9e6bf0;
-  color: white;
+  color: rgb(252, 251, 251);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -124,7 +126,7 @@ header {
 }
 
 .book-card {
-  background: rgb(76, 63, 129);
+  background: rgb(127, 108, 199);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -146,21 +148,24 @@ header {
 .book-info h3 {
   margin-bottom: 8px;
   font-size: 20px;
+  font-weight: bold;
 }
 
 .book-info p {
   color: #0e0d0d;
+  font-weight: bold;
   margin-bottom: 5px;
 }
 
 .year {
   font-size: 14px;
-  color: #999;
+  color: #202020;
 }
 
 .button-group {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
 }
@@ -168,11 +173,10 @@ header {
 .button-group button {
   padding: 8px;
   border: none;
-  background: #a47de2;
+  background: #432c68;
   color: white;
-  border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  width: 100%;
 }
 
 .button-group button:hover {
@@ -316,7 +320,7 @@ header {
 .rating-section {
   margin: 15px 0;
   padding: 15px;
-  background: #f8f9fa;
+  background: #a495e5;
   border-radius: 8px;
 }
 
@@ -344,26 +348,26 @@ header {
 }
 
 .btn-review {
-  background: #17a2b8;
+  background: #8079df;
 }
 
 .btn-review:hover {
-  background: #138496;
+  background: #564177;
 }
 
 .book-review-preview {
   margin: 12px 0;
   padding: 12px;
-  background: #f8f9fa;
+  background: #a17eda;
   border-radius: 6px;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #230658;
 }
 
 .review-label {
   font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;
-  color: #667eea;
+  color: #7d59d3;
   margin-bottom: 6px;
 }
 
@@ -390,7 +394,7 @@ header {
 }
 
 .btn-edit-review {
-  background: #667eea;
+  background: #8966ea;
   color: white;
 }
 
@@ -411,7 +415,7 @@ header {
   width: 100%;
   padding: 8px;
   margin: 10px 0;
-  background: #17a2b8;
+  background: #523996;
   color: white;
   border: none;
   border-radius: 4px;
@@ -422,7 +426,7 @@ header {
 }
 
 .btn-write-review:hover {
-  background: #138496;
+  background: #353db6;
 }
 
 .book-title-row {

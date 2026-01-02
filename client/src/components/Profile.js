@@ -27,6 +27,7 @@ function Profile() {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/profile/${username}`);
+      console.log('Response data:', response.data);
       setProfileData(response.data);
       setError('');
     } catch (err) {

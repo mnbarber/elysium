@@ -17,7 +17,7 @@
 }
 
 .stat-card {
-  background: white;
+  background: rgb(178, 156, 230);
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -46,7 +46,7 @@
 }
 
 .stat-card:not(.highlight) .stat-number {
-  color: #667eea;
+  color: #181818;
 }
 
 .stat-label {
@@ -57,7 +57,7 @@
 }
 
 .monthly-chart {
-  background: white;
+  background: rgb(177, 163, 238);
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);

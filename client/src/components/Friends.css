@@ -18,7 +18,7 @@
   flex: 1;
   padding: 12px;
   border: none;
-  background: white;
+  background: rgb(166, 137, 233);
   cursor: pointer;
   border-radius: 8px;
   font-size: 16px;
@@ -27,7 +27,7 @@
 }
 
 .friends-tabs button.active {
-  background: #667eea;
+  background: #7b4ad8;
   color: white;
 }
 
@@ -38,7 +38,7 @@
 }
 
 .friend-card, .request-card {
-  background: white;
+  background: rgb(160, 145, 228);
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -85,7 +85,7 @@
 
 .friend-details p, .request-details p {
   margin: 0;
-  color: #666;
+  color: #1a1919;
   font-size: 14px;
 }
 
@@ -134,14 +134,14 @@
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  background: white;
+  background: rgb(152, 131, 187);
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .empty-state p {
   margin-bottom: 20px;
-  color: #666;
+  color: #181818;
   font-size: 16px;
 }
 

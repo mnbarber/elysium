@@ -29,7 +29,7 @@
 }
 
 .activity-card {
-  background: white;
+  background: rgb(180, 147, 235);
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -78,7 +78,7 @@
 
 .user-name {
   font-weight: 600;
-  color: #333;
+  color: #111111;
   text-decoration: none;
 }
 
@@ -87,11 +87,12 @@
 }
 
 .activity-message {
-  color: #666;
+  color: #1a1919;
+  font-weight: bold;
 }
 
 .activity-time {
-  color: #999;
+  color: #3f3e3e;
   font-size: 14px;
   margin-left: auto;
 }
@@ -100,7 +101,7 @@
   display: flex;
   gap: 15px;
   padding: 15px;
-  background: #f8f9fa;
+  background: #9a89d8;
   border-radius: 8px;
 }
 
@@ -119,7 +120,7 @@
 
 .activity-book .book-info p {
   margin: 0;
-  color: #666;
+  color: #242323;
   font-size: 14px;
 }
 
@@ -141,13 +142,13 @@
 .activity-review {
   margin-top: 12px;
   padding: 12px;
-  background: white;
+  background: rgb(151, 116, 207);
   border-radius: 6px;
   border-left: 3px solid #667eea;
 }
 
 .activity-review .review-text {
-  color: #333;
+  color: #161616;
   font-size: 14px;
   line-height: 1.6;
   margin: 0;
