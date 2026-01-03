@@ -136,3 +136,12 @@
 .browse-book-card .btn-review:hover {
   background: #138496;
 }
+
+.book-title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.book-title-link:hover h3 {
+  color: #667eea;
+}

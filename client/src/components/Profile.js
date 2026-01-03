@@ -236,7 +236,9 @@ function Profile() {
                         <img src={book.coverUrl} alt={book.title} />
                       )}
                       <div className="book-details">
-                        <h4>{book.title}</h4>
+                        <Link to={`/book/${book.key}`} className="book-title-link">
+                          <h3>{book.title}</h3>
+                        </Link>
                         <p>{book.author}</p>
                         {activeTab === 'read' && book.rating > 0 && (
                           <div className="book-rating-display">

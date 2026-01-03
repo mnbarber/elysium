@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import StarRating from './StarRating';
 import ReviewModal from './ReviewModal';
@@ -199,7 +200,9 @@ const submitWithDate = async (completionDate) => {
               />
             )}
             <div className="book-info">
-              <h3>{book.title}</h3>
+              <Link to={`/book/${book.key}`} className="book-title-link">
+                <h3>{book.title}</h3>
+              </Link>
               <p>by {book.authors?.[0]?.name || 'Unknown'}</p>
               <p className="year">{book.first_publish_year}</p>
 

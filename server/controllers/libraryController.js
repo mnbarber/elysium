@@ -27,6 +27,84 @@ const searchBooks = async (req, res) => {
   }
 };
 
+// get more book details from open library API
+const getBookDetails = async (req, res) => {
+  try {
+    const { type, id } = req.params;
+    const bookKey = `/${type}/${id}`;
+    
+    console.log('getBookDetails called');
+    console.log('Type:', type, 'ID:', id);
+    console.log('Book key:', bookKey);
+
+    const workResponse = await axios.get(`https://openlibrary.org${bookKey}.json`);
+    const workData = workResponse.data;
+
+    // get the first edition for more details
+    let editionData = null;
+    if (workData.covers && workData.covers.length > 0) {
+      try {
+        const editionResponse = await axios.get(`https://openlibrary.org${bookKey}/editions.json?limit=1`);
+        if (editionResponse.data.entries && editionResponse.data.entries.length > 0) {
+          editionData = editionResponse.data.entries[0];
+        }
+      } catch (err) {
+        console.error('Error fetching edition data:', err);
+      }
+    }
+
+    // get author details
+    let authors = [];
+    if (workData.authors && workData.authors.length > 0) {
+      for (const author of workData.authors.slice(0, 3)) {
+        try {
+          const authorResponse = await axios.get(`https://openlibrary.org${author.author.key}.json`);
+          authors.push({
+            name: authorResponse.data.name,
+            bio: authorResponse.data.bio || '',
+            birth_date: authorResponse.data.birth_date || '',
+            photos: authorResponse.data.photos || []
+          });
+        } catch (err) {
+          console.error('Error fetching author data:', err);
+        }
+      }
+    }
+
+    // format book description
+    let description = '';
+    if (workData.description) {
+      if (typeof workData.description === 'string') {
+        description = workData.description;
+      } else if (workData.description.value) {
+        description = workData.description.value;
+      }
+    }
+
+    const bookDetails = {
+      key: bookKey,
+      title: workData.title,
+      subtitle: workData.subtitle || '',
+      description: description,
+      coverId: workData.covers ? workData.covers[0] : null,
+      subjects: workData.subjects?.slice(0, 10) || [],
+      authors: authors,
+      firstPublishDate: workData.first_publish_date || '',
+      numberOfPages: editionData ? editionData.number_of_pages : null,
+      publisher: editionData ? editionData.publishers : [],
+      publishDate: editionData ? editionData.publish_date : '',
+      isbn10: editionData ? editionData.isbn_10 : [],
+      isbn13: editionData ? editionData.isbn_13 : [],
+      physicalFormat: editionData ? editionData.physical_format : ''
+    };
+
+    res.json(bookDetails);
+  } catch (error) {
+    console.error('Error fetching book details:', error);
+    res.status(500).json({ error: 'Error fetching book details.' });
+  }
+}
+
 // browse books by genre using Open Library API
 const browseByGenre = async (req, res) => {
   try {
@@ -761,6 +839,7 @@ const getReadingStats = async (req, res) => {
 
 module.exports = {
   searchBooks,
+  getBookDetails,
   browseByGenre,
   getLibraries,
   addBookToLibrary,

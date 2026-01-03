@@ -486,3 +486,12 @@ header {
 .btn-edit-date:hover {
   background: #5568d3;
 }
+
+.book-title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.book-title-link:hover h3 {
+  color: #667eea;
+}

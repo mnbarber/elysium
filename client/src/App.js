@@ -15,6 +15,7 @@ import ReviewModal from './components/ReviewModal';
 import BrowseByGenre from './components/BrowseByGenre';
 import ReadingStats from './components/ReadingStats';
 import CompletionDateModal from './components/CompletionDateModal';
+import BookDetails from './components/BookDetails';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -63,6 +64,7 @@ function HomePage() {
         params: { q: searchQuery }
       });
       setSearchResults(response.data.docs || []);
+      console.log('book key:', response.data.docs[0]?.key);
     } catch (error) {
       console.error('Error searching books:', error);
     } finally {
@@ -335,7 +337,9 @@ const updateCompletionDate = async (completionDate) => {
                   />
                 )}
                 <div className="book-info">
-                  <h3>{book.title}</h3>
+                  <Link to={`/book${book.key}`} className="book-title-link">
+                    <h3>{book.title}</h3>
+                  </Link>
                   <p>by {book.author_name?.[0] || 'Unknown'}</p>
                   <p className="year">{book.first_publish_year}</p>
 
@@ -405,7 +409,9 @@ const updateCompletionDate = async (completionDate) => {
                       {book.coverUrl && <img src={book.coverUrl} alt={book.title} />}
                       <div className="book-info">
                         <div className="book-title-row">
-                          <h4>{book.title}</h4>
+                          <Link to={`/book${book.key}`} className="book-title-link">
+                            <h3>{book.title}</h3>
+                          </Link>
                           {libraryName === 'currently-reading' && book.readCount > 0 && (
                             <span className="reread-badge">
                               {book.readCount === 1 ? 'Re-read' : `Re-read (${book.readCount}x)`}
@@ -583,6 +589,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/browse" element={<BrowseByGenre />} />
+          <Route path="/book/*" element={<BookDetails />} />
           <Route path="/feed" element={<ActivityFeed />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/profile/:username" element={<Profile />} />

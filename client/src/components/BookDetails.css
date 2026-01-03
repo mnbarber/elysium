@@ -1,0 +1,254 @@
+.book-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.back-button {
+  padding: 10px 20px;
+  background: #a990f0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 30px;
+  transition: background 0.3s;
+}
+
+.back-button:hover {
+  background: #621ae9;
+}
+
+.book-details-header {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 40px;
+  background: #a990f0;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.book-cover-large {
+  flex-shrink: 0;
+}
+
+.book-cover-large img {
+  width: 300px;
+  height: 450px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.no-cover {
+  width: 300px;
+  height: 450px;
+  background: #adb1e7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #161616;
+  font-size: 18px;
+}
+
+.book-main-info {
+  flex: 1;
+}
+
+.book-main-info h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: #070707;
+}
+
+.subtitle {
+  font-size: 24px;
+  color: #0c0c0c;
+  font-weight: normal;
+  margin-bottom: 20px;
+}
+
+.authors-list {
+  margin-bottom: 30px;
+}
+
+.author-info h3 {
+  font-size: 20px;
+  color: #0f0f0f;
+  margin-bottom: 5px;
+}
+
+.author-birth {
+  color: #666;
+  font-size: 14px;
+}
+
+.book-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #a990f0;
+  border-radius: 8px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.meta-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #131313;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.meta-value {
+  font-size: 16px;
+  color: #080808;
+  font-weight: 500;
+}
+
+.book-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-add {
+  padding: 12px 24px;
+  background: #634ebe;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.btn-add:hover {
+  background: #5568d3;
+}
+
+.book-description {
+  background: #a990f0;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.book-description h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.book-description p {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+  color: #111111;
+  white-space: pre-wrap;
+}
+
+.book-subjects {
+  background: #a990f0;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.book-subjects h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #111111;
+}
+
+.subjects-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.subject-tag {
+  padding: 8px 16px;
+  background: #281d64;
+  color: #f6f6f8;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.author-bios {
+  background: #a990f0;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.author-bios h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #0e0d0d;
+}
+
+.author-bio {
+  margin-bottom: 30px;
+}
+
+.author-bio h4 {
+  font-size: 20px;
+  color: #111111;
+  margin-bottom: 10px;
+}
+
+.author-bio p {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+  color: #080808;
+}
+
+.loading, .error-container {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error-container button {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .book-details-header {
+    flex-direction: column;
+  }
+
+  .book-cover-large img, .no-cover {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .book-main-info h1 {
+    font-size: 28px;
+  }
+}
