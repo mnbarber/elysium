@@ -1,50 +1,15 @@
 const User = require('../models/user');
 const Library = require('../models/library');
 
-// get public profile by username
-const getPublicProfile = async (req, res) => {
-    try {
-        const user = await User.findOne({ username: req.params.username });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-
-        if (!user.profile.isPublic) {
-            return res.status(403).json({ error: 'This profile is private.' });
-        }
-        
-        const library = await Library.findOne({ userId: user._id });
-
-        res.json({
-            profile: user.getPublicProfile(),
-            stats: {
-                toReadCount: library?.toRead.length || 0,
-                currentlyReadingCount: library?.currentlyReading.length || 0,
-                readCount: library?.read.length || 0,
-                pausedCount: library?.paused.length || 0,
-                dnfCount: library?.dnf.length || 0
-            },
-            libraries: user.profile.isPublic ? {
-                'to-read': library?.toRead || [],
-                'currently-reading': library?.currentlyReading || [],
-                'read': library?.read || [],
-                'paused': library?.paused || [],
-                'dnf': library?.dnf || []
-            } : null
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error fetching public profile.' });
-    }
-};
-
 // get own profile
 const getOwnProfile = async (req, res) => {
+    console.log('=== getOwnProfile called ===');
     try {
         const user = await User.findById(req.user.id).select('-password');
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
-
+        console.log('User found:', user ? user.username : 'null');
         res.json({
             username: user.username,
             email: user.email,
@@ -108,9 +73,46 @@ const searchUsers = async (req, res) => {
     }
 };
 
+// get public profile by username
+const getPublicProfile = async (req, res) => {
+    console.log('=== getPublicProfile called for username:', req.params.username);
+    try {
+        const user = await User.findOne({ username: req.params.username });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        if (!user.profile.isPublic) {
+            return res.status(403).json({ error: 'This profile is private.' });
+        }
+        
+        const library = await Library.findOne({ userId: user._id });
+
+        res.json({
+            profile: user.getPublicProfile(),
+            stats: {
+                toReadCount: library?.toRead.length || 0,
+                currentlyReadingCount: library?.currentlyReading.length || 0,
+                readCount: library?.read.length || 0,
+                pausedCount: library?.paused.length || 0,
+                dnfCount: library?.dnf.length || 0
+            },
+            libraries: user.profile.isPublic ? {
+                'to-read': library?.toRead || [],
+                'currently-reading': library?.currentlyReading || [],
+                'read': library?.read || [],
+                'paused': library?.paused || [],
+                'dnf': library?.dnf || []
+            } : null
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error fetching public profile.' });
+    }
+};
+
 module.exports = {
-  getPublicProfile,
   getOwnProfile,
   updateProfile,
-  searchUsers
+  searchUsers,
+  getPublicProfile,
 };

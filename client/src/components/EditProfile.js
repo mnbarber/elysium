@@ -25,7 +25,8 @@ function EditProfile() {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get(`${API_URL}/profile`);
+      console.log('Fetching profile from:', `${API_URL}/profile/${user.username}`);
+      const response = await axios.get(`${API_URL}/profile/${user.username}`);
       const profile = response.data.profile;
       setFormData({
         displayName: profile.displayName || '',
@@ -57,7 +58,7 @@ function EditProfile() {
         ...formData,
       };
 
-      await axios.put(`${API_URL}/profile`, dataToSend);
+      await axios.put(`${API_URL}/profile/${user.username}/edit`, dataToSend);
       setSuccess('Profile updated successfully!');
       setTimeout(() => {
         navigate(`/profile/${user.username}`);

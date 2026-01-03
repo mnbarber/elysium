@@ -27,7 +27,6 @@ function Profile() {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/profile/${username}`);
-      console.log('Response data:', response.data);
       setProfileData(response.data);
       setError('');
     } catch (err) {
@@ -156,7 +155,7 @@ function Profile() {
               <p className="username">@{profile.username}</p>
             </div>
             {user && user.username === username ? (
-              <Link to="/edit-profile" className="btn-edit-profile">
+              <Link to={`/profile/${user.username}/edit`} className="btn-edit-profile">
                 Edit Profile
               </Link>
             ) : (
