@@ -53,12 +53,15 @@ function EditProfile() {
     setError('');
     setSuccess('');
 
+    console.log('Submitting profile update to:', `${API_URL}/profile/${user.username}/edit`);
     try {
       const dataToSend = {
         ...formData,
       };
+      console.log('profile data to send:', dataToSend);
 
       await axios.put(`${API_URL}/profile/${user.username}/edit`, dataToSend);
+      console.log('profile data sent:', dataToSend);
       setSuccess('Profile updated successfully!');
       setTimeout(() => {
         navigate(`/profile/${user.username}`);

@@ -23,13 +23,17 @@ const getOwnProfile = async (req, res) => {
 
 // update profile
 const updateProfile = async (req, res) => {
+    console.log('=== updateProfile called ===');
     try {
         const { displayName, bio, avatarUrl, isPublic } = req.body;
+        console.log('Update data received:', req.body);
 
-        const user = await User.findById(req.user.id);
+        const user = await User.findOne({ username: req.params.username });
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
+
+        console.log('Current profile data:', user.profile);
 
         user.profile.displayName = displayName || user.profile.displayName;
         user.profile.bio = bio || user.profile.bio;
@@ -37,6 +41,8 @@ const updateProfile = async (req, res) => {
         if (typeof isPublic === 'boolean') {
             user.profile.isPublic = isPublic;
         }
+
+        console.log('Updated profile data:', user.profile);
 
         await user.save();
 

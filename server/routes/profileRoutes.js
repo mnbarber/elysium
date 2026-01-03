@@ -14,8 +14,8 @@ router.get('/profile', auth, async (req, res) => {
   return res.json({ test: 'Route is working', userId: req.userId });
 //   return profileController.getOwnProfile(req, res);
 });
-router.put('/profile/:username/edit', auth, profileController.updateProfile);
 router.get('/profile/:username', profileController.getPublicProfile);
+router.put('/profile/:username/edit', auth, profileController.updateProfile);
 router.get('/users/search', profileController.searchUsers);
 
 module.exports = router;
