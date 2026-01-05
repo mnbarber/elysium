@@ -17,6 +17,9 @@ import ReadingStats from './components/ReadingStats';
 import CompletionDateModal from './components/CompletionDateModal';
 import BookDetails from './components/BookDetails';
 import AddCustomBook from './components/AddCustomBook';
+import MyLists from './components/MyLists';
+import ListDetail from './components/ListDetail';
+import BrowseLists from './components/BrowseLists';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -581,10 +584,12 @@ function App() {
           <nav className="header-nav">
             <Link to="/">Search</Link>
             <Link to="/browse">Browse</Link>
+            <Link to="/lists/browse">Lists</Link>
             <Link to="/feed">Friend Feed</Link>
             <Link to="/friends">Your Friends</Link>
             <Link to="/users">Find Users</Link>
             <Link to={`/profile/${user.username}`}>Profile</Link>
+            <Link to="/lists">My Lists</Link>
             <Link to="/stats">Your Stats</Link>
           </nav>
           <div className="user-info">
@@ -598,6 +603,9 @@ function App() {
           <Route path="/browse" element={<BrowseByGenre />} />
           <Route path="/book/*" element={<BookDetails />} />
           <Route path="/add-book" element={<AddCustomBook />} />
+          <Route path="/lists" element={<MyLists />} />
+          <Route path="/lists/browse" element={<BrowseLists />} />
+          <Route path="/lists/:listId" element={<ListDetail />} />
           <Route path="/feed" element={<ActivityFeed />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/profile/:username" element={<Profile />} />

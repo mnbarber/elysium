@@ -51,6 +51,7 @@ const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const libraryRoutes = require('./routes/libraryRoutes');
 const friendRoutes = require('./routes/friendRoutes');
+const bookListRoutes = require('./routes/bookListRoutes');
 
 // Health check
 app.get('/', (req, res) => {
@@ -62,6 +63,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api', profileRoutes);
 app.use('/api', libraryRoutes);
 app.use('/api', friendRoutes);
+app.use('/api', bookListRoutes);
 
 // ===== START SERVER =====
 app.listen(PORT, () => {

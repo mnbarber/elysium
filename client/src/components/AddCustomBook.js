@@ -6,64 +6,64 @@ import './AddCustomBook.css';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 function AddCustomBook() {
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        title: '',
-        author: '',
-        coverUrl: '',
-        description: '',
-        numberOfPages: '',
-        publishYear: '',
-        subjects: ''
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    title: '',
+    author: '',
+    coverUrl: '',
+    description: '',
+    numberOfPages: '',
+    publishYear: '',
+    subjects: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
-        if (!formData.title.trim() || !formData.author.trim()) {
-            setError('Title and Author are required.');
-            return;
-        }
+    if (!formData.title.trim() || !formData.author.trim()) {
+      setError('Title and Author are required.');
+      return;
+    }
 
-        setLoading(true);
+    setLoading(true);
 
-        try {
-            const bookData = {
-                title: formData.title.trim(),
-                author: formData.author.trim(),
-                coverUrl: formData.coverUrl.trim() || null,
-                description: formData.description.trim() || null,
-                numberOfPages: formData.numberOfPages ? parseInt(formData.numberOfPages, 10) : null,
-                publishYear: formData.publishYear ? parseInt(formData.publishYear, 10) : null,
-                subjects: formData.subjects
-                    .split(',')
-                    .map(sub => sub.trim())
-                    .filter(sub => sub.length > 0)
-            };
+    try {
+      const bookData = {
+        title: formData.title.trim(),
+        author: formData.author.trim(),
+        coverUrl: formData.coverUrl.trim() || null,
+        description: formData.description.trim() || null,
+        numberOfPages: formData.numberOfPages ? parseInt(formData.numberOfPages, 10) : null,
+        publishYear: formData.publishYear ? parseInt(formData.publishYear, 10) : null,
+        subjects: formData.subjects
+          .split(',')
+          .map(sub => sub.trim())
+          .filter(sub => sub.length > 0)
+      };
 
-            const response = await axios.post(`${API_URL}/books/custom`, bookData);
-            alert('Custom book added successfully!');
-            navigate('/');
-        } catch (err) {
-            console.error('Error adding custom book:', err);
-            setError('Failed to add custom book. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
+      const response = await axios.post(`${API_URL}/books/custom`, bookData);
+      alert('Custom book added successfully!');
+      navigate('/');
+    } catch (err) {
+      console.error('Error adding custom book:', err);
+      setError('Failed to add custom book. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
+  return (
     <div className="add-custom-book-container">
       <button className="back-button" onClick={() => navigate('/')}>
         ← Back to Search

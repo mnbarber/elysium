@@ -43,7 +43,7 @@ function ActivityFeed() {
         return `reviewed "${activity.book.title}"`;
       case 'moved_book':
         if (activity.toLibrary === 'currently-reading' && activity.book?.readCount > 0) {
-        return `is re-reading "${activity.book.title}"`;
+          return `is re-reading "${activity.book.title}"`;
         }
         return `moved "${activity.book.title}" to ${formatLibraryName(activity.toLibrary)}`;
       case 'finished_book':
@@ -60,7 +60,7 @@ function ActivityFeed() {
 
   const getTimeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    
+
     const intervals = {
       year: 31536000,
       month: 2592000,
@@ -76,7 +76,7 @@ function ActivityFeed() {
         return `${interval} ${unit}${interval > 1 ? 's' : ''} ago`;
       }
     }
-    
+
     return 'just now';
   };
 
@@ -87,7 +87,7 @@ function ActivityFeed() {
   return (
     <div className="activity-feed-container">
       <h1>Friend Activity</h1>
-      
+
       {activities.length === 0 ? (
         <div className="empty-feed">
           <p>No activity yet. Add some friends to see their reading activity!</p>
@@ -108,7 +108,7 @@ function ActivityFeed() {
                   )}
                 </div>
               </Link>
-              
+
               <div className="activity-content">
                 <div className="activity-header">
                   <Link to={`/profile/${activity.user.username}`} className="user-name">
@@ -117,12 +117,12 @@ function ActivityFeed() {
                   <span className="activity-message">{getActivityMessage(activity)}</span>
                   <span className="activity-time">{getTimeAgo(activity.createdAt)}</span>
                 </div>
-                
+
                 <div className="activity-book">
                   {activity.book.coverUrl && (
-                    <img src={activity.book.coverUrl} alt={activity.book.title} className="book-cover" />
+                    <img src={activity.book.coverUrl} alt={activity.book.title} className="activity-book-cover" />
                   )}
-                  <div className="book-info">
+                  <div className="activity-book-info">
                     <h4>{activity.book.title}</h4>
                     <p>by {activity.book.author}</p>
 
