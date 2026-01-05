@@ -16,6 +16,7 @@ import BrowseByGenre from './components/BrowseByGenre';
 import ReadingStats from './components/ReadingStats';
 import CompletionDateModal from './components/CompletionDateModal';
 import BookDetails from './components/BookDetails';
+import AddCustomBook from './components/AddCustomBook';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -325,6 +326,12 @@ const updateCompletionDate = async (completionDate) => {
             <button type="submit">Search</button>
           </form>
 
+          <div className="cant-find-book">
+            <Link to="/add-book" className="add-book-link">
+              Can't find your book? Add it yourself here!
+            </Link>
+          </div>
+
           {loading && <p>Searching...</p>}
 
           <div className="search-results">
@@ -590,6 +597,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/browse" element={<BrowseByGenre />} />
           <Route path="/book/*" element={<BookDetails />} />
+          <Route path="/add-book" element={<AddCustomBook />} />
           <Route path="/feed" element={<ActivityFeed />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/profile/:username" element={<Profile />} />

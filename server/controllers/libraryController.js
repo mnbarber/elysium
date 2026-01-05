@@ -119,6 +119,65 @@ const browseByGenre = async (req, res) => {
   }
 };
 
+const addCustomBook = async (req, res) => {
+  try {
+    const { title, author, coverUrl, description, numberOfPages, publishYear, subjects } = req.body;
+
+    if (!title || !author) {
+      return res.status(400).json({ error: 'Title and author are required.' });
+    }
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found.' });
+    }
+
+    const customBookKey = `/custom/${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const customBook = {
+      key: customBookKey,
+      title: title.trim(),
+      author: author.trim(),
+      coverUrl: coverUrl || '',
+      description: description || '',
+      numberOfPages: numberOfPages || null,
+      publishYear: publishYear || null,
+      subjects: subjects || [],
+      rating: 0,
+      review: '',
+      readCount: 0,
+      isCustom: true
+    };
+
+    library.toRead.push(customBook);
+    await library.save();
+
+    await createActivity(req.userId, 'added_custom_book', {
+      book: {
+        key: customBook.key,
+        title: customBook.title,
+        author: customBook.author,
+        coverUrl: customBook.coverUrl
+      },
+      libraryName: 'to-read'
+    });
+
+    res.json({ 
+      message: 'Custom book added successfully',
+      book: customBook,
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+  } catch (error) {
+    console.error('Error adding custom book:', error);
+    res.status(500).json({ error: 'Error adding custom book.' });
+  }
+}
+
 // get user's library
 const getLibraries = async (req, res) => {
   try {
@@ -842,6 +901,7 @@ module.exports = {
   getBookDetails,
   browseByGenre,
   getLibraries,
+  addCustomBook,
   addBookToLibrary,
   removeBookFromLibrary,
   moveBook,

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { subscribe } = require('../routes/authRoutes');
 
 const bookSchema = new mongoose.Schema({
   key: {
@@ -12,6 +13,14 @@ const bookSchema = new mongoose.Schema({
   author: String,
   coverUrl: String,
   firstPublishYear: Number,
+  description: String,
+  numberOfPages: Number,
+  isbn: String,
+  subjects: [String],
+  isCustom: {
+    type: Boolean,
+    default: false
+  },
   rating: {
     type: Number,
     min: 0,
@@ -22,6 +31,7 @@ const bookSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  reviewedAt: Date,
   readCount: {
     type: Number,
     default: 0,
