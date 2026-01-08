@@ -47,16 +47,22 @@ const login = async (req, res) => {
     console.log('Login attempt for email:', email);
 
     // find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ 
+      $or: [
+        { username: username },
+        { email: username.toLowerCase() }
+      ]
+     });
     if (!user) {
+      console.log('User not found');
       return res.status(400).json({ error: 'Invalid email or password.' });
     }
 
-    console.log('User found, checking password...');
+    console.log('User found:', user.username);
     console.log('Stored password hash:', user.password.substring(0, 20) + '...');
 
     // check password
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     console.log('Password match:', isMatch);
 
     if (!isMatch) {
