@@ -89,8 +89,8 @@ const sendPasswordResetEmail = async (email, resetToken, username) => {
                             
                             <p>We received a request to reset your password. Click the button below to create a new password:</p>
                             
-                            <div style="text-align: center;">
-                                <a href="${resetUrl}" class="button">Reset Password</a>
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="${resetUrl}" style="display: inline-block; padding: 14px 28px; background: #667eea; color: white !important; text-decoration: none; border-radius: 8px; font-weight: 600;">Reset Password</a>
                             </div>
                             
                             <p>Or copy and paste this link into your browser:</p>
