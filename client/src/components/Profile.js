@@ -255,10 +255,7 @@ function Profile() {
                           <div className="profile-book-review">
                             <p className="review-label">Review:</p>
                             <p className="review-text">
-                              {book.review.length > 100
-                                ? `${book.review.substring(0, 100)}...`
-                                : book.review
-                              }
+                              {book.review}
                             </p>
                           </div>
                         )}
