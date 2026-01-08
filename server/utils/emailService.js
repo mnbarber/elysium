@@ -1,5 +1,4 @@
-const nodemailer = require('nodemailer');
-const SMTPConnection = require('nodemailer/lib/smtp-connection');
+const sgMail = require('@sendgrid/mail');
 
 const sendPasswordResetEmail = async (email, resetToken, username) => {
     try {
@@ -14,24 +13,14 @@ const sendPasswordResetEmail = async (email, resetToken, username) => {
             console.log(`Reset URL: ${resetUrl}`);
             console.log('===========================================\n');
 
-            // Return success without actually sending email
             return { success: true, messageId: 'dev-mode' };
         }
 
-        // Production: Use real email service
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.sendgrid.net',
-            port: 587,
-            secure: false,
-            auth: {
-                user: 'apikey',
-                pass: process.env.SENDGRID_API_KEY
-            }
-        });
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
         const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-        const mailOptions = {
+        const msg = {
             from: process.env.SENDGRID_FROM_EMAIL || 'noreply@elysium.com',
             to: email,
             subject: 'Password Reset Request - Elysium',
@@ -129,8 +118,9 @@ const sendPasswordResetEmail = async (email, resetToken, username) => {
             `
         };
 
-        const info = await transporter.sendMail(mailOptions);
-        return { success: true, messageId: info.messageId };
+        const response = await sgMail.send(msg);
+        console.log('Email sent successfully:', response[0].statusCode);
+        return { success: true, messageId: response[0].headers['x-message-id'] };
     } catch (error) {
         console.error('Error sending email:', error);
         return { success: false, error: error.message };
