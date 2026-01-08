@@ -30,7 +30,7 @@ function Login({ onSwitchToRegister }) {
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>email</label>
+            <label>username OR email</label>
             <input
               type="email"
               value={email}

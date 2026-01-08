@@ -42,9 +42,9 @@ const register = async (req, res) => {
 // user login
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    console.log('Login attempt for email:', email);
+    console.log('Login attempt for email:', username);
 
     // find user by email
     const user = await User.findOne({ 
