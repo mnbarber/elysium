@@ -10,6 +10,8 @@ const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    console.log('Received new user info:', req.body)
+
     // check if user exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
@@ -18,6 +20,7 @@ const register = async (req, res) => {
 
     // create new user
     const user = new User({ username, email, password });
+    console.log('Created new user:', user)
     await user.save();
 
     // create empty library for the user
