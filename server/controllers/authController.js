@@ -44,15 +44,23 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log('Login attempt for email:', email);
+
     // find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ error: 'Invalid email or password.' });
     }
 
+    console.log('User found, checking password...');
+    console.log('Stored password hash:', user.password.substring(0, 20) + '...');
+
     // check password
     const isMatch = await user.comparePassword(password);
+    console.log('Password match:', isMatch);
+
     if (!isMatch) {
+      console.log('Password does not match');
       return res.status(400).json({ error: 'Invalid email or password.' });
     }
 
@@ -130,6 +138,10 @@ const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
 
+    console.log('Reset password request received');
+    console.log('Token received:', token ? 'yes' : 'no');
+    console.log('New password received:', newPassword ? 'yes' : 'no');
+
     if (!token || !newPassword) {
       return res.status(400).json({ error: 'Token and new password are required' });
     }
@@ -154,13 +166,23 @@ const resetPassword = async (req, res) => {
       });
     }
 
+    console.log('User found:', user.username);
+    console.log('Hashing new password...');
+
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    console.log('New password hashed successfully');
+    console.log('Old password hash:', user.password.substring(0, 20) + '...');
+    console.log('New password hash:', hashedPassword.substring(0, 20) + '...');
+
+    user.password = hashedPassword;
 
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
     await user.save();
+    console.log('User saved with new password');
 
     res.json({ message: 'Password reset successful! You can now log in with your new password.' });
   } catch (error) {
