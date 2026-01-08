@@ -42,15 +42,16 @@ const register = async (req, res) => {
 // user login
 const login = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
+    const loginIdentifier = username || email;
 
-    console.log('Login attempt for email:', username);
+    console.log('Login attempt for email:', loginIdentifier);
 
     // find user by email
     const user = await User.findOne({ 
       $or: [
-        { username: username },
-        { email: username.toLowerCase() }
+        { username: loginIdentifier },
+        { email: loginIdentifier.toLowerCase() }
       ]
      });
     if (!user) {
