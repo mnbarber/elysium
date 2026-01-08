@@ -24,15 +24,23 @@ const register = async (req, res) => {
     await user.save();
 
     // create empty library for the user
-    const library = new Library({
-        user: user._id,
+    try {
+      console.log('Creating library for user...');
+      const library = new Library({
+        userId: user._id,
         toRead: [],
         currentlyReading: [],
         read: [],
         paused: [],
         dnf: []
-    });
-    await library.save();
+      });
+
+      await library.save();
+      console.log('Library created successfully');
+    } catch (libraryError) {
+      console.error('Error creating library:', libraryError);
+      console.log('Continuing despite library error...');
+    }
 
     // create token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -42,6 +50,8 @@ const register = async (req, res) => {
     res.status(201).json({ token, user: { userId: user._id, username: user.username, email: user.email, profile: user.profile } });
 
   } catch (error) {
+    console.error('Error in register:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ error: 'Server error during registration.' });
   }
 };
