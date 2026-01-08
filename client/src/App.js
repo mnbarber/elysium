@@ -20,6 +20,8 @@ import AddCustomBook from './components/AddCustomBook';
 import MyLists from './components/MyLists';
 import ListDetail from './components/ListDetail';
 import BrowseLists from './components/BrowseLists';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -567,10 +569,29 @@ function App() {
   }
 
   if (!user) {
-    return showRegister ? (
-      <Register onSwitchToLogin={() => setShowRegister(false)} />
-    ) : (
-      <Login onSwitchToRegister={() => setShowRegister(true)} />
+    return (
+      <Router>
+        <Routes>
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route
+            path="*"
+            element={
+              showRegister ? (
+                <Register
+                  onSwitchToLogin={() => setShowRegister(false)}
+                  setShowRegister={setShowRegister}
+                />
+              ) : (
+                <Login
+                  onSwitchToRegister={() => setShowRegister(true)}
+                  setShowRegister={setShowRegister}
+                />
+              )
+            }
+          />
+        </Routes>
+      </Router>
     );
   }
 
@@ -599,6 +620,8 @@ function App() {
         </header>
 
         <Routes>
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/browse" element={<BrowseByGenre />} />
           <Route path="/book/*" element={<BookDetails />} />

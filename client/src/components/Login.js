@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import './Auth.css';
 
@@ -45,6 +46,9 @@ function Login({ onSwitchToRegister }) {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+          </div>
+          <div className="links">
+            <Link to="/forgot-password">Forgot password?</Link>
           </div>
           <button type="submit" disabled={loading}>
             {loading ? 'Logging in...' : 'login'}
