@@ -20,17 +20,19 @@ const sendPasswordResetEmail = async (email, resetToken, username) => {
 
         // Production: Use real email service
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.sendgrid.net',
+            port: 587,
+            secure: false,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASSWORD
+                user: 'apikey',
+                pass: process.env.SENDGRID_API_KEY
             }
         });
 
         const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
         const mailOptions = {
-            from: process.env.EMAIL_USER || 'noreply@elysium.com',
+            from: process.env.SENDGRID_FROM_EMAIL || 'noreply@elysium.com',
             to: email,
             subject: 'Password Reset Request - Elysium',
             html: `
