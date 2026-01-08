@@ -174,16 +174,8 @@ const resetPassword = async (req, res) => {
     }
 
     console.log('User found:', user.username);
-    console.log('Hashing new password...');
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    console.log('New password hashed successfully');
-    console.log('Old password hash:', user.password.substring(0, 20) + '...');
-    console.log('New password hash:', hashedPassword.substring(0, 20) + '...');
-
-    user.password = hashedPassword;
+    user.password = newPassword;
 
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
