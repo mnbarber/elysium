@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './ReviewModal.css';
 
-function ReviewModal({ book, existingReview, onClose, onSubmit }) {
+function ReviewModal({ book, existingReview, onClose, onSubmit, existingSpoilerFlag }) {
   const [reviewText, setReviewText] = useState(existingReview || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [containsSpoilers, setContainsSpoilers] = useState(existingSpoilerFlag || false)
+
+  useEffect(() => {
+    setReviewText(existingReview || '');
+    setContainsSpoilers(existingSpoilerFlag || false);
+  }, [existingReview, existingSpoilerFlag]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +21,7 @@ function ReviewModal({ book, existingReview, onClose, onSubmit }) {
 
     setIsSubmitting(true);
     try {
-      await onSubmit(reviewText);
+      await onSubmit(reviewText, containsSpoilers);
     } finally {
       setIsSubmitting(false);
     }
@@ -52,6 +58,18 @@ function ReviewModal({ book, existingReview, onClose, onSubmit }) {
             <div className="character-count">
               {reviewText.length}/2000 characters
             </div>
+            <div className="spoiler-checkbox">
+            <label>
+              <input
+                type="checkbox"
+                checked={containsSpoilers}
+                onChange={(e) => setContainsSpoilers(e.target.checked)}
+              />
+              <span className="checkbox-label">
+                ⚠️ This review contains spoilers
+              </span>
+            </label>
+          </div>
           </div>
 
           <div className="modal-actions">

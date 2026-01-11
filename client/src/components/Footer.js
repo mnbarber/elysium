@@ -7,7 +7,7 @@ function Footer() {
         <footer className="site-footer">
             <div className="footer-content">
                 <div className="footer-section">
-                    <h3>♥ Elysium</h3>
+                    <h3>♥ elysium</h3>
                     <p>Your personal book tracking and social reading platform</p>
                 </div>
 

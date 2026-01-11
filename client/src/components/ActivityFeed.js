@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
+import SpoilerReview from './SpoilerReview';
 import './ActivityFeed.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -9,7 +10,6 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 function ActivityFeed() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedReviews, setExpandedReviews] = useState({});
 
   useEffect(() => {
     fetchActivities();
@@ -24,13 +24,6 @@ function ActivityFeed() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const toggleReview = (activityId) => {
-    setExpandedReviews((prev) => ({
-      ...prev,
-      [activityId]: !prev[activityId]
-    }));
   };
 
   const getActivityMessage = (activity) => {
@@ -95,36 +88,38 @@ function ActivityFeed() {
         </div>
       ) : (
         <div className="activities-list">
-          {activities.map((activity) => (
-            <div key={activity.id} className="activity-card">
-              <Link to={`/profile/${activity.user.username}`} className="activity-user">
-                <div className="activity-avatar">
-                  {activity.user.avatarUrl ? (
-                    <img src={activity.user.avatarUrl} alt={activity.user.displayName} />
-                  ) : (
-                    <div className="avatar-placeholder">
-                      {activity.user.displayName.charAt(0).toUpperCase()}
+            {activities.map((activity) => {
+              console.log('Activity type:', activity.activityType, 'Full activity:', activity, 'activities reviews:', activity.review);
+              return (
+                <div key={activity._id} className="activity-card">
+                  <div className="activity-content">
+                    <div className="activity-header">
+                      <Link to={`/profile/${activity.user.username}`} className="user-name">
+                        {activity.user.displayName}
+                      </Link>
+                      <span className="activity-message">
+                        {getActivityMessage(activity)}
+                      </span>
+                      <span className="activity-time">
+                        {getTimeAgo(activity.createdAt)}
+                      </span>
                     </div>
-                  )}
-                </div>
-              </Link>
 
-              <div className="activity-content">
-                <div className="activity-header">
-                  <Link to={`/profile/${activity.user.username}`} className="user-name">
-                    {activity.user.displayName}
-                  </Link>
-                  <span className="activity-message">{getActivityMessage(activity)}</span>
-                  <span className="activity-time">{getTimeAgo(activity.createdAt)}</span>
-                </div>
-
-                <div className="activity-book">
-                  {activity.book.coverUrl && (
-                    <img src={activity.book.coverUrl} alt={activity.book.title} className="activity-book-cover" />
-                  )}
-                  <div className="activity-book-info">
-                    <h4>{activity.book.title}</h4>
-                    <p>by {activity.book.author}</p>
+                    {(activity.details?.book || activity.book) && (
+                      <div className="activity-book">
+                        {((activity.details?.book?.coverUrl || activity.book?.coverUrl)) && (
+                          <img
+                            src={activity.details?.book?.coverUrl || activity.book?.coverUrl}
+                            alt={activity.details?.book?.title || activity.book?.title}
+                            className="activity-book-cover"
+                          />
+                        )}
+                        <div className="activity-book-info">
+                          <h4>{activity.details?.book?.title || activity.book?.title}</h4>
+                          <p>by {activity.details?.book?.author || activity.book?.author}</p>
+                        </div>
+                      </div>
+                    )}
 
                     {activity.activityType === 'rated_book' && activity.rating && (
                       <div className="activity-rating">
@@ -134,27 +129,20 @@ function ActivityFeed() {
 
                     {activity.activityType === 'reviewed_book' && activity.review && (
                       <div className="activity-review">
-                        <p className="review-text">
-                          {expandedReviews[activity.id] || activity.review.length <= 200
-                            ? activity.review
-                            : `${activity.review.substring(0, 200)}...`
-                          }
-                        </p>
-                        {activity.review.length > 200 && (
-                          <button
-                            className="btn-read-more"
-                            onClick={() => toggleReview(activity.id)}
-                          >
-                            {expandedReviews[activity.id] ? 'Show Less' : 'Read More'}
-                          </button>
+                        {activity.containsSpoilers ? (
+                          <SpoilerReview
+                            review={activity.review}
+                            bookTitle={activity.book.title}
+                          />
+                        ) : (
+                          <p className="review-text">"{activity.review}"</p>
                         )}
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              )
+            })}
         </div>
       )}
     </div>

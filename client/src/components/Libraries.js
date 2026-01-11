@@ -137,7 +137,7 @@ function Libraries() {
         setShowMoveDropdown(showMoveDropdown === bookKey ? null : bookKey);
     };
 
-    const openReviewModal = (book, review = '') => {
+    const openReviewModal = (book, review = '', containsSpoilers = false) => {
         setSelectedBook(book);
         setExistingReview(review);
         setShowReviewModal(true);
@@ -149,7 +149,7 @@ function Libraries() {
         setExistingReview('');
     };
 
-    const submitReview = async (review) => {
+    const submitReview = async (review, containsSpoilers) => {
         try {
             const bookData = {
                 key: selectedBook.key,
@@ -160,7 +160,8 @@ function Libraries() {
 
             const response = await axios.post(`${API_URL}/books/review`, {
                 book: bookData,
-                review: review
+                review: review,
+                containsSpoilers: containsSpoilers
             });
 
             setLibraries(response.data.libraries);
@@ -317,13 +318,12 @@ function Libraries() {
                                         />
                                     </div>
 
-                                    {/* Show completion date only for books in "Read" library */}
                                     {activeLibrary === 'read' && (
                                         <div className="completion-date-display">
                                             {book.completedAt ? (
                                                 <>
                                                     <p className="completion-date-text">
-                                                        📅 Finished: {new Date(book.completedAt).toLocaleDateString('en-US', {
+                                                        Finished: {new Date(book.completedAt).toLocaleDateString('en-US', {
                                                             year: 'numeric',
                                                             month: 'short',
                                                             day: 'numeric'
@@ -355,7 +355,6 @@ function Libraries() {
                                         </div>
                                     )}
 
-                                    {/* Move to Library Dropdown */}
                                     <div className="move-dropdown-container">
                                         <button
                                             className="btn-move"
@@ -387,7 +386,10 @@ function Libraries() {
                                             title: book.title,
                                             author: book.author || 'Unknown',
                                             coverUrl: book.coverUrl
-                                        })}
+                                        },
+                                        book.review || '',
+                                        book.containsSpoilers || false
+                                        )}
                                     >
                                         {book.review ? 'Edit Review' : 'Write Review'}
                                     </button>
@@ -407,6 +409,7 @@ function Libraries() {
                 <ReviewModal
                     book={selectedBook}
                     existingReview={existingReview}
+                    existingSpoilerFlag={selectedBook?.containsSpoilers || false}
                     onClose={closeReviewModal}
                     onSubmit={submitReview}
                 />

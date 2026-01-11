@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import StarRating from './StarRating';
+import SpoilerReview from './SpoilerReview';
 import './Profile.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -256,13 +257,17 @@ function Profile() {
                             </span>
                           )}
                         </div>
-                        {activeTab === 'read' && book.review && (
-                          <div className="profile-book-review">
-                            <p className="review-label">Review:</p>
-                            <p className="review-text">
-                              {book.review}
-                            </p>
-                          </div>
+                        {book.review && (
+                          book.containsSpoilers ? (
+                            <SpoilerReview
+                              review={book.review}
+                              bookTitle={book.title}
+                            />
+                          ) : (
+                            <div className='profile-book-review'>
+                            <p className="review-text">{book.review}</p>
+                            </div>
+                          )
                         )}
                       </div>
                     </div>

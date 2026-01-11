@@ -10,6 +10,7 @@ const createActivity = async (userId, activityType, data) => {
       activityType,
       ...data
     });
+    console.log(activity)
     await activity.save();
   } catch (error) {
     console.error('Error creating activity:', error);
@@ -605,143 +606,150 @@ const updateRating = async (req, res) => {
 
 // review a book
 const reviewBook = async (req, res) => {
-    try {
-        const { book, review } = req.body;
+  try {
+    const { book, review, containsSpoilers } = req.body;
 
-        if (!review || review.trim() === '') {
-            return res.status(400).json({ error: 'Review cannot be empty' });
-        }
+    if (!review || review.trim() === '') {
+      return res.status(400).json({ error: 'Review cannot be empty' });
+    }
 
-        const library = await Library.findOne({ userId: req.userId });
-        if (!library) {
-            return res.status(404).json({ error: 'Library not found' });
-        }
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
 
-        const allLibraries = ['toRead', 'currentlyReading', 'read', 'paused', 'dnf'];
-        let bookFound = false;
-        let bookLibrary = null;
+    const allLibraries = ['toRead', 'currentlyReading', 'read', 'paused', 'dnf'];
+    let bookFound = false;
+    let bookLibrary = null;
 
-        for (const lib of allLibraries) {
-            const bookIndex = library[lib].findIndex(b => b.key === book.key);
-            if (bookIndex !== -1) {
-                bookFound = true;
-                bookLibrary = lib;
+    for (const lib of allLibraries) {
+      const bookIndex = library[lib].findIndex(b => b.key === book.key);
+      if (bookIndex !== -1) {
+        bookFound = true;
+        bookLibrary = lib;
 
-                if (lib === 'read') {
-                    library.read[bookIndex].review = review;
-                    library.read[bookIndex].updatedAt = new Date();
-                    await library.save();
+        if (lib === 'read') {
+          library.read[bookIndex].review = review;
+          library.read[bookIndex].containsSpoilers = containsSpoilers || false;
+          library.read[bookIndex].reviewedAt = new Date();  // Changed from updatedAt
+          await library.save();
 
-                    await createActivity(req.userId, 'reviewed_book', {
-                        book: {
-                            key: book.key,
-                            title: library.read[bookIndex].title,
-                            author: library.read[bookIndex].author,
-                            coverUrl: library.read[bookIndex].coverUrl
-                        },
-                        review: review
-                    });
-
-                    return res.json({
-                        message: 'Book review updated successfully',
-                        book: library.read[bookIndex],
-                        libraries: {
-                            'to-read': library.toRead || [],
-                            'currently-reading': library.currentlyReading || [],
-                            'read': library.read || [],
-                            'paused': library.paused || [],
-                            'dnf': library.dnf || []
-                        }
-                    });
-                }
-
-                // if book is in another library, move it to 'read' with review
-                const bookToMove = library[lib][bookIndex];
-                bookToMove.review = review;
-                bookToMove.updatedAt = new Date();
-                library[lib].splice(bookIndex, 1);
-                library.read.push(bookToMove);
-                await library.save();
-
-                await createActivity(req.userId, 'finished_book', {
-                    book: {
-                        key: book.key,
-                        title: bookToMove.title,
-                        author: bookToMove.author,
-                        coverUrl: bookToMove.coverUrl
-                    },
-                    review: review
-                });
-
-                await createActivity(req.userId, 'reviewed_book', {
-                    book: {
-                        key: bookToMove.key,
-                        title: bookToMove.title,
-                        author: bookToMove.author,
-                        coverUrl: bookToMove.coverUrl
-                    },
-                    review: review
-                });
-
-                return res.json({
-                    message: 'Book review updated successfully',
-                    book: library.read[library.read.length - 1],
-                    libraries: {
-                        'to-read': library.toRead || [],
-                        'currently-reading': library.currentlyReading || [],
-                        'read': library.read || [],
-                        'paused': library.paused || [],
-                        'dnf': library.dnf || []
-                    }
-                });
-            }
-        }
-
-        // If book not found in any library, add to 'read' with review
-        const newBook = {
-            ...book,
+          await createActivity(req.userId, 'reviewed_book', {
+            book: {
+              key: library.read[bookIndex].key,
+              title: library.read[bookIndex].title,
+              author: library.read[bookIndex].author,
+              coverUrl: library.read[bookIndex].coverUrl
+            },
             review: review,
-            updatedAt: new Date()
-        };
-        library.read.push(newBook);
+            containsSpoilers: containsSpoilers || false
+          });
+
+          console.log('created activity with review:', review);
+
+          return res.json({
+            message: 'Book review updated successfully',
+            book: library.read[bookIndex],
+            libraries: {
+              'to-read': library.toRead || [],
+              'currently-reading': library.currentlyReading || [],
+              'read': library.read || [],
+              'paused': library.paused || [],
+              'dnf': library.dnf || []
+            }
+          });
+        }
+
+        // if book is in another library, move it to 'read' with review
+        const bookToMove = library[lib][bookIndex];
+        bookToMove.review = review;
+        bookToMove.containsSpoilers = containsSpoilers || false;  // Add this
+        bookToMove.reviewedAt = new Date();  // Changed from updatedAt
+        library[lib].splice(bookIndex, 1);
+        library.read.push(bookToMove);
         await library.save();
 
-        await createActivity(req.userId, 'added_book', {
-            book: {
-                key: newBook.key,
-                title: newBook.title,
-                author: newBook.author,
-                coverUrl: newBook.coverUrl
-            },
-            libraryName: 'read'
+        await createActivity(req.userId, 'finished_book', {
+          book: {
+            key: bookToMove.key,
+            title: bookToMove.title,
+            author: bookToMove.author,
+            coverUrl: bookToMove.coverUrl
+          }
         });
 
         await createActivity(req.userId, 'reviewed_book', {
-            book: {
-                key: newBook.key,
-                title: newBook.title,
-                author: newBook.author,
-                coverUrl: newBook.coverUrl
-            },
-            review: review
+          book: {
+            key: bookToMove.key,
+            title: bookToMove.title,
+            author: bookToMove.author,
+            coverUrl: bookToMove.coverUrl
+          },
+          review: bookToMove.review,
+          containsSpoilers: bookToMove.containsSpoilers  // Add this
         });
 
         return res.json({
-            message: 'Book review added successfully',
-            book: newBook,
-            libraries: {
-                'to-read': library.toRead || [],
-                'currently-reading': library.currentlyReading || [],
-                'read': library.read || [],
-                'paused': library.paused || [],
-                'dnf': library.dnf || []
-            }
+          message: 'Book review updated successfully',
+          book: library.read[library.read.length - 1],
+          libraries: {
+            'to-read': library.toRead || [],
+            'currently-reading': library.currentlyReading || [],
+            'read': library.read || [],
+            'paused': library.paused || [],
+            'dnf': library.dnf || []
+          }
         });
-
-    } catch (error) {
-        console.error('Error updating book review:', error);
-        res.status(500).json({ error: 'Error updating book review' });
+      }
     }
+
+    // If book not found in any library, add to 'read' with review
+    const newBook = {
+      ...book,
+      review: review,
+      containsSpoilers: containsSpoilers || false,  // Add this
+      reviewedAt: new Date()  // Changed from updatedAt
+    };
+    library.read.push(newBook);
+    await library.save();
+
+    await createActivity(req.userId, 'added_book', {
+      book: {
+        key: newBook.key,
+        title: newBook.title,
+        author: newBook.author,
+        coverUrl: newBook.coverUrl
+      },
+      libraryName: 'read'
+    });
+
+    await createActivity(req.userId, 'reviewed_book', {
+      book: {
+        key: newBook.key,
+        title: newBook.title,
+        author: newBook.author,
+        coverUrl: newBook.coverUrl
+      },
+      review: newBook.review,
+      containsSpoilers: newBook.containsSpoilers  // Add this
+    });
+
+    return res.json({
+      message: 'Book review added successfully',
+      book: newBook,
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+
+  } catch (error) {
+    console.error('Error updating book review:', error);
+    res.status(500).json({ error: 'Error updating book review' });
+  }
 };
 
 // get review

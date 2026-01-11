@@ -21,6 +21,7 @@ const activitySchema = new mongoose.Schema({
     libraryName: String,
     rating: Number,
     review: String,
+    containsSpoilers: Boolean,
     fromLibrary: String,
     toLibrary: String,
     createdAt: {

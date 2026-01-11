@@ -31,6 +31,10 @@ const bookSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  containsSpoilers: {
+    type: Boolean,
+    default: false
+  },
   reviewedAt: Date,
   readCount: {
     type: Number,
