@@ -22,6 +22,9 @@ import ListDetail from './components/ListDetail';
 import BrowseLists from './components/BrowseLists';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
+import Footer from './components/Footer';
+import FAQ from './components/FAQ';
+import Contact from './components/Contact';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -635,8 +638,11 @@ function App() {
           <Route path="/profile/:username/edit" element={<EditProfile />} />
           <Route path="/stats" element={<ReadingStats />} />
           <Route path="/users" element={<UserSearch />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
+        <Footer />
       </div>
     </Router>
   );
