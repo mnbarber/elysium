@@ -155,9 +155,12 @@ function Profile() {
               <p className="username">@{profile.username}</p>
             </div>
             {user && user.username === username ? (
+              <>
               <Link to={`/profile/${user.username}/edit`} className="btn-edit-profile">
                 Edit Profile
               </Link>
+              <Link to="/friends" className='btn-edit-profile'>Your Friends</Link>
+              </>
             ) : (
               renderFriendButton()
             )}
@@ -231,8 +234,10 @@ function Profile() {
                 <div className="books-grid">
                   {libraries[activeTab].map((book) => (
                     <div key={book.key} className="book-card-mini">
-                      {book.coverUrl && (
+                      {book.coverUrl ? (
                         <img src={book.coverUrl} alt={book.title} />
+                      ) : (
+                        <img src='https://i.imgur.com/GxzWr9n.jpeg' />
                       )}
                       <div className="book-details">
                         <Link to={`/book/${book.key}`} className="book-title-link">

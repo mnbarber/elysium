@@ -50,8 +50,8 @@ function ReadingStats() {
 
     const maxMonthlyBooks = Math.max(...Object.values(stats.monthlyBreakdown), 1);
 
-    return (
-        <div className="stats-container">
+  return (
+    <div className="stats-container">
       <h1>Reading Statistics</h1>
 
       <div className="stats-grid">
@@ -76,9 +76,9 @@ function ReadingStats() {
         <div className="chart">
           {Object.entries(stats.monthlyBreakdown).map(([month, count]) => (
             <div key={month} className="chart-bar-container">
-              <div 
-                className="chart-bar" 
-                style={{ 
+              <div
+                className="chart-bar"
+                style={{
                   height: `${(count / maxMonthlyBooks) * 200}px`,
                   backgroundColor: count > 0 ? '#667eea' : '#e0e0e0'
                 }}

@@ -73,13 +73,10 @@ function BookDetails() {
 
             <div className="book-details-header">
                 <div className="book-cover-large">
-                    {book.coverId ? (
-                        <img
-                            src={`https://covers.openlibrary.org/b/id/${book.coverId}-L.jpg`}
-                            alt={book.title}
-                        />
+                    {book.coverUrl ? (
+                        <img src={book.coverUrl} alt={book.title} />
                     ) : (
-                        <div className="no-cover">No Cover Available</div>
+                        <img src='https://i.imgur.com/GxzWr9n.jpeg' />
                     )}
                 </div>
 

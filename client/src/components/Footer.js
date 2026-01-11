@@ -14,7 +14,8 @@ function Footer() {
                 <div className="footer-section">
                     <h4>Quick Links</h4>
                     <ul>
-                        <Link to="/">Home</Link>
+                        <Link to="/search">Search Books</Link>
+                        <Link to="/libraries">My Libraries</Link>
                         <Link to="/browse">Browse Books</Link>
                         <Link to="/lists/browse">Public Lists</Link>
                         <Link to="/users">Find Users</Link>

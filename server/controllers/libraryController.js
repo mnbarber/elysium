@@ -813,32 +813,59 @@ const deleteReview = async (req, res) => {
 
 // update completion date of a book
 const updateCompletionDate = async (req, res) => {
-    try {
-        const { bookKey } = req.params;
-        const { completedAt } = req.body;
-        const decodedKey = decodeURIComponent(bookKey);
+  try {
+    const { bookKey } = req.params;
+    const { completedAt } = req.body;
 
-        const library = await Library.findOne({ userId: req.userId });
-        if (!library) {
-            return res.status(404).json({ error: 'Library not found' });
-        }
+    const decodedKey = decodeURIComponent(bookKey);
 
-        const bookIndex = library.read.findIndex(b => b.key === decodedKey);
-        if (bookIndex === -1) {
-            return res.status(404).json({ error: 'Book not found in read library' });
-        }
-
-        library.read[bookIndex].completedAt = new Date(completedAt);
-        await library.save();
-
-        res.json({
-            message: 'Completion date updated',
-            book: library.read[bookIndex]
-        });
-    } catch (error) {
-        console.error('Error updating completion date:', error);
-        res.status(500).json({ error: 'Error updating completion date' });
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
     }
+
+    // Search for the book in all libraries
+    let found = false;
+    let bookRef = null;
+
+    for (const libraryName of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+      const libraryArray = library[libraryName];
+      if (libraryArray) {
+        bookRef = libraryArray.find(b => b.key === decodedKey);
+        if (bookRef) {
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (!found) {
+      return res.status(404).json({ error: 'Book not found in any library' });
+    }
+
+    // Allow null/undefined to remove the date
+    if (completedAt === null || completedAt === undefined || completedAt === '') {
+      bookRef.completedAt = undefined;
+    } else {
+      bookRef.completedAt = new Date(completedAt);
+    }
+
+    await library.save();
+
+    res.json({
+      message: completedAt ? 'Completion date updated' : 'Completion date removed',
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+  } catch (error) {
+    console.error('Error updating completion date:', error);
+    res.status(500).json({ error: 'Error updating completion date' });
+  }
 };
 
 // get reading stats
