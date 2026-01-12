@@ -89,7 +89,6 @@ function ActivityFeed() {
       ) : (
         <div className="activities-list">
             {activities.map((activity) => {
-              console.log('Activity type:', activity.activityType, 'Full activity:', activity, 'activities reviews:', activity.review);
               return (
                 <div key={activity._id} className="activity-card">
                   <div className="activity-content">
@@ -115,7 +114,9 @@ function ActivityFeed() {
                           />
                         )}
                         <div className="activity-book-info">
-                          <h4>{activity.details?.book?.title || activity.book?.title}</h4>
+                          <Link to={`/book${activity.book.key}`}>
+                            <h3>{activity.book.title}</h3>
+                          </Link>
                           <p>by {activity.details?.book?.author || activity.book?.author}</p>
                         </div>
                       </div>

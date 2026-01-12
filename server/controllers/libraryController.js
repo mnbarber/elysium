@@ -28,83 +28,130 @@ const searchBooks = async (req, res) => {
   }
 };
 
-// get more book details from open library API
+// get more book details from open library API OR from custom books
 const getBookDetails = async (req, res) => {
   try {
-    const { type, id } = req.params;
-    const bookKey = `/${type}/${id}`;
-    
-    console.log('getBookDetails called');
-    console.log('Type:', type, 'ID:', id);
-    console.log('Book key:', bookKey);
+    const bookKey = req.query.key;
 
-    const workResponse = await axios.get(`https://openlibrary.org${bookKey}.json`);
-    const workData = workResponse.data;
+    console.log('Book key from query:', bookKey);
 
-    // get the first edition for more details
-    let editionData = null;
-    if (workData.covers && workData.covers.length > 0) {
+    if (!bookKey) {
+      return res.status(400).json({ error: 'Book key is required' });
+    }
+
+    if (bookKey.startsWith('/custom/')) {
+      console.log('Custom book detected, searching all libraries...');
+
       try {
-        const editionResponse = await axios.get(`https://openlibrary.org${bookKey}/editions.json?limit=1`);
-        if (editionResponse.data.entries && editionResponse.data.entries.length > 0) {
-          editionData = editionResponse.data.entries[0];
+        const allLibraries = await Library.find({});
+        console.log(`Searching ${allLibraries.length} libraries...`);
+
+        let customBook = null;
+
+        for (const library of allLibraries) {
+          const libraryNames = ['toRead', 'currentlyReading', 'read', 'paused', 'dnf'];
+
+          for (const libraryName of libraryNames) {
+            const libraryArray = library[libraryName];
+
+            if (libraryArray && Array.isArray(libraryArray)) {
+              customBook = libraryArray.find(b => b.key === bookKey);
+
+              if (customBook) {
+                console.log('Found custom book in a library:', customBook.title);
+                break;
+              }
+            }
+          }
+
+          if (customBook) break;
         }
-      } catch (err) {
-        console.error('Error fetching edition data:', err);
+
+        if (!customBook) {
+          console.log('Custom book NOT FOUND in any library');
+          return res.status(404).json({
+            error: 'Custom book not found'
+          });
+        }
+
+        const bookDetails = {
+          key: customBook.key,
+          title: customBook.title,
+          author: customBook.author,
+          coverUrl: customBook.coverUrl,
+          description: customBook.description || 'No description available.',
+          firstPublishYear: customBook.firstPublishYear,
+          numberOfPages: customBook.numberOfPages,
+          subjects: customBook.subjects || [],
+          isbn: customBook.isbn,
+          isCustom: true
+        };
+
+        console.log('Returning custom book:', bookDetails.title);
+        return res.json(bookDetails);
+
+      } catch (error) {
+        console.error('Error searching for custom book:', error);
+        return res.status(500).json({ error: 'Error fetching custom book' });
       }
     }
 
-    // get author details
+    const openLibraryUrl = `https://openlibrary.org${bookKey}.json`;
+    console.log('Fetching from Open Library:', openLibraryUrl);
+
+    const response = await axios.get(openLibraryUrl);
+    const bookData = response.data;
+
+    let description = 'No description available.';
+    if (bookData.description) {
+      if (typeof bookData.description === 'string') {
+        description = bookData.description;
+      } else if (bookData.description.value) {
+        description = bookData.description.value;
+      }
+    }
+
     let authors = [];
-    if (workData.authors && workData.authors.length > 0) {
-      for (const author of workData.authors.slice(0, 3)) {
+    if (bookData.authors && bookData.authors.length > 0) {
+      const authorPromises = bookData.authors.map(async (author) => {
         try {
           const authorResponse = await axios.get(`https://openlibrary.org${author.author.key}.json`);
-          authors.push({
-            name: authorResponse.data.name,
-            bio: authorResponse.data.bio || '',
-            birth_date: authorResponse.data.birth_date || '',
-            photos: authorResponse.data.photos || []
-          });
+          return authorResponse.data.name;
         } catch (err) {
-          console.error('Error fetching author data:', err);
+          return 'Unknown Author';
         }
-      }
+      });
+      authors = await Promise.all(authorPromises);
     }
 
-    // format book description
-    let description = '';
-    if (workData.description) {
-      if (typeof workData.description === 'string') {
-        description = workData.description;
-      } else if (workData.description.value) {
-        description = workData.description.value;
-      }
+    let coverUrl = null;
+    if (bookData.covers && bookData.covers.length > 0) {
+      coverUrl = `https://covers.openlibrary.org/b/id/${bookData.covers[0]}-L.jpg`;
     }
+
+    const subjects = bookData.subjects?.slice(0, 10) || [];
 
     const bookDetails = {
       key: bookKey,
-      title: workData.title,
-      subtitle: workData.subtitle || '',
-      description: description,
-      coverId: workData.covers ? workData.covers[0] : null,
-      subjects: workData.subjects?.slice(0, 10) || [],
+      title: bookData.title,
+      author: authors[0] || 'Unknown Author',
       authors: authors,
-      firstPublishDate: workData.first_publish_date || '',
-      numberOfPages: editionData ? editionData.number_of_pages : null,
-      publisher: editionData ? editionData.publishers : [],
-      publishDate: editionData ? editionData.publish_date : '',
-      isbn10: editionData ? editionData.isbn_10 : [],
-      isbn13: editionData ? editionData.isbn_13 : [],
-      physicalFormat: editionData ? editionData.physical_format : ''
+      coverUrl: coverUrl,
+      description: description,
+      firstPublishYear: bookData.first_publish_date ?
+        new Date(bookData.first_publish_date).getFullYear() : null,
+      numberOfPages: bookData.number_of_pages || null,
+      subjects: subjects,
+      isbn: bookData.isbn_13?.[0] || bookData.isbn_10?.[0] || null,
+      isCustom: false
     };
 
     res.json(bookDetails);
   } catch (error) {
     console.error('Error fetching book details:', error);
-    res.status(500).json({ error: 'Error fetching book details.' });
+    res.status(500).json({ error: 'Error fetching book details' });
   }
-}
+};
 
 // browse books by genre using Open Library API
 const browseByGenre = async (req, res) => {

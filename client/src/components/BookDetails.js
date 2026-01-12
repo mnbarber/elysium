@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import StarRating from './StarRating';
 import './BookDetails.css';
@@ -7,35 +7,33 @@ import './BookDetails.css';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 function BookDetails() {
-    const params = useParams();
-    const bookKey = params['*'];
+    const location = useLocation();
     const navigate = useNavigate();
     const [book, setBook] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    console.log('Book key from params:', bookKey);
+    const bookKey = location.pathname.replace('/book', '');
 
     useEffect(() => {
-        fetchBookDetails();
-    }, [bookKey]);
-
     const fetchBookDetails = async () => {
-        try {
-            setLoading(true);
-            const fullURL = `${API_URL}/books/details/${bookKey}`;
-            console.log('API_URL:', API_URL);
-            console.log('bookKey:', bookKey);
-            console.log('Full URL being called:', fullURL);
-
-            const response = await axios.get(fullURL);
-            setBook(response.data);
-        } catch (err) {
-            setError('Failed to fetch book details');
-        } finally {
-            setLoading(false);
-        }
+      try {
+        setLoading(true);
+        const response = await axios.get(`${API_URL}/books/details`, {
+            params: { key: bookKey }
+        });
+        setBook(response.data);
+      } catch (error) {
+        console.error('Error fetching book details:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+    
+    if (bookKey) {
+      fetchBookDetails();
+    }
+  }, [bookKey]);
 
     const addToLibrary = async (libraryName) => {
         try {
@@ -85,12 +83,7 @@ function BookDetails() {
                     {book.subtitle && <h2 className="subtitle">{book.subtitle}</h2>}
 
                     <div className="authors-list">
-                        {book.authors.map((author, index) => (
-                            <div key={index} className="author-info">
-                                <h3>by {author.name}</h3>
-                                {author.birthDate && <p className="author-birth">Born: {author.birthDate}</p>}
-                            </div>
-                        ))}
+                        <h3>by {book.author}</h3>
                     </div>
 
                     <div className="book-meta">
@@ -158,17 +151,13 @@ function BookDetails() {
                 </div>
             )}
 
-            {book.authors.some(a => a.bio) && (
+            {book.author.bio && (
                 <div className="author-bios">
-                    <h3>About the Author{book.authors.length > 1 ? 's' : ''}</h3>
-                    {book.authors.map((author, index) => (
-                        author.bio && (
-                            <div key={index} className="author-bio">
-                                <h4>{author.name}</h4>
-                                <p>{typeof author.bio === 'string' ? author.bio : author.bio.value}</p>
-                            </div>
-                        )
-                    ))}
+                    <h3>About the Author, {book.author}</h3>
+                    <div className="author-bio">
+                        <h4>{book.author.name}</h4>
+                        <p>{typeof book.author.bio === 'string' ? book.author.bio : book.author.bio.value}</p>
+                    </div>
                 </div>
             )}
         </div>

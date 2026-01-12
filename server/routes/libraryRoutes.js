@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 // book search and browse
 router.get('/books/search', libraryController.searchBooks);
 router.get('/books/browse/:genre', libraryController.browseByGenre);
-router.get('/books/details/:type/:id', libraryController.getBookDetails);
+router.get('/books/details', libraryController.getBookDetails);
 router.post('/books/custom', auth, libraryController.addCustomBook);
 
 // library management
