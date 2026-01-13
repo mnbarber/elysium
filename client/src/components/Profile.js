@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import StarRating from './StarRating';
 import SpoilerReview from './SpoilerReview';
+import Goals from './Goals';
 import './Profile.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -13,6 +14,7 @@ function Profile() {
   const { user } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [friendshipStatus, setFriendshipStatus] = useState(null);
+  const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('to-read');
@@ -22,6 +24,7 @@ function Profile() {
     if (user && user.username !== username) {
       fetchFriendshipStatus();
     }
+    fetchGoals();
   }, [username, user]);
 
   const fetchProfile = async () => {
@@ -34,6 +37,16 @@ function Profile() {
       setError(err.response?.data?.error || 'Failed to load profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGoals = async () => {
+    console.log('fetching goals for user:', user);
+    try {
+      const response = await axios.get(`${API_URL}/goals/user/${user._id}`);
+      setGoals(response.data.goals);
+    } catch (error) {
+      console.error('Error fetching goals:', error);
     }
   };
 
@@ -168,6 +181,11 @@ function Profile() {
           </div>
           {profile.bio && <p className="bio">{profile.bio}</p>}
         </div>
+        <Goals
+          goals={goals}
+          onDelete={() => { }}
+          isOwnProfile={false}
+        />
       </div>
 
       <div className="profile-stats">

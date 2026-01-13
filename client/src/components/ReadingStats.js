@@ -1,27 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Goals from './Goals';
+import GoalModal from './GoalModal';
 import './ReadingStats.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 function ReadingStats() {
     const [stats, setStats] = useState(null);
+    const [goals, setGoals] = useState([]);
+    const [showGoalModal, setShowGoalModal] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchStats();
+        fetchGoals();
     }, []);
 
-    const fetchStats = async () => {
-        try {
-            const response = await axios.get(`${API_URL}/stats/reading`);
-            setStats(response.data);
-        } catch (error) {
-            console.error('Error fetching reading stats:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchStats = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/stats/reading`);
+      setStats(response.data);
+    } catch (error) {
+      console.error('Error fetching reading stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchGoals = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/goals`);
+      setGoals(response.data.goals);
+    } catch (error) {
+      console.error('Error fetching goals:', error);
+    }
+  };
+
+  const createGoal = async (goalData) => {
+    try {
+      await axios.post(`${API_URL}/goals`, goalData);
+      setShowGoalModal(false);
+      fetchGoals();
+      alert('Goal created successfully!');
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      alert('Error creating goal');
+    }
+  };
+
+  const deleteGoal = async (goalId) => {
+    if (!window.confirm('Delete this goal?')) return;
+
+    try {
+      await axios.delete(`${API_URL}/goals/${goalId}`);
+      fetchGoals();
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      alert('Error deleting goal');
+    }
+  };
 
     const getMonthName = (monthIndex) => {
         const months = [
@@ -53,6 +91,16 @@ function ReadingStats() {
   return (
     <div className="stats-container">
       <h1>Reading Statistics</h1>
+
+      <button onClick={() => setShowGoalModal(true)} className="btn-add-goal">
+          + New Goal
+      </button>
+
+      <Goals 
+        goals={goals} 
+        onDelete={deleteGoal}
+        isOwnProfile={true}
+      />
 
       <div className="stats-grid">
         <div className="stat-card highlight">
@@ -108,6 +156,12 @@ function ReadingStats() {
             ))}
           </div>
         </div>
+      )}
+      {showGoalModal && (
+        <GoalModal
+          onClose={() => setShowGoalModal(false)}
+          onSubmit={createGoal}
+        />
       )}
     </div>
   );

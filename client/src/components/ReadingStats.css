@@ -10,6 +10,7 @@
 .stats-container h1 {
   margin-bottom: 30px;
   text-align: center;
+  color: white;
 }
 
 .stats-grid {
@@ -171,6 +172,29 @@
   padding: 60px 20px;
   font-size: 18px;
   color: #666;
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.btn-add-goal {
+  padding: 12px 24px;
+  background: #594add;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-add-goal:hover {
+  background: #5568d3;
 }
 
 @media (max-width: 768px) {
