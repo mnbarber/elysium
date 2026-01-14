@@ -8,6 +8,9 @@ router.get('/books/search', libraryController.searchBooks);
 router.get('/books/browse/:genre', libraryController.browseByGenre);
 router.get('/books/details', libraryController.getBookDetails);
 router.post('/books/custom', auth, libraryController.addCustomBook);
+router.put('/books/progress/:bookKey', auth, libraryController.updatePageProgress);
+router.get('/books/library-status/:bookKey', auth, libraryController.getBookLibraryStatus);
+router.put('/books/edit/:bookKey', auth, libraryController.editBookInLibrary);
 
 // library management
 router.get('/libraries', auth, libraryController.getLibraries);

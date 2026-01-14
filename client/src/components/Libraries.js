@@ -5,6 +5,7 @@ import './Libraries.css';
 import StarRating from './StarRating';
 import ReviewModal from './ReviewModal';
 import CompletionDateModal from './CompletionDateModal';
+import PageProgressModal from './PageProgressModal';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -24,7 +25,9 @@ function Libraries() {
     const [existingReview, setExistingReview] = useState('');
     const [pendingLibrary, setPendingLibrary] = useState('');
     const [showEditDateModal, setShowEditDateModal] = useState(false);
-    const [showMoveDropdown, setShowMoveDropdown] = useState(null); // Track which book's dropdown is open
+    const [showMoveDropdown, setShowMoveDropdown] = useState(null);
+    const [showProgressModal, setShowProgressModal] = useState(false);
+    const [selectedBookForProgress, setSelectedBookForProgress] = useState(null);
 
     useEffect(() => {
         fetchLibraries();
@@ -99,7 +102,7 @@ function Libraries() {
 
     const moveBook = async (book, fromLibrary, toLibrary) => {
         if (fromLibrary === toLibrary) {
-            return; // Don't move to same library
+            return;
         }
 
         try {
@@ -124,7 +127,7 @@ function Libraries() {
             });
 
             console.log('Move successful, fetching libraries...');
-            setShowMoveDropdown(null); // Close dropdown after move
+            setShowMoveDropdown(null);
             await fetchLibraries();
             alert(`Moved "${book.title}" to ${libraryLabels[toLibrary]}`);
         } catch (error) {
@@ -253,6 +256,31 @@ function Libraries() {
         }
     };
 
+    const openProgressModal = (book) => {
+        setSelectedBookForProgress(book);
+        setShowProgressModal(true);
+    };
+
+    const closeProgressModal = () => {
+        setShowProgressModal(false);
+        setSelectedBookForProgress(null);
+    };
+
+    const updateProgress = async (currentPage) => {
+        try {
+            await axios.put(`${API_URL}/books/progress/${encodeURIComponent(selectedBookForProgress.key)}`, {
+                currentPage
+            });
+
+            await fetchLibraries();
+            closeProgressModal();
+            alert('Progress updated!');
+        } catch (error) {
+            console.error('Error updating progress:', error);
+            alert('Error updating progress');
+        }
+    };
+
     if (loading) {
         return <div className="loading">Loading your libraries...</div>;
     }
@@ -308,7 +336,7 @@ function Libraries() {
                                         </span>
                                     )}
                                     <p className="author">{book.author || 'Unknown Author'}</p>
-                                    
+
                                     <div className="rating-section">
                                         <p className="rating-label">Rate this book:</p>
                                         <StarRating
@@ -317,6 +345,35 @@ function Libraries() {
                                             size="medium"
                                         />
                                     </div>
+
+                                    {activeLibrary === 'currently-reading' && (
+                                        <div className="book-progress-section">
+                                            {book.numberOfPages && book.numberOfPages > 0 ? (
+                                                <>
+                                                    <div className="progress-bar-small">
+                                                        <div
+                                                            className="progress-fill-small"
+                                                            style={{
+                                                                width: `${Math.min((book.currentPage || 0) / book.numberOfPages * 100, 100)}%`
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <p className="progress-text-small">
+                                                        {book.currentPage || 0} / {book.numberOfPages} pages
+                                                        ({Math.round((book.currentPage || 0) / book.numberOfPages * 100)}%)
+                                                    </p>
+                                                </>
+                                            ) : (
+                                                <p className="progress-text-small">No page count available</p>
+                                            )}
+                                            <button
+                                                className="btn-update-progress"
+                                                onClick={() => openProgressModal(book)}
+                                            >
+                                                Update Progress
+                                            </button>
+                                        </div>
+                                    )}
 
                                     {activeLibrary === 'read' && (
                                         <div className="completion-date-display">
@@ -330,14 +387,14 @@ function Libraries() {
                                                         })}
                                                     </p>
                                                     <div className="date-action-buttons">
-                                                        <button 
-                                                            onClick={() => editCompletionDate(book)} 
+                                                        <button
+                                                            onClick={() => editCompletionDate(book)}
                                                             className="btn-edit-small"
                                                         >
                                                             Edit
                                                         </button>
-                                                        <button 
-                                                            onClick={() => handleRemoveCompletionDate(book)} 
+                                                        <button
+                                                            onClick={() => handleRemoveCompletionDate(book)}
                                                             className="btn-remove-small"
                                                         >
                                                             Remove
@@ -345,8 +402,8 @@ function Libraries() {
                                                     </div>
                                                 </>
                                             ) : (
-                                                <button 
-                                                    onClick={() => editCompletionDate(book)} 
+                                                <button
+                                                    onClick={() => editCompletionDate(book)}
                                                     className="btn-add-date"
                                                 >
                                                     + Add Completion Date
@@ -387,8 +444,8 @@ function Libraries() {
                                             author: book.author || 'Unknown',
                                             coverUrl: book.coverUrl
                                         },
-                                        book.review || '',
-                                        book.containsSpoilers || false
+                                            book.review || '',
+                                            book.containsSpoilers || false
                                         )}
                                     >
                                         {book.review ? 'Edit Review' : 'Write Review'}
@@ -427,6 +484,13 @@ function Libraries() {
                     onClose={() => setShowEditDateModal(false)}
                     onSubmit={updateCompletionDate}
                     existingDate={selectedBook?.completedAt}
+                />
+            )}
+            {showProgressModal && (
+                <PageProgressModal
+                    book={selectedBookForProgress}
+                    onClose={closeProgressModal}
+                    onSubmit={updateProgress}
                 />
             )}
         </div>

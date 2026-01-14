@@ -257,6 +257,42 @@ const getLibraries = async (req, res) => {
     }
 };
 
+// check if book is in user's library
+const getBookLibraryStatus = async (req, res) => {
+  try {
+    const bookKey = decodeURIComponent(req.params.bookKey);
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.json({ inLibrary: false });
+    }
+
+    const libraryMap = {
+      'toRead': 'toRead',
+      'currentlyReading': 'currentlyReading',
+      'read': 'read',
+      'paused': 'paused',
+      'dnf': 'dnf'
+    };
+
+    for (const [displayName, schemaName] of Object.entries(libraryMap)) {
+      const book = library[schemaName]?.find(b => b.key === bookKey);
+      if (book) {
+        return res.json({
+          inLibrary: true,
+          library: schemaName,
+          book: book
+        });
+      }
+    }
+
+    res.json({ inLibrary: false });
+  } catch (error) {
+    console.error('Error checking library status:', error);
+    res.status(500).json({ error: 'Error checking library status' });
+  }
+};
+
 // move book between libraries
 const moveBook = async (req, res) => {
     try {
@@ -466,6 +502,64 @@ const removeBookFromLibrary = async (req, res) => {
         console.error('Error removing book:', error);
         res.status(500).json({ error: 'Error removing book' });
       }
+};
+
+// update page progress for a book
+const updatePageProgress = async (req, res) => {
+  try {
+    const bookKey = decodeURIComponent(req.params.bookKey);
+    const { currentPage } = req.body;
+
+    if (currentPage === undefined || currentPage === null) {
+      return res.status(400).json({ error: 'Current page is required' });
+    }
+
+    if (currentPage < 0) {
+      return res.status(400).json({ error: 'Current page cannot be negative' });
+    }
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    let foundBook = null;
+    let foundLibrary = null;
+
+    for (const libraryName of ['currentlyReading', 'toRead', 'paused', 'read', 'dnf']) {
+      foundBook = library[libraryName]?.find(b => b.key === bookKey);
+      if (foundBook) {
+        foundLibrary = libraryName;
+        break;
+      }
+    }
+
+    if (!foundBook) {
+      return res.status(404).json({ error: 'Book not found in your library' });
+    }
+
+    foundBook.currentPage = currentPage;
+
+    const isComplete = foundBook.numberOfPages && currentPage >= foundBook.numberOfPages;
+
+    await library.save();
+
+    res.json({
+      message: 'Page progress updated',
+      book: foundBook,
+      isComplete,
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+  } catch (error) {
+    console.error('Error updating page progress:', error);
+    res.status(500).json({ error: 'Error updating page progress' });
+  }
 };
 
 // rate a book
@@ -923,6 +1017,59 @@ const updateCompletionDate = async (req, res) => {
   }
 };
 
+// edit book details in library
+const editBookInLibrary = async (req, res) => {
+  try {
+    const bookKey = decodeURIComponent(req.params.bookKey);
+    const updates = req.body;
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    let foundBook = null;
+    let foundLibrary = null;
+
+    for (const libraryName of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+      foundBook = library[libraryName]?.find(b => b.key === bookKey);
+      if (foundBook) {
+        foundLibrary = libraryName;
+        break;
+      }
+    }
+
+    if (!foundBook) {
+      return res.status(404).json({ error: 'Book not found in your library' });
+    }
+
+    if (updates.title) foundBook.title = updates.title;
+    if (updates.author) foundBook.author = updates.author;
+    if (updates.numberOfPages !== undefined) foundBook.numberOfPages = updates.numberOfPages;
+    if (updates.firstPublishYear !== undefined) foundBook.firstPublishYear = updates.firstPublishYear;
+    if (updates.description !== undefined) foundBook.description = updates.description;
+    if (updates.coverUrl !== undefined) foundBook.coverUrl = updates.coverUrl;
+    if (updates.isbn !== undefined) foundBook.isbn = updates.isbn;
+
+    await library.save();
+
+    res.json({
+      message: 'Book details updated successfully',
+      book: foundBook,
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+  } catch (error) {
+    console.error('Error editing book:', error);
+    res.status(500).json({ error: 'Error editing book' });
+  }
+};
+
 // get reading stats
 const getReadingStats = async (req, res) => {
     try {
@@ -987,11 +1134,14 @@ module.exports = {
   addBookToLibrary,
   removeBookFromLibrary,
   moveBook,
+  getBookLibraryStatus,
+  updatePageProgress,
   rateBook,
   updateRating,
   reviewBook,
   getReview,
   deleteReview,
   updateCompletionDate,
+  editBookInLibrary,
   getReadingStats
 };

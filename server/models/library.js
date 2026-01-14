@@ -15,6 +15,11 @@ const bookSchema = new mongoose.Schema({
   firstPublishYear: Number,
   description: String,
   numberOfPages: Number,
+  currentPage: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   isbn: String,
   subjects: [String],
   isCustom: {
