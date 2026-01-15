@@ -14,8 +14,9 @@ router.get('/friends', auth, friendController.getFriendsList);
 router.delete('/friends/:friendId', auth, friendController.removeFriend);
 router.get('/friends/status/:username', auth, friendController.getFriendshipStatus);
 
-// cctivity feed
-router.get('/activities/feed', auth, friendController.getActivityFeed);
+// activity feed
+router.get('/activity/friends', auth, friendController.getFriendsActivityFeed);
+router.get('/activity/public', friendController.getPublicActivityFeed);
 router.get('/activities/me', auth, friendController.getOwnActivities);
 
 module.exports = router;

@@ -23,6 +23,7 @@ import FAQ from './components/FAQ';
 import Contact from './components/Contact';
 import SearchBooks from './components/SearchBooks';
 import Libraries from './components/Libraries';
+import Home from './components/Home';
 
 function App() {
   const { user, logout, loading: authLoading } = useAuth();
@@ -70,7 +71,7 @@ function App() {
             <Link to="/search">Search</Link>
             <Link to="/browse">Browse</Link>
             <Link to="/lists/browse">Lists</Link>
-            <Link to="/feed">Friend Feed</Link>
+            <Link to="/activity/friends">Friend Feed</Link>
             <Link to="/users">Find Users</Link>
             <Link to="/libraries">My Libraries</Link>
             <Link to={`/profile/${user.username}`}>Profile</Link>
@@ -86,7 +87,7 @@ function App() {
         <Routes>
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/" element={<Navigate to="/search" />} />
+          <Route path="/" element={<Home />} />
           <Route path="/search" element={<SearchBooks />} />
           <Route path="/browse" element={<BrowseByGenre />} />
           <Route path="/book/*" element={<BookDetails />} />
@@ -94,7 +95,7 @@ function App() {
           <Route path="/lists" element={<MyLists />} />
           <Route path="/lists/browse" element={<BrowseLists />} />
           <Route path="/lists/:listId" element={<ListDetail />} />
-          <Route path="/feed" element={<ActivityFeed />} />
+          <Route path="/activity/friends" element={<ActivityFeed />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/libraries" element={<Libraries />} />
           <Route path="/profile/:username" element={<Profile />} />

@@ -191,45 +191,82 @@ const getFriendshipStatus = async (req, res) => {
 };
 
 // get activity feed
-const getActivityFeed = async (req, res) => {
-    try {
-        // get friends' ids
-        const friends = await Friend.find({
-          $or: [
-            { userId: req.userId, status: 'accepted' },
-            { friendId: req.userId, status: 'accepted' }
-          ]
-        });
-    
-        const friendIds = friends.map(f => f.userId.equals(req.userId) ? f.friendId : f.userId);
-    
-        // get recent activities
-        const activities = await Activity.find({ userId: { $in: friendIds } })
-          .sort({ createdAt: -1 })
-          .limit(50)
-          .populate('userId', 'username profile.displayName profile.avatarUrl');
-    
-        const formattedActivities = activities.map(act => ({
-          id: act._id,
-          user: {
-            username: act.userId.username,
-            displayName: act.userId.profile.displayName || act.userId.username,
-            avatarUrl: act.userId.profile.avatarUrl
-          },
-          activityType: act.activityType,
-          book: act.book,
-          libraryName: act.libraryName,
-          rating: act.rating,
-          fromLibrary: act.fromLibrary,
-          toLibrary: act.toLibrary,
-          createdAt: act.createdAt
-        }));
-    
-        res.json({ activities: formattedActivities });
-      } catch (error) {
-        console.error('Error fetching activity feed:', error);
-        res.status(500).json({ error: 'Error fetching activity feed' });
+const getFriendsActivityFeed = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+
+    const friendships = await Friend.find({
+      $or: [
+        { userId: req.userId, status: 'accepted' },
+        { friendId: req.userId, status: 'accepted' }
+      ]
+    });
+
+    if (!friendships || friendships.length === 0) {
+      return res.json({ activities: [] });
+    }
+
+    const friendIds = friendships.map(friendship => {
+      if (friendship.userId.toString() === req.userId.toString()) {
+        return friendship.friendId;
+      } else {
+        return friendship.userId;
       }
+    });
+
+    console.log('Friend IDs:', friendIds);
+
+    const activities = await Activity.find({
+      userId: { $in: friendIds },
+      isPublic: true
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .populate('userId', 'username displayName avatarUrl')
+      .lean();
+    console.log('Fetched activities:', activities);
+
+    const formattedActivities = activities.map(activity => ({
+      ...activity,
+      user: {
+        username: activity.userId?.username,
+        displayName: activity.userId?.displayName,
+        avatarUrl: activity.userId?.avatarUrl
+      }
+    }));
+
+    res.json({ activities: formattedActivities });
+  } catch (error) {
+    console.error('Error fetching friends activity feed:', error);
+    res.status(500).json({ error: 'Error fetching friends activity feed' });
+  }
+};
+
+// get public activity feed
+const getPublicActivityFeed = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+
+    const activities = await Activity.find({ isPublic: true })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .populate('userId', 'username displayName avatarUrl')
+      .lean();
+
+    const formattedActivities = activities.map(activity => ({
+      ...activity,
+      user: {
+        username: activity.userId?.username,
+        displayName: activity.userId?.displayName,
+        avatarUrl: activity.userId?.avatarUrl
+      }
+    }));
+
+    res.json({ activities: formattedActivities });
+  } catch (error) {
+    console.error('Error fetching public activity feed:', error);
+    res.status(500).json({ error: 'Error fetching activity feed' });
+  }
 };
 
 // get own activities
@@ -254,6 +291,7 @@ module.exports = {
   getFriendsList,
   removeFriend,
   getFriendshipStatus,
-  getActivityFeed,
+  getFriendsActivityFeed,
+  getPublicActivityFeed,
   getOwnActivities
 };

@@ -8,7 +8,8 @@ const createActivity = async (userId, activityType, data) => {
     const activity = new Activity({
       userId,
       activityType,
-      ...data
+      ...data,
+      isPublic: true
     });
     console.log(activity)
     await activity.save();

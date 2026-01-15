@@ -24,6 +24,10 @@ const activitySchema = new mongoose.Schema({
     containsSpoilers: Boolean,
     fromLibrary: String,
     toLibrary: String,
+    isPublic: {
+    type: Boolean,
+    default: true
+  },
     createdAt: {
         type: Date,
         default: Date.now
