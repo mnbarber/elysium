@@ -266,9 +266,9 @@ function Home() {
                                     <div key={activity._id} className="activity-item">
                                         <div className="activity-content">
                                             <div className="activity-header">
-                                                <p className="activity-text">
+                                                <div className="activity-text">
                                                     {getActivityText(activity)}
-                                                </p>
+                                                </div>
                                                 <span className="activity-time">
                                                     {formatTimeAgo(activity.createdAt)}
                                                 </span>
