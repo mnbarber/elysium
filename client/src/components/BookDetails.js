@@ -16,7 +16,7 @@ function BookDetails() {
     const [showProgressModal, setShowProgressModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [error] = useState(null);
 
     const bookKey = location.pathname.replace('/book', '');
 

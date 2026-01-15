@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './CompletionDateModal.css';
 
 function CompletionDateModal({ book, onClose, onSubmit }) {
-  const currentYear = new Date().getFullYear();
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );

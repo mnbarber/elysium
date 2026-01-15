@@ -4,6 +4,7 @@ import axios from 'axios';
 import PageProgressModal from './PageProgressModal';
 import Goals from './Goals';
 import SpoilerReview from './SpoilerReview';
+import ActivityText from './ActivityText';
 import './Home.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -80,89 +81,6 @@ function Home() {
         } catch (error) {
             console.error('Error deleting goal:', error);
             alert('Error deleting goal');
-        }
-    };
-
-    const getActivityText = (activity) => {
-        const username = activity.user?.username || 'Someone';
-        const bookTitle = activity.book?.title || 'a book';
-
-        switch (activity.activityType) {
-            case 'added_book':
-                return (
-                    <>
-                        <Link to={`/profile/${username}`} className="username-link">
-                            {username}
-                        </Link>
-                        {' '}added{' '}
-                        <Link to={`/book${activity.book?.key}`} className="book-link">
-                            {bookTitle}
-                        </Link>
-                        {' '}to {activity.libraryName}
-                    </>
-                );
-            case 'rated_book':
-                return (
-                    <>
-                        <Link to={`/profile/${username}`} className="username-link">
-                            {username}
-                        </Link>
-                        {' '}rated{' '}
-                        <Link to={`/book${activity.book?.key}`} className="book-link">
-                            {bookTitle}
-                        </Link>
-                        {' '}{activity.rating} stars
-                    </>
-                );
-            case 'moved_book':
-                return (
-                    <>
-                        <Link to={`/profile/${username}`} className="username-link">
-                            {username}
-                        </Link>
-                        {' '}moved{' '}
-                        <Link to={`/book${activity.book?.key}`} className="book-link">
-                            {bookTitle}
-                        </Link>
-                        {' '}to {activity.toLibrary}
-                    </>
-                );
-            case 'finished_book':
-                return (
-                    <>
-                        <Link to={`/profile/${username}`} className="username-link">
-                            {username}
-                        </Link>
-                        {' '}finished reading{' '}
-                        <Link to={`/book${activity.book?.key}`} className="book-link">
-                            {bookTitle}
-                        </Link>
-                    </>
-                );
-            case 'reviewed_book':
-                return (
-                    <>
-                        <Link to={`/profile/${username}`} className="username-link">
-                            {username}
-                        </Link>
-                        {' '}reviewed{' '}
-                        <Link to={`/book${activity.book?.key}`} className="book-link">
-                            {bookTitle}
-                        </Link>
-                    </>
-                );
-            default:
-                return (
-                    <>
-                        <Link to={`/profile/${username}`} className="username-link">
-                            {username}
-                        </Link>
-                        {' '}did something with{' '}
-                        <Link to={`/book${activity.book?.key}`} className="book-link">
-                            {bookTitle}
-                        </Link>
-                    </>
-                );
         }
     };
 
@@ -267,7 +185,7 @@ function Home() {
                                         <div className="activity-content">
                                             <div className="activity-header">
                                                 <div className="activity-text">
-                                                    {getActivityText(activity)}
+                                                    <ActivityText activity={activity} />
                                                 </div>
                                                 <span className="activity-time">
                                                     {formatTimeAgo(activity.createdAt)}

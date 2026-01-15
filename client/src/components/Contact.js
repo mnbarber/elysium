@@ -12,8 +12,8 @@ function Contact() {
         message: ''
     });
     const [submitted, setSubmitted] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [setLoading] = useState(false);
+    const [setError] = useState('');
 
     const handleChange = (e) => {
         setFormData({
