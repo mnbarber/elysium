@@ -247,13 +247,23 @@ const getPublicActivityFeed = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
 
-    const activities = await Activity.find({ isPublic: true })
+    const activities = await Activity.find({})
       .sort({ createdAt: -1 })
-      .limit(limit)
-      .populate('userId', 'username displayName avatarUrl')
+      .limit(limit * 2)
+      .populate({
+        path: 'userId',
+        select: 'username displayName avatarUrl isPublic',
+        match: { isPublic: true }
+      })
       .lean();
 
-    const formattedActivities = activities.map(activity => ({
+    const publicActivities = activities
+      .filter(activity => activity.userId !== null)
+      .slice(0, limit);
+
+    console.log(`Showing ${publicActivities.length} activities from public profiles`);
+
+    const formattedActivities = publicActivities.map(activity => ({
       ...activity,
       user: {
         username: activity.userId?.username,
