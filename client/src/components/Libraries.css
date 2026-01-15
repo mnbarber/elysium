@@ -591,6 +591,73 @@
   background: #5568d3;
 }
 
+.library-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+  padding: 15px 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-controls label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.sort-dropdown {
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 160px;
+}
+
+.sort-dropdown:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.sort-dropdown:hover {
+  border-color: #667eea;
+}
+
+.book-count {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .library-controls {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .sort-controls {
+    width: 100%;
+  }
+
+  .sort-dropdown {
+    flex: 1;
+    min-width: auto;
+  }
+}
+
 @media (max-width: 768px) {
     .libraries-header {
         flex-direction: column;

@@ -25,6 +25,7 @@ router.put('/books/rate/:bookKey', auth, libraryController.updateRating);
 // reviews
 router.post('/books/review', auth, libraryController.reviewBook);
 router.get('/books/review/:bookKey', auth, libraryController.getReview);
+router.get('/books/reviews/:bookKey', libraryController.getBookReviews);
 router.delete('/books/review/:bookKey', auth, libraryController.deleteReview);
 
 // stats and dates

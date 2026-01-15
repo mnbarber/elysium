@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import PageProgressModal from './PageProgressModal';
 import Goals from './Goals';
+import SpoilerReview from './SpoilerReview';
 import './Home.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -31,7 +32,6 @@ function Home() {
             setCurrentlyReading(librariesResponse.data['currently-reading'] || []);
 
             const activityResponse = await axios.get(`${API_URL}/activity/public`);
-            console.log('Public activity response:', activityResponse.data);
             setActivityFeed(activityResponse.data.activities || []);
 
             const goalsResponse = await axios.get(`${API_URL}/goals`);
@@ -243,7 +243,14 @@ function Home() {
 
                                             {activity.activityType === 'reviewed_book' && activity.review && (
                                                 <div className="activity-review">
-                                                    <p className="review-text">"{activity.review}"</p>
+                                                    {activity.containsSpoilers ? (
+                                                        <SpoilerReview
+                                                            review={activity.review}
+                                                            bookTitle={activity.book?.title}
+                                                        />
+                                                    ) : (
+                                                        <p className="review-text">"{activity.review}"</p>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>

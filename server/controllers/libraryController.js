@@ -11,7 +11,6 @@ const createActivity = async (userId, activityType, data) => {
       ...data,
       isPublic: true
     });
-    console.log(activity)
     await activity.save();
   } catch (error) {
     console.error('Error creating activity:', error);
@@ -34,18 +33,14 @@ const getBookDetails = async (req, res) => {
   try {
     const bookKey = req.query.key;
 
-    console.log('Book key from query:', bookKey);
-
     if (!bookKey) {
       return res.status(400).json({ error: 'Book key is required' });
     }
 
     if (bookKey.startsWith('/custom/')) {
-      console.log('Custom book detected, searching all libraries...');
 
       try {
         const allLibraries = await Library.find({});
-        console.log(`Searching ${allLibraries.length} libraries...`);
 
         let customBook = null;
 
@@ -59,7 +54,6 @@ const getBookDetails = async (req, res) => {
               customBook = libraryArray.find(b => b.key === bookKey);
 
               if (customBook) {
-                console.log('Found custom book in a library:', customBook.title);
                 break;
               }
             }
@@ -69,7 +63,6 @@ const getBookDetails = async (req, res) => {
         }
 
         if (!customBook) {
-          console.log('Custom book NOT FOUND in any library');
           return res.status(404).json({
             error: 'Custom book not found'
           });
@@ -88,7 +81,6 @@ const getBookDetails = async (req, res) => {
           isCustom: true
         };
 
-        console.log('Returning custom book:', bookDetails.title);
         return res.json(bookDetails);
 
       } catch (error) {
@@ -98,7 +90,6 @@ const getBookDetails = async (req, res) => {
     }
 
     const openLibraryUrl = `https://openlibrary.org${bookKey}.json`;
-    console.log('Fetching from Open Library:', openLibraryUrl);
 
     const response = await axios.get(openLibraryUrl);
     const bookData = response.data;
@@ -230,7 +221,6 @@ const addCustomBook = async (req, res) => {
 // get user's library
 const getLibraries = async (req, res) => {
   try {
-    console.log('Fetching libraries for user:', req.userId);
       let library = await Library.findOne({ userId: req.userId });
       
       if (!library) {
@@ -297,7 +287,6 @@ const getBookLibraryStatus = async (req, res) => {
 // move book between libraries
 const moveBook = async (req, res) => {
     try {
-        console.log('move request received:', req.body);
         const { book, fromLibrary, toLibrary } = req.body;
     
         const library = await Library.findOne({ userId: req.userId });
@@ -313,7 +302,6 @@ const moveBook = async (req, res) => {
           'dnf': 'dnf'
         };
     
-        // Find the book in the source library
         let bookToMove = null;
         if (fromLibrary && fieldMap[fromLibrary]) {
           const fromField = fieldMap[fromLibrary];
@@ -327,19 +315,16 @@ const moveBook = async (req, res) => {
           }
         }
     
-        // If moving to 'read' library, increment readCount and set completion date
         if (toLibrary === 'read' && bookToMove) {
           bookToMove.readCount = (bookToMove.readCount || 0) + 1;
           bookToMove.completedAt = new Date();  // Add this line
         }
     
-        // Add to new library
         const toField = fieldMap[toLibrary];
         if (toField) {
           if (!library[toField]) {
             library[toField] = [];
           }
-          // Use bookToMove if we found it, otherwise use the book from request
           const bookData = bookToMove || {
             ...book,
             completedAt: toLibrary === 'read' ? new Date() : undefined
@@ -351,7 +336,6 @@ const moveBook = async (req, res) => {
     
         await library.save();
     
-        // Create activity
         if (toLibrary === 'read') {
           const activityBook = bookToMove || book;
           await createActivity(req.userId, 'finished_book', {
@@ -417,12 +401,10 @@ const addBookToLibrary = async (req, res) => {
             return res.status(400).json({ error: 'Invalid library name' });
         }
 
-        // Initialize field if it doesn't exist
         if (!library[field]) {
             library[field] = [];
         }
 
-        // Check if book already exists
         const exists = library[field].some(b => b.key === book.key);
         if (exists) {
             return res.status(400).json({ error: 'Book already in this library' });
@@ -481,7 +463,6 @@ const removeBookFromLibrary = async (req, res) => {
           return res.status(400).json({ error: 'Invalid library name' });
         }
     
-         // Initialize field if it doesn't exist
         if (!library[field]) {
           library[field] = [];
         }
@@ -577,7 +558,6 @@ const rateBook = async (req, res) => {
           return res.status(404).json({ error: 'Library not found' });
         }
       
-        // Check if book is already in any library
         const allLibraries = ['toRead', 'currentlyReading', 'read', 'paused', 'dnf'];
         let bookFound = false;
         let bookLibrary = null;
@@ -587,7 +567,6 @@ const rateBook = async (req, res) => {
           if (bookIndex !== -1) {
             bookFound = true;
             bookLibrary = lib;
-            // Update rating if in 'read' library
             if (lib === 'read') {
               library.read[bookIndex].rating = rating;
               if (!library.read[bookIndex].completedAt) {
@@ -618,7 +597,6 @@ const rateBook = async (req, res) => {
               });
             }
     
-            // if book is in another library, move it to 'read' with rating
             const bookToMove = library[lib][bookIndex];
             bookToMove.rating = rating;
             bookToMove.completedAt = new Date();
@@ -659,7 +637,6 @@ const rateBook = async (req, res) => {
           }
         }
       
-        // If book not found in any library, add to 'read' with rating
         const newBook = {
           ...book,
           rating: rating,
@@ -773,7 +750,7 @@ const reviewBook = async (req, res) => {
         if (lib === 'read') {
           library.read[bookIndex].review = review;
           library.read[bookIndex].containsSpoilers = containsSpoilers || false;
-          library.read[bookIndex].reviewedAt = new Date();  // Changed from updatedAt
+          library.read[bookIndex].reviewedAt = new Date();
           await library.save();
 
           await createActivity(req.userId, 'reviewed_book', {
@@ -786,8 +763,6 @@ const reviewBook = async (req, res) => {
             review: review,
             containsSpoilers: containsSpoilers || false
           });
-
-          console.log('created activity with review:', review);
 
           return res.json({
             message: 'Book review updated successfully',
@@ -802,11 +777,10 @@ const reviewBook = async (req, res) => {
           });
         }
 
-        // if book is in another library, move it to 'read' with review
         const bookToMove = library[lib][bookIndex];
         bookToMove.review = review;
-        bookToMove.containsSpoilers = containsSpoilers || false;  // Add this
-        bookToMove.reviewedAt = new Date();  // Changed from updatedAt
+        bookToMove.containsSpoilers = containsSpoilers || false;
+        bookToMove.reviewedAt = new Date();
         library[lib].splice(bookIndex, 1);
         library.read.push(bookToMove);
         await library.save();
@@ -828,7 +802,7 @@ const reviewBook = async (req, res) => {
             coverUrl: bookToMove.coverUrl
           },
           review: bookToMove.review,
-          containsSpoilers: bookToMove.containsSpoilers  // Add this
+          containsSpoilers: bookToMove.containsSpoilers
         });
 
         return res.json({
@@ -845,12 +819,11 @@ const reviewBook = async (req, res) => {
       }
     }
 
-    // If book not found in any library, add to 'read' with review
     const newBook = {
       ...book,
       review: review,
-      containsSpoilers: containsSpoilers || false,  // Add this
-      reviewedAt: new Date()  // Changed from updatedAt
+      containsSpoilers: containsSpoilers || false,
+      reviewedAt: new Date()
     };
     library.read.push(newBook);
     await library.save();
@@ -873,7 +846,7 @@ const reviewBook = async (req, res) => {
         coverUrl: newBook.coverUrl
       },
       review: newBook.review,
-      containsSpoilers: newBook.containsSpoilers  // Add this
+      containsSpoilers: newBook.containsSpoilers
     });
 
     return res.json({
@@ -905,7 +878,6 @@ const getReview = async (req, res) => {
           return res.status(404).json({ error: 'Library not found' });
         }
     
-        // Find the book in all libraries
         let book = null;
         for (const lib of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
           book = library[lib].find(b => b.key === decodedKey);
@@ -916,7 +888,6 @@ const getReview = async (req, res) => {
           return res.status(404).json({ error: 'Book not found in any library' });
         }
     
-        // Return the review if it exists
         if (book.review) {
           return res.json({ review: book.review });
         } else {
@@ -928,37 +899,109 @@ const getReview = async (req, res) => {
       }
 };
 
+// get all reviews for a specific book
+const getBookReviews = async (req, res) => {
+  try {
+    const bookKey = decodeURIComponent(req.params.bookKey);
+
+    const libraries = await Library.find({}).populate('userId', 'username profile.displayName profile.avatarUrl profile.isPublic');
+
+    const reviews = [];
+
+    for (const library of libraries) {
+      const isPublic = library.userId?.profile?.isPublic !== false;
+
+      if (!isPublic) continue;
+
+      for (const libraryName of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+        const book = library[libraryName]?.find(b => b.key === bookKey);
+
+        if (book && book.review && book.review.trim().length > 0) {
+          reviews.push({
+            _id: library._id + '-' + book.key,
+            user: {
+              username: library.userId?.username,
+              displayName: library.userId?.profile?.displayName || library.userId?.username,
+              avatarUrl: library.userId?.profile?.avatarUrl
+            },
+            review: book.review,
+            rating: book.rating || 0,
+            containsSpoilers: book.containsSpoilers || false,
+            reviewedAt: book.reviewedAt || book.addedAt,
+            librarySection: libraryName
+          });
+          break;
+        }
+      }
+    }
+
+    reviews.sort((a, b) => {
+      const dateA = new Date(a.reviewedAt || 0);
+      const dateB = new Date(b.reviewedAt || 0);
+      return dateB - dateA;
+    });
+
+    console.log(`Found ${reviews.length} reviews for book ${bookKey}`);
+
+    res.json({ reviews });
+  } catch (error) {
+    console.error('Error fetching book reviews:', error);
+    res.status(500).json({ error: 'Error fetching book reviews' });
+  }
+};
+
 // delete review
 const deleteReview = async (req, res) => {
-    try {
-        const { bookKey } = req.params;
-        const decodedKey = decodeURIComponent(bookKey);
-    
-        const library = await Library.findOne({ userId: req.userId });
-        if (!library) {
-          return res.status(404).json({ error: 'Library not found' });
-        }
-    
-        // Find the book in all libraries
-        let book = null;
-        for (const lib of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
-          book = library[lib].find(b => b.key === decodedKey);
-          if (book) break;
-        }
-    
-        if (!book) {
-          return res.status(404).json({ error: 'Book not found in any library' });
-        }
-    
-        // Remove the review from the book
-        book.review = null;
-        await library.save();
-    
-        return res.json({ message: 'Review deleted successfully' });
-      } catch (error) {
-        console.error('Error deleting review:', error);
-        res.status(500).json({ error: 'Error deleting review' });
+  try {
+    const bookKey = decodeURIComponent(req.params.bookKey);
+
+    const library = await Library.findOne({ userId: req.userId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    let foundBook = null;
+    let foundLibrary = null;
+
+    for (const libraryName of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+      foundBook = library[libraryName]?.find(b => b.key === bookKey);
+      if (foundBook) {
+        foundLibrary = libraryName;
+        break;
       }
+    }
+
+    if (!foundBook) {
+      return res.status(404).json({ error: 'Book not found in your library' });
+    }
+
+    foundBook.review = '';
+    foundBook.containsSpoilers = false;
+    foundBook.reviewedAt = null;
+
+    await library.save();
+
+    await Activity.deleteMany({
+      userId: req.userId,
+      activityType: 'reviewed_book',
+      'book.key': bookKey
+    });
+
+    res.json({
+      message: 'Review deleted successfully',
+      book: foundBook,
+      libraries: {
+        'to-read': library.toRead || [],
+        'currently-reading': library.currentlyReading || [],
+        'read': library.read || [],
+        'paused': library.paused || [],
+        'dnf': library.dnf || []
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    res.status(500).json({ error: 'Error deleting review' });
+  }
 };
 
 // update completion date of a book
@@ -974,7 +1017,6 @@ const updateCompletionDate = async (req, res) => {
       return res.status(404).json({ error: 'Library not found' });
     }
 
-    // Search for the book in all libraries
     let found = false;
     let bookRef = null;
 
@@ -993,7 +1035,6 @@ const updateCompletionDate = async (req, res) => {
       return res.status(404).json({ error: 'Book not found in any library' });
     }
 
-    // Allow null/undefined to remove the date
     if (completedAt === null || completedAt === undefined || completedAt === '') {
       bookRef.completedAt = undefined;
     } else {
@@ -1083,14 +1124,12 @@ const getReadingStats = async (req, res) => {
         const currentYear = now.getFullYear();
         const yearStart = new Date(currentYear, 0, 1);
     
-        // count books read this year
         const booksThisYear = library.read.filter(book => {
           if (!book.completedAt) return false;
           const completedDate = new Date(book.completedAt);
           return completedDate >= yearStart && completedDate <= now;
         });
     
-        // calculate monthly breakdown
         const monthlyBreakdown = {};
         for (let i = 0; i < 12; i++) {
           monthlyBreakdown[i] = 0;
@@ -1101,7 +1140,6 @@ const getReadingStats = async (req, res) => {
           monthlyBreakdown[month]++;
         });
     
-        // get reading streak
         const activities = await Activity.find({
           userId: req.userId,
           activityType: 'finished_book'
@@ -1141,6 +1179,7 @@ module.exports = {
   updateRating,
   reviewBook,
   getReview,
+  getBookReviews,
   deleteReview,
   updateCompletionDate,
   editBookInLibrary,

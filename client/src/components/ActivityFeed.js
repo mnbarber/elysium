@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import SpoilerReview from './SpoilerReview';
 import './ActivityFeed.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -17,7 +18,6 @@ function ActivityFeed() {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/activity/friends`);
-      console.log('Fetched friends activity:', response.data.activities);
       setActivities(response.data.activities || []);
     } catch (error) {
       console.error('Error fetching friends activity:', error);
@@ -168,12 +168,10 @@ function ActivityFeed() {
                 {activity.activityType === 'reviewed_book' && activity.review && (
                   <div className="activity-review">
                     {activity.containsSpoilers ? (
-                      <details className="spoiler-review">
-                        <summary className="spoiler-warning">
-                          ⚠️ This review contains spoilers (click to reveal)
-                        </summary>
-                        <p className="review-text">"{activity.review}"</p>
-                      </details>
+                      <SpoilerReview 
+                        review={activity.review}
+                        bookTitle={activity.book?.title}
+                      />
                     ) : (
                       <p className="review-text">"{activity.review}"</p>
                     )}

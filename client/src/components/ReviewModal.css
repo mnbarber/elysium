@@ -126,7 +126,7 @@
   justify-content: flex-end;
 }
 
-.btn-cancel, .btn-submit {
+.btn-cancel, .btn-submit, .btn-delete-review {
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
@@ -152,6 +152,17 @@
 
 .btn-submit:hover {
   background: #5568d3;
+}
+
+.btn-delete-review {
+  background: #fee;
+  color: #c33;
+  border: 2px solid #c33;
+}
+
+.btn-delete-review:hover {
+  background: #c33;
+  color: white;
 }
 
 .btn-submit:disabled {
@@ -218,4 +229,21 @@
   font-weight: 600;
   color: #856404;
   user-select: none;
+}
+
+@media (max-width: 600px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .action-buttons-right {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .btn-cancel,
+  .btn-submit,
+  .btn-delete-review {
+    width: 100%;
+  }
 }

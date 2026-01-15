@@ -4,6 +4,7 @@ import axios from 'axios';
 import StarRating from './StarRating';
 import PageProgressModal from './PageProgressModal';
 import EditBookModal from './EditBookModal';
+import BookReviews from './BookReviews';
 import './BookDetails.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -244,6 +245,8 @@ function BookDetails() {
                     <p>{book.description}</p>
                 </div>
             )}
+
+            <BookReviews bookKey={book.key} bookTitle={book.title} />
 
             {book.subjects && book.subjects.length > 0 && (
                 <div className="book-subjects">

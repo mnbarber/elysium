@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ReviewModal.css';
 
-function ReviewModal({ book, existingReview, onClose, onSubmit, existingSpoilerFlag }) {
+function ReviewModal({ book, existingReview, onClose, onSubmit, existingSpoilerFlag, onDelete }) {
   const [reviewText, setReviewText] = useState(existingReview || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [containsSpoilers, setContainsSpoilers] = useState(existingSpoilerFlag || false)
@@ -24,6 +24,12 @@ function ReviewModal({ book, existingReview, onClose, onSubmit, existingSpoilerF
       await onSubmit(reviewText, containsSpoilers);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this review?')) {
+      onDelete();
     }
   };
 
@@ -76,6 +82,15 @@ function ReviewModal({ book, existingReview, onClose, onSubmit, existingSpoilerF
             <button type="button" onClick={onClose} className="btn-cancel">
               Cancel
             </button>
+            {existingReview && onDelete && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="btn-delete-review"
+              >
+                Delete Review
+              </button>
+            )}
             <button type="submit" disabled={isSubmitting} className="btn-submit">
               {isSubmitting ? 'Submitting...' : existingReview ? 'Update Review' : 'Submit Review'}
             </button>

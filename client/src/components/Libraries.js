@@ -28,6 +28,7 @@ function Libraries() {
     const [showMoveDropdown, setShowMoveDropdown] = useState(null);
     const [showProgressModal, setShowProgressModal] = useState(false);
     const [selectedBookForProgress, setSelectedBookForProgress] = useState(null);
+    const [sortBy, setSortBy] = useState('latest');
 
     useEffect(() => {
         fetchLibraries();
@@ -42,6 +43,49 @@ function Libraries() {
             console.error('Error fetching libraries:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const sortBooks = (books) => {
+        const booksCopy = [...books];
+
+        switch (sortBy) {
+            case 'latest':
+                return booksCopy.sort((a, b) => {
+                    const dateA = new Date(a.addedAt || a.createdAt || 0);
+                    const dateB = new Date(b.addedAt || b.createdAt || 0);
+                    return dateB - dateA; // Newest first
+                });
+
+            case 'oldest':
+                return booksCopy.sort((a, b) => {
+                    const dateA = new Date(a.addedAt || a.createdAt || 0);
+                    const dateB = new Date(b.addedAt || b.createdAt || 0);
+                    return dateA - dateB; // Oldest first
+                });
+
+            case 'title-asc':
+                return booksCopy.sort((a, b) =>
+                    (a.title || '').localeCompare(b.title || '')
+                );
+
+            case 'title-desc':
+                return booksCopy.sort((a, b) =>
+                    (b.title || '').localeCompare(a.title || '')
+                );
+
+            case 'author-asc':
+                return booksCopy.sort((a, b) =>
+                    (a.author || '').localeCompare(b.author || '')
+                );
+
+            case 'rating':
+                return booksCopy.sort((a, b) =>
+                    (b.rating || 0) - (a.rating || 0)
+                );
+
+            default:
+                return booksCopy;
         }
     };
 
@@ -65,29 +109,7 @@ function Libraries() {
         'dnf': 'Did Not Finish'
     };
 
-    const currentBooks = libraries[activeLibrary] || [];
-
-    const rateBook = async (book, rating) => {
-        try {
-            const bookData = {
-                key: book.key,
-                title: book.title,
-                author: book.author_name?.[0] || 'Unknown',
-                coverUrl: book.cover_i
-                    ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
-                    : null,
-                firstPublishYear: book.first_publish_year
-            };
-
-            await axios.post(`${API_URL}/books/rate`, {
-                book: bookData,
-                rating
-            });
-            alert('Book rated and added to your library!');
-        } catch (error) {
-            console.error('Error rating book:', error);
-        }
-    };
+    const currentBooks = sortBooks(libraries[activeLibrary] || []);
 
     const updateRating = async (bookKey, rating) => {
         try {
@@ -175,13 +197,16 @@ function Libraries() {
         }
     };
 
-    const deleteReview = async (bookKey) => {
+    const deleteReview = async () => {
         try {
-            await axios.delete(`${API_URL}/books/review/${encodeURIComponent(bookKey)}`);
+            await axios.delete(`${API_URL}/books/review/${encodeURIComponent(selectedBook.key)}`);
+
             await fetchLibraries();
+            closeReviewModal();
             alert('Review deleted successfully!');
         } catch (error) {
             console.error('Error deleting review:', error);
+            alert('Error deleting review');
         }
     };
 
@@ -305,6 +330,28 @@ function Libraries() {
                         <span className="count">({libraries[key]?.length || 0})</span>
                     </button>
                 ))}
+            </div>
+
+            <div className="library-controls">
+                <div className="sort-controls">
+                    <label htmlFor="sort-select">Sort by:</label>
+                    <select
+                        id="sort-select"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="sort-dropdown"
+                    >
+                        <option value="latest">Latest Added</option>
+                        <option value="oldest">Oldest Added</option>
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                        <option value="author-asc">Author (A-Z)</option>
+                        <option value="rating">Highest Rated</option>
+                    </select>
+                </div>
+                <div className="book-count">
+                    {currentBooks.length} {currentBooks.length === 1 ? 'book' : 'books'}
+                </div>
             </div>
 
             <div className="library-content">
@@ -469,6 +516,7 @@ function Libraries() {
                     existingSpoilerFlag={selectedBook?.containsSpoilers || false}
                     onClose={closeReviewModal}
                     onSubmit={submitReview}
+                    onDelete={deleteReview}
                 />
             )}
             {showDateModal && (
