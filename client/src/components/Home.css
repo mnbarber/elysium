@@ -239,15 +239,10 @@
 }
 
 .activity-text {
-    margin: 0;
-    font-size: 15px;
-    color: #f7f4f4;
-    line-height: 1.5;
-}
-
-.activity-text strong {
-    font-weight: 600;
-    color: #f5f6fa;
+  margin: 0;
+  font-size: 15px;
+  color: #333;
+  line-height: 1.5;
 }
 
 .activity-time {
@@ -326,6 +321,24 @@
     padding: 50px;
     font-size: 18px;
     color: #666;
+}
+
+.username-link,
+.book-link {
+  color: #667eea;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.username-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.book-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
 }
 
 @media (max-width: 1024px) {

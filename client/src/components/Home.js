@@ -91,35 +91,78 @@ function Home() {
             case 'added_book':
                 return (
                     <>
-                        <strong>{username}</strong> added <strong>{bookTitle}</strong> to {activity.libraryName}
+                        <Link to={`/profile/${username}`} className="username-link">
+                            {username}
+                        </Link>
+                        {' '}added{' '}
+                        <Link to={`/book${activity.book?.key}`} className="book-link">
+                            {bookTitle}
+                        </Link>
+                        {' '}to {activity.libraryName}
                     </>
                 );
             case 'rated_book':
                 return (
                     <>
-                        <strong>{username}</strong> rated <strong>{bookTitle}</strong> {activity.rating} stars
+                        <Link to={`/profile/${username}`} className="username-link">
+                            {username}
+                        </Link>
+                        {' '}rated{' '}
+                        <Link to={`/book${activity.book?.key}`} className="book-link">
+                            {bookTitle}
+                        </Link>
+                        {' '}{activity.rating} stars
                     </>
                 );
             case 'moved_book':
                 return (
                     <>
-                        <strong>{username}</strong> moved <strong>{bookTitle}</strong> to {activity.toLibrary}
+                        <Link to={`/profile/${username}`} className="username-link">
+                            {username}
+                        </Link>
+                        {' '}moved{' '}
+                        <Link to={`/book${activity.book?.key}`} className="book-link">
+                            {bookTitle}
+                        </Link>
+                        {' '}to {activity.toLibrary}
                     </>
                 );
             case 'finished_book':
                 return (
                     <>
-                        <strong>{username}</strong> finished reading <strong>{bookTitle}</strong>
+                        <Link to={`/profile/${username}`} className="username-link">
+                            {username}
+                        </Link>
+                        {' '}finished reading{' '}
+                        <Link to={`/book${activity.book?.key}`} className="book-link">
+                            {bookTitle}
+                        </Link>
                     </>
                 );
             case 'reviewed_book':
                 return (
                     <>
-                        <strong>{username}</strong> reviewed <strong>{bookTitle}</strong>
+                        <Link to={`/profile/${username}`} className="username-link">
+                            {username}
+                        </Link>
+                        {' '}reviewed{' '}
+                        <Link to={`/book${activity.book?.key}`} className="book-link">
+                            {bookTitle}
+                        </Link>
                     </>
                 );
             default:
-                return `${username} did something with ${bookTitle}`;
+                return (
+                    <>
+                        <Link to={`/profile/${username}`} className="username-link">
+                            {username}
+                        </Link>
+                        {' '}did something with{' '}
+                        <Link to={`/book${activity.book?.key}`} className="book-link">
+                            {bookTitle}
+                        </Link>
+                    </>
+                );
         }
     };
 
