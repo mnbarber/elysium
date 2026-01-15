@@ -52,7 +52,7 @@ function AddCustomBook() {
           .filter(sub => sub.length > 0)
       };
 
-      const response = await axios.post(`${API_URL}/books/custom`, bookData);
+      await axios.post(`${API_URL}/books/custom`, bookData);
       alert('Custom book added successfully!');
       navigate('/');
     } catch (err) {

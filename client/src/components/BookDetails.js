@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import StarRating from './StarRating';
 import PageProgressModal from './PageProgressModal';
 import EditBookModal from './EditBookModal';
 import BookReviews from './BookReviews';
