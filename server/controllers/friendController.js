@@ -254,8 +254,8 @@ const getPublicActivityFeed = async (req, res) => {
 
     const publicUsers = await User.find({ 
       $or: [
-        { isPublic: true },
-        { isPublic: { $exists: false } }
+        { 'profile.isPublic': true },
+        { 'profile.isPublic': { $exists: false } }
       ]
     }).select('_id');
     const publicUserIds = publicUsers.map(user => user._id);
@@ -267,7 +267,7 @@ const getPublicActivityFeed = async (req, res) => {
     })
       .sort({ createdAt: -1 })
       .limit(limit)
-      .populate('userId', 'username displayName avatarUrl isPublic')
+      .populate('userId', 'username displayName avatarUrl profile')
       .lean();
 
     console.log(`Found ${activities.length} total activities`);

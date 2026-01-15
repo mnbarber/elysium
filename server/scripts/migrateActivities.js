@@ -8,8 +8,8 @@ const migrateActivities = async () => {
         console.log('Connected to MongoDB');
 
         const result = await Activity.updateMany(
-            { isPublic: { $exists: false } },
-            { $set: { isPublic: true } }
+            { 'profile.isPublic': { $exists: false } },
+            { $set: { 'profile.isPublic': true } }
         );
 
         console.log(`Migration complete! Updated ${result.modifiedCount} activities.`);
