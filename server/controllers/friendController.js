@@ -247,23 +247,32 @@ const getPublicActivityFeed = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
 
-    const activities = await Activity.find({})
+    const allUsers = await User.find({});
+    console.log('Total users in database:', allUsers.length);
+    console.log('Users with isPublic field:', allUsers.filter(u => u.isPublic !== undefined).length);
+    console.log('Users with isPublic=true:', allUsers.filter(u => u.isPublic === true).length);
+
+    const publicUsers = await User.find({ 
+      $or: [
+        { isPublic: true },
+        { isPublic: { $exists: false } }
+      ]
+    }).select('_id');
+    const publicUserIds = publicUsers.map(user => user._id);
+
+    console.log(`Found ${publicUserIds.length} users with public profiles`);
+
+    const activities = await Activity.find({
+      userId: { $in: publicUserIds }
+    })
       .sort({ createdAt: -1 })
-      .limit(limit * 2)
-      .populate({
-        path: 'userId',
-        select: 'username displayName avatarUrl isPublic',
-        match: { isPublic: true }
-      })
+      .limit(limit)
+      .populate('userId', 'username displayName avatarUrl isPublic')
       .lean();
 
-    const publicActivities = activities
-      .filter(activity => activity.userId !== null)
-      .slice(0, limit);
+    console.log(`Found ${activities.length} total activities`);
 
-    console.log(`Showing ${publicActivities.length} activities from public profiles`);
-
-    const formattedActivities = publicActivities.map(activity => ({
+    const formattedActivities = activities.map(activity => ({
       ...activity,
       user: {
         username: activity.userId?.username,

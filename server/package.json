@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "migrate:activities": "node scripts/migrateActivities.js"
+    "migrate:activities": "node scripts/migrateActivities.js",
+    "migrate:users": "node scripts/migrateUsers.js"
   },
   "keywords": [],
   "author": "",
