@@ -190,7 +190,7 @@ const getFriendshipStatus = async (req, res) => {
       }
 };
 
-// get activity feed
+// get friends activity feed
 const getFriendsActivityFeed = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
@@ -214,8 +214,6 @@ const getFriendsActivityFeed = async (req, res) => {
       }
     });
 
-    console.log('Friend IDs:', friendIds);
-
     const activities = await Activity.find({
       userId: { $in: friendIds },
       isPublic: true
@@ -224,15 +222,40 @@ const getFriendsActivityFeed = async (req, res) => {
       .limit(limit)
       .populate('userId', 'username displayName avatarUrl')
       .lean();
-    console.log('Fetched activities:', activities);
 
-    const formattedActivities = activities.map(activity => ({
-      ...activity,
-      user: {
-        username: activity.userId?.username,
-        displayName: activity.userId?.displayName,
-        avatarUrl: activity.userId?.avatarUrl
+    const Library = require('../models/library');
+    const formattedActivities = await Promise.all(activities.map(async (activity) => {
+      let likesCount = 0;
+      let isLikedByCurrentUser = false;
+
+      if (activity.activityType === 'reviewed_book' && activity.book?.key) {
+        try {
+          const library = await Library.findOne({ userId: activity.userId._id });
+          if (library) {
+            for (const libraryName of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+              const book = library[libraryName]?.find(b => b.key === activity.book.key);
+              if (book && book.review) {
+                likesCount = book.reviewLikes?.length || 0;
+                isLikedByCurrentUser = currentUserId ? book.reviewLikes?.includes(currentUserId) : false;
+                break;
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching like info:', err);
+        }
       }
+
+      return {
+        ...activity,
+        user: {
+          username: activity.userId?.username,
+          displayName: activity.userId?.displayName,
+          avatarUrl: activity.userId?.avatarUrl
+        },
+        likesCount,
+        isLikedByCurrentUser
+      };
     }));
 
     res.json({ activities: formattedActivities });
@@ -247,20 +270,14 @@ const getPublicActivityFeed = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
 
-    const allUsers = await User.find({});
-    console.log('Total users in database:', allUsers.length);
-    console.log('Users with isPublic field:', allUsers.filter(u => u.isPublic !== undefined).length);
-    console.log('Users with isPublic=true:', allUsers.filter(u => u.isPublic === true).length);
-
     const publicUsers = await User.find({ 
       $or: [
         { 'profile.isPublic': true },
         { 'profile.isPublic': { $exists: false } }
       ]
     }).select('_id');
-    const publicUserIds = publicUsers.map(user => user._id);
 
-    console.log(`Found ${publicUserIds.length} users with public profiles`);
+    const publicUserIds = publicUsers.map(user => user._id);
 
     const activities = await Activity.find({
       userId: { $in: publicUserIds }
@@ -270,21 +287,117 @@ const getPublicActivityFeed = async (req, res) => {
       .populate('userId', 'username displayName avatarUrl profile')
       .lean();
 
-    console.log(`Found ${activities.length} total activities`);
+    const Library = require('../models/library');
+    const formattedActivities = await Promise.all(activities.map(async (activity) => {
+      let likesCount = 0;
+      let isLikedByCurrentUser = false;
 
-    const formattedActivities = activities.map(activity => ({
-      ...activity,
-      user: {
-        username: activity.userId?.username,
-        displayName: activity.userId?.displayName,
-        avatarUrl: activity.userId?.avatarUrl
+      if (activity.activityType === 'reviewed_book' && activity.book?.key) {
+        try {
+          const library = await Library.findOne({ userId: activity.userId._id });
+          if (library) {
+            for (const libraryName of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+              const book = library[libraryName]?.find(b => b.key === activity.book.key);
+              if (book && book.review) {
+                likesCount = book.reviewLikes?.length || 0;
+                isLikedByCurrentUser = currentUserId ? book.reviewLikes?.includes(currentUserId) : false;
+                break;
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching like info:', err);
+        }
       }
+
+      return {
+        ...activity,
+        user: {
+          username: activity.userId?.username,
+          displayName: activity.userId?.displayName,
+          avatarUrl: activity.userId?.avatarUrl
+        },
+        likesCount,
+        isLikedByCurrentUser
+      };
     }));
 
     res.json({ activities: formattedActivities });
   } catch (error) {
     console.error('Error fetching public activity feed:', error);
     res.status(500).json({ error: 'Error fetching activity feed' });
+  }
+};
+
+// like a review in the activity feeds
+const likeReviewFromActivity = async (req, res) => {
+  try {
+    const { activityId } = req.params;
+    const currentUserId = req.userId;
+
+    const activity = await Activity.findById(activityId);
+    if (!activity) {
+      return res.status(404).json({ error: 'Activity not found' });
+    }
+
+    if (activity.userId.toString() === currentUserId) {
+      return res.status(400).json({ error: 'Cannot like your own review' });
+    }
+
+    if (activity.activityType !== 'reviewed_book') {
+      return res.status(400).json({ error: 'Only reviews can be liked' });
+    }
+
+    const bookKey = activity.book?.key;
+    const reviewOwnerId = activity.userId;
+
+    if (!bookKey) {
+      return res.status(404).json({ error: 'Book key not found' });
+    }
+
+    const Library = require('../models/library');
+    const library = await Library.findOne({ userId: reviewOwnerId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    let foundBook = null;
+    for (const libraryName of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+      foundBook = library[libraryName]?.find(b => b.key === bookKey);
+      if (foundBook && foundBook.review) {
+        break;
+      }
+    }
+
+    if (!foundBook || !foundBook.review) {
+      return res.status(404).json({ error: 'Review not found' });
+    }
+
+    if (!foundBook.reviewLikes) {
+      foundBook.reviewLikes = [];
+    }
+
+    const likeIndex = foundBook.reviewLikes.indexOf(currentUserId);
+    let liked = false;
+
+    if (likeIndex > -1) {
+      foundBook.reviewLikes.splice(likeIndex, 1);
+      liked = false;
+    } else {
+      foundBook.reviewLikes.push(currentUserId);
+      liked = true;
+    }
+
+    await library.save();
+
+    res.json({
+      message: liked ? 'Review liked' : 'Review unliked',
+      liked,
+      likesCount: foundBook.reviewLikes.length
+    });
+  } catch (error) {
+    console.error('Error liking review from activity:', error);
+    res.status(500).json({ error: 'Error liking review' });
   }
 };
 
@@ -312,5 +425,6 @@ module.exports = {
   getFriendshipStatus,
   getFriendsActivityFeed,
   getPublicActivityFeed,
+  likeReviewFromActivity,
   getOwnActivities
 };

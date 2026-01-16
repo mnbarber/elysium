@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import SpoilerReview from './SpoilerReview';
-import './ActivityFeed.css';
+import './Discover.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -13,16 +13,16 @@ function ActivityFeed() {
   const activitiesPerPage = 20;
 
   useEffect(() => {
-    fetchFriendsActivity();
+    fetchPublicActivity();
   }, []);
 
-  const fetchFriendsActivity = async () => {
+  const fetchPublicActivity = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/activity/friends`);
+      const response = await axios.get(`${API_URL}/activity/public`);
       setActivities(response.data.activities || []);
     } catch (error) {
-      console.error('Error fetching friends activity:', error);
+      console.error('Error fetching public activity:', error);
       setActivities([]);
     } finally {
       setLoading(false);
@@ -112,6 +112,29 @@ function ActivityFeed() {
     }
   };
 
+  const toggleLike = async (activityId, activityIndex) => {
+    try {
+      const response = await axios.post(`${API_URL}/activity/${activityId}/like`);
+
+      setActivities(prevActivities => {
+        const updated = [...prevActivities];
+        updated[activityIndex] = {
+          ...updated[activityIndex],
+          isLikedByCurrentUser: response.data.liked,
+          likesCount: response.data.likesCount
+        };
+        return updated;
+      });
+    } catch (error) {
+      console.error('Error liking review:', error);
+      if (error.response?.status === 401) {
+        alert('Please log in to like reviews');
+      } else if (error.response?.status === 400) {
+        alert(error.response?.data?.error || 'Cannot like this review');
+      }
+    }
+  };
+
   const indexOfLastActivity = currentPage * activitiesPerPage;
   const indexOfFirstActivity = indexOfLastActivity - activitiesPerPage;
   const currentActivities = activities.slice(indexOfFirstActivity, indexOfLastActivity);
@@ -149,14 +172,14 @@ function ActivityFeed() {
   };
 
   if (loading) {
-    return <div className="loading">Loading friends' activity...</div>;
+    return <div className="loading">Discovering readers...</div>;
   }
 
   return (
     <div className="activity-feed-container">
       <div className="activity-feed-header">
-        <h1>Friends' Activity</h1>
-        <p className="activity-subtitle">See what your friends are reading</p>
+        <h1>Discover</h1>
+        <p className="activity-subtitle">See what the community is reading!</p>
       </div>
       {activities.length > 0 && (
         <p className="activity-count">
@@ -166,8 +189,7 @@ function ActivityFeed() {
 
       {activities.length === 0 ? (
         <div className="empty-activity-state">
-          <p>No activity from friends yet.</p>
-          <p>Add some friends to see their reading activity!</p>
+          <p>No public activity yet.</p>
         </div>
       ) : (
         <div className="activity-list">
@@ -206,6 +228,17 @@ function ActivityFeed() {
                     ) : (
                       <p className="review-text">"{activity.review}"</p>
                     )}
+                    <button
+                      onClick={() => toggleLike(activity._id, activities.indexOf(activity))}
+                      className={`activity-like-button ${activity.isLikedByCurrentUser ? 'liked' : ''}`}
+                    >
+                      <span className="like-icon">
+                        {activity.isLikedByCurrentUser ? '❤️' : '🤍'}
+                      </span>
+                      <span className="like-count">
+                        {activity.likesCount || 0}
+                      </span>
+                    </button>
                   </div>
                 )}
               </div>

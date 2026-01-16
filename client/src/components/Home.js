@@ -34,7 +34,7 @@ function Home() {
             const librariesResponse = await axios.get(`${API_URL}/libraries`);
             setCurrentlyReading(librariesResponse.data['currently-reading'] || []);
 
-            const activityResponse = await axios.get(`${API_URL}/activity/public`);
+            const activityResponse = await axios.get(`${API_URL}/activity/friends`);
             setActivityFeed(activityResponse.data.activities || []);
 
             const goalsResponse = await axios.get(`${API_URL}/goals`);
@@ -83,6 +83,29 @@ function Home() {
         } catch (error) {
             console.error('Error deleting goal:', error);
             alert('Error deleting goal');
+        }
+    };
+
+    const toggleLike = async (activityId, activityIndex) => {
+        try {
+            const response = await axios.post(`${API_URL}/activity/${activityId}/like`);
+
+            setActivityFeed(prevActivities => {
+                const updated = [...prevActivities];
+                updated[activityIndex] = {
+                    ...updated[activityIndex],
+                    isLikedByCurrentUser: response.data.liked,
+                    likesCount: response.data.likesCount
+                };
+                return updated;
+            });
+        } catch (error) {
+            console.error('Error liking review:', error);
+            if (error.response?.status === 401) {
+                alert('Please log in to like reviews');
+            } else if (error.response?.status === 400) {
+                alert(error.response?.data?.error || 'Cannot like this review');
+            }
         }
     };
 
@@ -197,7 +220,7 @@ function Home() {
                 <main className="home-main">
                     <div className="welcome-header">
                         <h1>Welcome back, {user?.username}!</h1>
-                        <p className="welcome-subtitle">See what the community is reading</p>
+                        <p className="welcome-subtitle">See what your friends are reading!</p>
                     </div>
 
                     <div className="activity-feed-section">
@@ -243,6 +266,17 @@ function Home() {
                                                     ) : (
                                                         <p className="review-text">"{activity.review}"</p>
                                                     )}
+                                                    <button
+                                                        onClick={() => toggleLike(activity._id, activityFeed.indexOf(activity))}
+                                                        className={`activity-like-button ${activity.isLikedByCurrentUser ? 'liked' : ''}`}
+                                                    >
+                                                        <span className="like-icon">
+                                                            {activity.isLikedByCurrentUser ? '❤️' : '🤍'}
+                                                        </span>
+                                                        <span className="like-count">
+                                                            {activity.likesCount || 0}
+                                                        </span>
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>

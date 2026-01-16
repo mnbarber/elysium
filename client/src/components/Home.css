@@ -426,6 +426,51 @@
   padding: 0 5px;
 }
 
+.activity-like-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  margin-top: 8px;
+  background: transparent;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.activity-like-button:hover {
+  border-color: #ff6b6b;
+  transform: scale(1.05);
+}
+
+.activity-like-button.liked {
+  border-color: #ff6b6b;
+  background: #fff5f5;
+  color: #ff6b6b;
+}
+
+.activity-like-button .like-icon {
+  font-size: 14px;
+  transition: transform 0.3s;
+}
+
+.activity-like-button:hover .like-icon {
+  transform: scale(1.2);
+}
+
+.activity-like-button:active .like-icon {
+  transform: scale(0.9);
+}
+
+.activity-like-button .like-count {
+  min-width: 15px;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .pagination {
     flex-wrap: wrap;

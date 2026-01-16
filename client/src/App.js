@@ -8,7 +8,7 @@ import Profile from './components/Profile';
 import EditProfile from './components/EditProfile';
 import UserSearch from './components/UserSearch';
 import Friends from './components/Friends';
-import ActivityFeed from './components/ActivityFeed';
+import Discover from './components/Discover';
 import BrowseByGenre from './components/BrowseByGenre';
 import ReadingStats from './components/ReadingStats';
 import BookDetails from './components/BookDetails';
@@ -71,7 +71,7 @@ function App() {
             <Link to="/search">Search</Link>
             <Link to="/browse">Browse</Link>
             <Link to="/lists/browse">Lists</Link>
-            <Link to="/activity/friends">Friend Feed</Link>
+            <Link to="/discover">Discover</Link>
             <Link to="/users">Find Users</Link>
             <Link to="/libraries">My Libraries</Link>
             <Link to={`/profile/${user.username}`}>Profile</Link>
@@ -95,7 +95,7 @@ function App() {
           <Route path="/lists" element={<MyLists />} />
           <Route path="/lists/browse" element={<BrowseLists />} />
           <Route path="/lists/:listId" element={<ListDetail />} />
-          <Route path="/activity/friends" element={<ActivityFeed />} />
+          <Route path="/discover" element={<Discover />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/libraries" element={<Libraries />} />
           <Route path="/profile/:username" element={<Profile />} />

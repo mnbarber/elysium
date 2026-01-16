@@ -17,6 +17,7 @@ router.get('/friends/status/:username', auth, friendController.getFriendshipStat
 // activity feed
 router.get('/activity/friends', auth, friendController.getFriendsActivityFeed);
 router.get('/activity/public', friendController.getPublicActivityFeed);
+router.post('/activity/:activityId/like', auth, friendController.likeReviewFromActivity);
 router.get('/activities/me', auth, friendController.getOwnActivities);
 
 module.exports = router;
