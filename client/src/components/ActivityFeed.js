@@ -9,6 +9,8 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 function ActivityFeed() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const activitiesPerPage = 20;
 
   useEffect(() => {
     fetchFriendsActivity();
@@ -110,6 +112,30 @@ function ActivityFeed() {
     }
   };
 
+  const indexOfLastActivity = currentPage * activitiesPerPage;
+  const indexOfFirstActivity = indexOfLastActivity - activitiesPerPage;
+  const currentActivities = activities.slice(indexOfFirstActivity, indexOfLastActivity);
+  const totalPages = Math.ceil(activities.length / activitiesPerPage);
+
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const formatTimeAgo = (date) => {
     const now = new Date();
     const activityDate = new Date(date);
@@ -132,6 +158,11 @@ function ActivityFeed() {
         <h1>Friends' Activity</h1>
         <p className="activity-subtitle">See what your friends are reading</p>
       </div>
+      {activities.length > 0 && (
+        <p className="activity-count">
+          Showing {indexOfFirstActivity + 1}-{Math.min(indexOfLastActivity, activities.length)} of {activities.length}
+        </p>
+      )}
 
       {activities.length === 0 ? (
         <div className="empty-activity-state">
@@ -140,7 +171,7 @@ function ActivityFeed() {
         </div>
       ) : (
         <div className="activity-list">
-          {activities.map((activity) => (
+          {currentActivities.map((activity) => (
             <div key={activity._id} className="activity-card">
               <div className="activity-content">
                 <div className="activity-header">
@@ -151,11 +182,11 @@ function ActivityFeed() {
                     {formatTimeAgo(activity.createdAt)}
                   </span>
                 </div>
-                
+
                 {activity.book?.coverUrl && (
                   <Link to={`/book${activity.book.key}`} className="activity-book-preview">
-                    <img 
-                      src={activity.book.coverUrl} 
+                    <img
+                      src={activity.book.coverUrl}
                       alt={activity.book.title}
                     />
                     <div className="book-preview-info">
@@ -164,11 +195,11 @@ function ActivityFeed() {
                     </div>
                   </Link>
                 )}
-                
+
                 {activity.activityType === 'reviewed_book' && activity.review && (
                   <div className="activity-review">
                     {activity.containsSpoilers ? (
-                      <SpoilerReview 
+                      <SpoilerReview
                         review={activity.review}
                         bookTitle={activity.book?.title}
                       />
@@ -182,8 +213,73 @@ function ActivityFeed() {
           ))}
         </div>
       )}
+
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button
+            onClick={prevPage}
+            disabled={currentPage === 1}
+            className="pagination-btn"
+          >
+            ← Previous
+          </button>
+
+          <div className="pagination-numbers">
+            {currentPage > 2 && (
+              <>
+                <button onClick={() => goToPage(1)} className="pagination-number">
+                  1
+                </button>
+                {currentPage > 3 && <span className="pagination-ellipsis">...</span>}
+              </>
+            )}
+
+            {currentPage > 1 && (
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                className="pagination-number"
+              >
+                {currentPage - 1}
+              </button>
+            )}
+
+            <button className="pagination-number active">
+              {currentPage}
+            </button>
+
+            {currentPage < totalPages && (
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                className="pagination-number"
+              >
+                {currentPage + 1}
+              </button>
+            )}
+
+            {currentPage < totalPages - 1 && (
+              <>
+                {currentPage < totalPages - 2 && <span className="pagination-ellipsis">...</span>}
+                <button
+                  onClick={() => goToPage(totalPages)}
+                  className="pagination-number"
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+          </div>
+
+          <button
+            onClick={nextPage}
+            disabled={currentPage === totalPages}
+            className="pagination-btn"
+          >
+            Next →
+          </button>
+        </div>
+      )}
     </div>
-  );
+  )
 }
 
 export default ActivityFeed;

@@ -17,6 +17,8 @@ function Home() {
     const [loading, setLoading] = useState(true);
     const [showProgressModal, setShowProgressModal] = useState(false);
     const [selectedBook, setSelectedBook] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const activitiesPerPage = 20;
 
     useEffect(() => {
         fetchHomeData();
@@ -82,6 +84,31 @@ function Home() {
             console.error('Error deleting goal:', error);
             alert('Error deleting goal');
         }
+    };
+
+    const indexOfLastActivity = currentPage * activitiesPerPage;
+    const indexOfFirstActivity = indexOfLastActivity - activitiesPerPage;
+    const currentActivities = activityFeed.slice(indexOfFirstActivity, indexOfLastActivity);
+    const totalPages = Math.ceil(activityFeed.length / activitiesPerPage);
+
+    const nextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+            // Scroll to top of activity feed
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const goToPage = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const formatTimeAgo = (date) => {
@@ -175,12 +202,16 @@ function Home() {
 
                     <div className="activity-feed-section">
                         <h2>⏾ Recent Activity</h2>
-
+                        {activityFeed.length > 0 && (
+                            <p className="activity-count">
+                                Showing {indexOfFirstActivity + 1}-{Math.min(indexOfLastActivity, activityFeed.length)} of {activityFeed.length}
+                            </p>
+                        )}
                         {activityFeed.length === 0 ? (
                             <p className="empty-state">No recent activity to show.</p>
                         ) : (
                             <div className="activity-feed">
-                                {activityFeed.map((activity) => (
+                                {currentActivities.map((activity) => (
                                     <div key={activity._id} className="activity-item">
                                         <div className="activity-content">
                                             <div className="activity-header">
@@ -217,6 +248,70 @@ function Home() {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                            )}
+                            {totalPages > 1 && (
+                            <div className="pagination">
+                                <button
+                                    onClick={prevPage}
+                                    disabled={currentPage === 1}
+                                    className="pagination-btn"
+                                >
+                                    ← Previous
+                                </button>
+
+                                <div className="pagination-numbers">
+                                    {currentPage > 2 && (
+                                        <>
+                                            <button onClick={() => goToPage(1)} className="pagination-number">
+                                                1
+                                            </button>
+                                            {currentPage > 3 && <span className="pagination-ellipsis">...</span>}
+                                        </>
+                                    )}
+
+                                    {currentPage > 1 && (
+                                        <button
+                                            onClick={() => goToPage(currentPage - 1)}
+                                            className="pagination-number"
+                                        >
+                                            {currentPage - 1}
+                                        </button>
+                                    )}
+
+                                    <button className="pagination-number active">
+                                        {currentPage}
+                                    </button>
+
+                                    {currentPage < totalPages && (
+                                        <button
+                                            onClick={() => goToPage(currentPage + 1)}
+                                            className="pagination-number"
+                                        >
+                                            {currentPage + 1}
+                                        </button>
+                                    )}
+
+                                    {currentPage < totalPages - 1 && (
+                                        <>
+                                            {currentPage < totalPages - 2 && <span className="pagination-ellipsis">...</span>}
+                                            <button
+                                                onClick={() => goToPage(totalPages)}
+                                                className="pagination-number"
+                                            >
+                                                {totalPages}
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={nextPage}
+                                    disabled={currentPage === totalPages}
+                                    className="pagination-btn"
+                                >
+                                    Next →
+                                </button>
                             </div>
                         )}
                     </div>
