@@ -66,6 +66,7 @@ const getUserGoals = async (req, res) => {
     const userId = req.params.userId || req.userId;
 
     const goals = await Goal.find({ userId, isActive: true });
+    console.log('Fetched goals for user:', userId, goals);
 
     const library = await Library.findOne({ userId });
 

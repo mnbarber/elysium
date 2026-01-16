@@ -3,12 +3,25 @@ import { Link } from 'react-router-dom';
 import './Footer.css';
 
 function Footer() {
+    const paypalLink = 'paypal.me/megameganx';
+
     return (
         <footer className="site-footer">
             <div className="footer-content">
                 <div className="footer-section">
                     <h3>♥ elysium</h3>
                     <p>Your personal book tracking and social reading platform</p>
+                    <p className="footer-text">
+                        Made with 📚 and ☕ by{' '}
+                        <a
+                            href="https://github.com/mnbarber"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="footer-link"
+                        >
+                            Megan Barber
+                        </a>
+                    </p>
                 </div>
 
                 <div className="footer-section">
@@ -28,6 +41,15 @@ function Footer() {
                         <Link to="/faq">FAQ</Link>
                         <Link to="/contact">Contact Us</Link>
                     </ul>
+                    <a href={paypalLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="donation-button"
+                        >
+                            <span className="donation-text">Buy me a </span>
+                            <span className="paypal-icon">☕</span>
+                        </a>
+                        <p className="donation-subtext">Support elysium's development</p>
                 </div>
 
             </div>
