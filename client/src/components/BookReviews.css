@@ -151,6 +151,77 @@
     font-size: 16px;
 }
 
+.review-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.review-actions {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.like-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: transparent;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+}
+
+.like-button:hover {
+  border-color: #ff6b6b;
+  transform: scale(1.05);
+}
+
+.like-button.liked {
+  border-color: #a46bff;
+  background: #d6d4f7;
+  color: #a46bff;
+}
+
+.like-icon {
+  font-size: 14px;
+  transition: transform 0.3s;
+}
+
+.like-button:hover .like-icon {
+  transform: scale(1.2);
+}
+
+.like-button:active .like-icon {
+  transform: scale(0.9);
+}
+
+.like-count {
+  min-width: 20px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .review-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .review-meta {
+    align-items: flex-start;
+  }
+}
+
 @media (max-width: 768px) {
     .book-reviews-section {
         padding: 20px;

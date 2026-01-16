@@ -41,6 +41,10 @@ const bookSchema = new mongoose.Schema({
     default: false
   },
   reviewedAt: Date,
+  reviewLikes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   readCount: {
     type: Number,
     default: 0,

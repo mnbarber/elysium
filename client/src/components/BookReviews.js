@@ -29,6 +29,36 @@ function BookReviews({ bookKey, bookTitle }) {
         }
     };
 
+    const toggleLike = async (reviewOwnerId, reviewId) => {
+        try {
+            const response = await axios.post(
+                `${API_URL}/books/reviews/${encodeURIComponent(bookKey)}/like`,
+                { reviewOwnerId }
+            );
+
+            setReviews(prevReviews => {
+                return prevReviews.map(review => {
+                    if (review._id === reviewId) {
+                        return {
+                            ...review,
+                            isLikedByCurrentUser: response.data.liked,
+                            likesCount: response.data.likesCount
+                        };
+                    }
+                    return review;
+                });
+            });
+        } catch (error) {
+            console.error('Error liking review:', error);
+            if (error.response?.status === 401) {
+                alert('Please log in to like reviews');
+            } else {
+                alert('Error liking review');
+            }
+        }
+    };
+
+
     const sortReviews = (reviewsList) => {
         const sorted = [...reviewsList];
 
@@ -43,6 +73,8 @@ function BookReviews({ bookKey, bookTitle }) {
                 return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
             case 'lowest-rated':
                 return sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+            case 'most-liked':
+                return sorted.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
             default:
                 return sorted;
         }
@@ -79,6 +111,7 @@ function BookReviews({ bookKey, bookTitle }) {
                             <option value="recent">Most Recent</option>
                             <option value="highest-rated">Highest Rated</option>
                             <option value="lowest-rated">Lowest Rated</option>
+                            <option value="most-liked">Most Liked</option>
                         </select>
                     </div>
                 )}
@@ -128,6 +161,20 @@ function BookReviews({ bookKey, bookTitle }) {
                                 ) : (
                                     <p className="review-text">{review.review}</p>
                                 )}
+                            </div>
+
+                            <div className="review-actions">
+                                <button
+                                    onClick={() => toggleLike(review.reviewOwnerId, review._id)}
+                                    className={`like-button ${review.isLikedByCurrentUser ? 'liked' : ''}`}
+                                >
+                                    <span className="like-icon">
+                                        {review.isLikedByCurrentUser ? '❤️' : '🤍'}
+                                    </span>
+                                    <span className="like-count">
+                                        {review.likesCount || 0}
+                                    </span>
+                                </button>
                             </div>
                         </div>
                     ))}

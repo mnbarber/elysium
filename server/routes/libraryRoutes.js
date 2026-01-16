@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const libraryController = require('../controllers/libraryController');
 const auth = require('../middleware/auth');
+const optionalAuth = require('../middleware/optionalAuth');
 
 // book search and browse
 router.get('/books/search', libraryController.searchBooks);
@@ -25,8 +26,9 @@ router.put('/books/rate/:bookKey', auth, libraryController.updateRating);
 // reviews
 router.post('/books/review', auth, libraryController.reviewBook);
 router.get('/books/review/:bookKey', auth, libraryController.getReview);
-router.get('/books/reviews/:bookKey', libraryController.getBookReviews);
+router.get('/books/reviews/:bookKey', optionalAuth, libraryController.getBookReviews);
 router.delete('/books/review/:bookKey', auth, libraryController.deleteReview);
+router.post('/books/reviews/:bookKey/like', auth, libraryController.toggleReviewLike);
 
 // stats and dates
 router.put('/books/completion-date/:bookKey', auth, libraryController.updateCompletionDate);

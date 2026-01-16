@@ -903,6 +903,9 @@ const getReview = async (req, res) => {
 const getBookReviews = async (req, res) => {
   try {
     const bookKey = decodeURIComponent(req.params.bookKey);
+    const currentUserId = req.userId;
+
+    console.log('Fetching reviews for book:', bookKey);
 
     const libraries = await Library.find({}).populate('userId', 'username profile.displayName profile.avatarUrl profile.isPublic');
 
@@ -917,8 +920,12 @@ const getBookReviews = async (req, res) => {
         const book = library[libraryName]?.find(b => b.key === bookKey);
 
         if (book && book.review && book.review.trim().length > 0) {
+          const likesCount = book.reviewLikes?.length || 0;
+          const isLikedByCurrentUser = currentUserId ? book.reviewLikes?.includes(currentUserId) : false;
+
           reviews.push({
             _id: library._id + '-' + book.key,
+            reviewOwnerId: library.userId._id,
             user: {
               username: library.userId?.username,
               displayName: library.userId?.profile?.displayName || library.userId?.username,
@@ -928,7 +935,9 @@ const getBookReviews = async (req, res) => {
             rating: book.rating || 0,
             containsSpoilers: book.containsSpoilers || false,
             reviewedAt: book.reviewedAt || book.addedAt,
-            librarySection: libraryName
+            librarySection: libraryName,
+            likesCount,
+            isLikedByCurrentUser
           });
           break;
         }
@@ -1164,6 +1173,66 @@ const getReadingStats = async (req, res) => {
       }
 };
 
+// like or unlike a review
+const toggleReviewLike = async (req, res) => {
+  try {
+    const bookKey = decodeURIComponent(req.params.bookKey);
+    const reviewOwnerId = req.body.reviewOwnerId;
+    const currentUserId = req.userId;
+
+    if (!reviewOwnerId) {
+      return res.status(400).json({ error: 'Review owner ID is required' });
+    }
+
+    if (reviewOwnerId === currentUserId) {
+      return res.status(400).json({ error: 'Cannot like your own review' });
+    }
+
+    const library = await Library.findOne({ userId: reviewOwnerId });
+    if (!library) {
+      return res.status(404).json({ error: 'Library not found' });
+    }
+
+    let foundBook = null;
+    for (const libraryName of ['toRead', 'currentlyReading', 'read', 'paused', 'dnf']) {
+      foundBook = library[libraryName]?.find(b => b.key === bookKey);
+      if (foundBook && foundBook.review) {
+        break;
+      }
+    }
+
+    if (!foundBook || !foundBook.review) {
+      return res.status(404).json({ error: 'Review not found' });
+    }
+
+    if (!foundBook.reviewLikes) {
+      foundBook.reviewLikes = [];
+    }
+
+    const likeIndex = foundBook.reviewLikes.indexOf(currentUserId);
+    let liked = false;
+
+    if (likeIndex > -1) {
+      foundBook.reviewLikes.splice(likeIndex, 1);
+      liked = false;
+    } else {
+      foundBook.reviewLikes.push(currentUserId);
+      liked = true;
+    }
+
+    await library.save();
+
+    res.json({
+      message: liked ? 'Review liked' : 'Review unliked',
+      liked,
+      likesCount: foundBook.reviewLikes.length
+    });
+  } catch (error) {
+    console.error('Error toggling review like:', error);
+    res.status(500).json({ error: 'Error updating review like' });
+  }
+};
+
 module.exports = {
   searchBooks,
   getBookDetails,
@@ -1183,5 +1252,6 @@ module.exports = {
   deleteReview,
   updateCompletionDate,
   editBookInLibrary,
-  getReadingStats
+  getReadingStats,
+  toggleReviewLike
 };
