@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import './Footer.css';
 
 function Footer() {
-    const paypalLink = 'paypal.me/megameganx';
 
     return (
         <footer className="site-footer">
@@ -41,7 +40,7 @@ function Footer() {
                         <Link to="/faq">FAQ</Link>
                         <Link to="/contact">Contact Us</Link>
                     </ul>
-                    <a href={paypalLink}
+                    <a href="https://www.paypal.com/paypalme/megameganx"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="donation-button"
