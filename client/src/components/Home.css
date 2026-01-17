@@ -471,6 +471,36 @@
   text-align: center;
 }
 
+.reading-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.move-dropdown-mini {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1.5px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+  background: rgb(193, 217, 250);
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #333;
+  font-weight: 500;
+}
+
+.move-dropdown-mini:hover {
+  border-color: #667eea;
+}
+
+.move-dropdown-mini:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
 @media (max-width: 768px) {
   .pagination {
     flex-wrap: wrap;

@@ -74,6 +74,29 @@ function Home() {
         }
     };
 
+    const moveBook = async (book, toLibrary) => {
+        try {
+            await axios.put(`${API_URL}/libraries/move`, {
+                bookKey: book.key,
+                fromLibrary: 'currently-reading',
+                toLibrary: toLibrary
+            });
+
+            setCurrentlyReading(prev => prev.filter(b => b.key !== book.key));
+
+            const libraryNames = {
+                'to-read': 'To Read',
+                'read': 'Read',
+                'paused': 'Paused',
+                'dnf': 'Did Not Finish'
+            };
+            alert(`Moved "${book.title}" to ${libraryNames[toLibrary]}!`);
+        } catch (error) {
+            console.error('Error moving book:', error);
+            alert('Error moving book');
+        }
+    };
+
     const deleteGoal = async (goalId) => {
         if (!window.confirm('Delete this goal?')) return;
 
@@ -192,12 +215,31 @@ function Home() {
                                                 </div>
                                             )}
 
-                                            <button
-                                                onClick={() => openProgressModal(book)}
-                                                className="btn-mini-update"
-                                            >
-                                                Update Progress
-                                            </button>
+                                            <div className="reading-actions">
+                                                <button
+                                                    onClick={() => openProgressModal(book)}
+                                                    className="btn-mini-update"
+                                                >
+                                                    Update Progress
+                                                </button>
+
+                                                <select
+                                                    onChange={(e) => {
+                                                        if (e.target.value) {
+                                                            moveBook(book, e.target.value);
+                                                            e.target.value = '';
+                                                        }
+                                                    }}
+                                                    className="move-dropdown-mini"
+                                                    defaultValue=""
+                                                >
+                                                    <option value="" disabled>Move to...</option>
+                                                    <option value="to-read">To Read</option>
+                                                    <option value="read">Read</option>
+                                                    <option value="paused">Paused</option>
+                                                    <option value="dnf">Did Not Finish</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
