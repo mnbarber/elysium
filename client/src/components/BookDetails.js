@@ -4,6 +4,8 @@ import axios from 'axios';
 import PageProgressModal from './PageProgressModal';
 import EditBookModal from './EditBookModal';
 import BookReviews from './BookReviews';
+import StarRating from './StarRating';
+import ReviewModal from './ReviewModal';
 import './BookDetails.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -15,6 +17,7 @@ function BookDetails() {
     const [bookInLibrary, setBookInLibrary] = useState(null);
     const [showProgressModal, setShowProgressModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showReviewModal, setShowReviewModal] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error] = useState(null);
 
@@ -124,6 +127,80 @@ function BookDetails() {
         }
     };
 
+    const rateBook = async (rating) => {
+        try {
+            await axios.post(`${API_URL}/books/rate`, {
+                book: book,
+                rating: rating
+            });
+
+            setBookInLibrary(prev => ({
+                ...prev,
+                book: {
+                    ...prev.book,
+                    rating: rating
+                }
+            }));
+
+            alert('Rating saved!');
+        } catch (error) {
+            console.error('Error rating book:', error);
+            alert('Error saving rating');
+        }
+    };
+
+    const openReviewModal = () => {
+        setShowReviewModal(true);
+    };
+
+    const submitReview = async (reviewText, containsSpoilers) => {
+        try {
+            await axios.post(`${API_URL}/books/review`, {
+                book: book,
+                review: reviewText,
+                containsSpoilers: containsSpoilers
+            });
+
+            setBookInLibrary(prev => ({
+                ...prev,
+                book: {
+                    ...prev.book,
+                    review: reviewText,
+                    containsSpoilers: containsSpoilers,
+                    reviewedAt: new Date()
+                }
+            }));
+
+            setShowReviewModal(false);
+            alert('Review saved!');
+        } catch (error) {
+            console.error('Error saving review:', error);
+            alert('Error saving review');
+        }
+    };
+
+    const deleteReview = async () => {
+        try {
+            await axios.delete(`${API_URL}/books/review/${encodeURIComponent(book.key)}`);
+
+            setBookInLibrary(prev => ({
+                ...prev,
+                book: {
+                    ...prev.book,
+                    review: '',
+                    containsSpoilers: false,
+                    reviewedAt: null
+                }
+            }));
+
+            setShowReviewModal(false);
+            alert('Review deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            alert('Error deleting review');
+        }
+    };
+
     if (loading) return <div className="loading">Loading...</div>;
     if (error) return <div className="error">{error}</div>;
     if (!book) return <div className="error">No book details available</div>;
@@ -145,6 +222,7 @@ function BookDetails() {
 
                 <div className="book-main-info">
                     <h1>{book.title}</h1>
+                    
                     {book.isCustom && (
                         <span className="custom-badge">Custom Book</span>
                     )}
@@ -174,10 +252,18 @@ function BookDetails() {
                             </div>
                         )}
                     </div>
+                    {bookInLibrary && (
+                        <button
+                            onClick={() => setShowEditModal(true)}
+                            className="btn-edit-book"
+                        >
+                            Edit Book Details
+                        </button>
+                    )}
 
                     {bookInLibrary && bookInLibrary.library === 'currentlyReading' && (
                         <div className="reading-progress-section">
-                            <h3>📖 Reading Progress</h3>
+                            <h3>⏾ Reading Progress</h3>
                             {book.numberOfPages && book.numberOfPages > 0 ? (
                                 <>
                                     <div className="progress-bar-large">
@@ -205,36 +291,56 @@ function BookDetails() {
                         </div>
                     )}
 
-                    <div className="book-actions">
-                        {!bookInLibrary ? (
-                            <>
-                                <button onClick={() => addToLibrary('toRead')} className="btn-add">
-                                    Add to To Read
-                                </button>
-                                <button onClick={() => addToLibrary('currentlyReading')} className="btn-add">
-                                    Add to Currently Reading
-                                </button>
-                                <button onClick={() => addToLibrary('read')} className="btn-add">
-                                    Add to Read
-                                </button>
-                            </>
-                        ) : (
-                                <div>
-                                    <p className="in-library-notice">
-                                        ✓ In your library ({bookInLibrary.library === 'toRead' ? 'To Read' :
-                                            bookInLibrary.library === 'currentlyReading' ? 'Currently Reading' :
-                                                bookInLibrary.library === 'read' ? 'Read' :
-                                                    bookInLibrary.library === 'paused' ? 'Paused' : 'Did Not Finish'})
-                                    </p>
-                                    <button
-                                        onClick={() => setShowEditModal(true)}
-                                        className="btn-edit-book"
-                                    >
-                                        Edit Book Details
+                    {bookInLibrary ? (
+                        <div className="book-library-status">
+                            <p className="in-library-badge">
+                                ✓ In your library: <strong>{bookInLibrary.library.replace(/-/g, ' ')}</strong>
+                            </p>
+
+                            <div className="rating-section">
+                                <h3>Your Rating</h3>
+                                <StarRating
+                                    rating={bookInLibrary.book.rating || 0}
+                                    onRate={rateBook}
+                                    size={32}
+                                />
+                                {bookInLibrary.book.rating > 0 && (
+                                    <p className="rating-text">You rated this {bookInLibrary.book.rating} stars</p>
+                                )}
+                            </div>
+
+                            <div className="review-section">
+                                <h3>Your Review</h3>
+                                {bookInLibrary.book.review ? (
+                                    <div className="existing-review">
+                                        <p className="review-preview">"{bookInLibrary.book.review.substring(0, 150)}{bookInLibrary.book.review.length > 150 ? '...' : ''}"</p>
+                                        <button onClick={openReviewModal} className="btn-edit-review">
+                                            Edit Review
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button onClick={openReviewModal} className="btn-write-review">
+                                        Write a Review
                                     </button>
-                                </div>
-                        )}
-                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="add-to-library-section">
+                            <h3>Add to Library:</h3>
+                            <div className="library-buttons">
+                                <button onClick={() => addToLibrary('to-read')} className="btn-library">
+                                    To Read
+                                </button>
+                                <button onClick={() => addToLibrary('currently-reading')} className="btn-library">
+                                    Currently Reading
+                                </button>
+                                <button onClick={() => addToLibrary('read')} className="btn-library">
+                                    Read
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
