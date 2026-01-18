@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './EditBookModal.css';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 function EditBookModal({ book, onClose, onSubmit }) {
     const [formData, setFormData] = useState({
@@ -11,6 +14,8 @@ function EditBookModal({ book, onClose, onSubmit }) {
         coverUrl: '',
         isbn: ''
     });
+    const [coverFile, setCoverFile] = useState(null);
+    const [coverPreview, setCoverPreview] = useState('');
 
     useEffect(() => {
         setFormData({
@@ -32,8 +37,52 @@ function EditBookModal({ book, onClose, onSubmit }) {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleCoverChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+
+            setCoverFile(file);
+            setCoverPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        try {
+            let coverUrl = formData.coverUrl;
+
+            // Upload new cover if selected
+            if (coverFile) {
+                const uploadFormData = new FormData();
+                uploadFormData.append('image', coverFile);
+
+                const uploadResponse = await axios.post(
+                    `${API_URL}/upload/book-cover`,
+                    uploadFormData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
+
+                coverUrl = uploadResponse.data.imageUrl;
+            }
+        } catch (error) {
+            console.error('Error uploading cover image:', error);
+            alert('Failed to upload cover image. Please try again.');
+            return;
+        }
 
         const updatedData = {
             ...formData,
@@ -109,19 +158,31 @@ function EditBookModal({ book, onClose, onSubmit }) {
                     </div>
 
                     <div className="form-group">
-                        <label>Cover URL</label>
-                        <input
-                            type="url"
-                            name="coverUrl"
-                            value={formData.coverUrl}
-                            onChange={handleChange}
-                            placeholder="https://example.com/cover.jpg"
-                        />
-                        {formData.coverUrl && (
-                            <div className="cover-preview">
-                                <img src={formData.coverUrl} alt="Cover preview" />
+                        <label>Book Cover</label>
+                        <div className="cover-upload-section">
+                            {coverPreview && (
+                                <div className="cover-preview-container">
+                                    <img
+                                        src={coverPreview}
+                                        alt="Cover preview"
+                                        className="cover-preview"
+                                    />
+                                </div>
+                            )}
+                            <div className="file-input-wrapper">
+                                <input
+                                    type="file"
+                                    id="cover-upload"
+                                    accept="image/*"
+                                    onChange={handleCoverChange}
+                                    className="file-input"
+                                />
+                                <label htmlFor="cover-upload" className="file-input-label">
+                                    {coverFile ? '✓ New cover selected' : '📁 Choose new cover image'}
+                                </label>
                             </div>
-                        )}
+                            <small>Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
+                        </div>
                     </div>
 
                     <div className="form-group">

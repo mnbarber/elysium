@@ -15,6 +15,8 @@ function EditProfile() {
     avatarUrl: '',
     isPublic: true
   });
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -47,27 +49,53 @@ function EditProfile() {
     }));
   };
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
 
-    console.log('Submitting profile update to:', `${API_URL}/profile/${user.username}/edit`);
     try {
-      const dataToSend = {
-        ...formData,
-      };
-      console.log('profile data to send:', dataToSend);
+      let avatarUrl = formData.avatarUrl;
 
-      await axios.put(`${API_URL}/profile/${user.username}/edit`, dataToSend);
-      console.log('profile data sent:', dataToSend);
-      setSuccess('Profile updated successfully!');
-      setTimeout(() => {
-        navigate(`/profile/${user.username}`);
-      }, 1500);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update profile');
+      if (avatarFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('image', avatarFile);
+
+        const uploadResponse = await axios.post(
+          `${API_URL}/upload/profile-picture`,
+          uploadFormData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        );
+
+        avatarUrl = uploadResponse.data.imageUrl;
+      }
+
+      await axios.put(`${API_URL}/profile/${user.username}/edit`, {
+        ...formData,
+        avatarUrl
+      });
+
+      alert('Profile updated successfully!');
+      navigate(`/profile/${user.username}`);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Error updating profile');
     } finally {
       setLoading(false);
     }
@@ -106,15 +134,23 @@ function EditProfile() {
         </div>
 
         <div className="form-group">
-          <label>Avatar URL</label>
-          <input
-            type="url"
-            name="avatarUrl"
-            value={formData.avatarUrl}
-            onChange={handleChange}
-            placeholder="https://example.com/avatar.jpg"
-          />
-          <small>Link to your profile picture</small>
+          <label>Profile Picture</label>
+          <div className="avatar-upload-section">
+            {(avatarPreview || formData.avatarUrl) && (
+              <img
+                src={avatarPreview || formData.avatarUrl}
+                alt="Avatar preview"
+                className="avatar-preview"
+              />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="file-input"
+            />
+          </div>
+          <small>Max file size: 5MB. Supported formats: JPG, PNG, GIF</small>
         </div>
 
         <div className="form-group checkbox-group">

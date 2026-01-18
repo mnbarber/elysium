@@ -54,6 +54,7 @@ const friendRoutes = require('./routes/friendRoutes');
 const bookListRoutes = require('./routes/bookListRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const goalRoutes = require('./routes/goalRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 // Health check
 app.get('/', (req, res) => {
@@ -68,6 +69,7 @@ app.use('/api', friendRoutes);
 app.use('/api', bookListRoutes);
 app.use('/api', contactRoutes);
 app.use('/api', goalRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // ===== START SERVER =====
 app.listen(PORT, () => {

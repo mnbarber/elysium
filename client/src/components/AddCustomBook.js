@@ -16,6 +16,8 @@ function AddCustomBook() {
     publishYear: '',
     subjects: ''
   });
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,39 +29,55 @@ function AddCustomBook() {
     }));
   };
 
+  const handleCoverChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+
+      setCoverFile(file);
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    if (!formData.title.trim() || !formData.author.trim()) {
-      setError('Title and Author are required.');
-      return;
-    }
-
-    setLoading(true);
 
     try {
+      let coverUrl = '';
+
+      if (coverFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('image', coverFile);
+
+        const uploadResponse = await axios.post(
+          `${API_URL}/upload/book-cover`,
+          uploadFormData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        );
+
+        coverUrl = uploadResponse.data.imageUrl;
+      }
+
       const bookData = {
-        title: formData.title.trim(),
-        author: formData.author.trim(),
-        coverUrl: formData.coverUrl.trim() || null,
-        description: formData.description.trim() || null,
-        numberOfPages: formData.numberOfPages ? parseInt(formData.numberOfPages, 10) : null,
-        publishYear: formData.publishYear ? parseInt(formData.publishYear, 10) : null,
-        subjects: formData.subjects
-          .split(',')
-          .map(sub => sub.trim())
-          .filter(sub => sub.length > 0)
+        ...formData,
+        coverUrl,
+        numberOfPages: parseInt(formData.numberOfPages) || 0,
+        firstPublishYear: parseInt(formData.firstPublishYear) || null
       };
 
-      await axios.post(`${API_URL}/books/custom`, bookData);
-      alert('Custom book added successfully!');
-      navigate('/');
-    } catch (err) {
-      console.error('Error adding custom book:', err);
-      setError('Failed to add custom book. Please try again.');
-    } finally {
-      setLoading(false);
+      await axios.post(`${API_URL}/custom-books`, bookData);
+      alert('Book added successfully!');
+      navigate('/libraries');
+    } catch (error) {
+      console.error('Error adding book:', error);
+      alert('Error adding book');
     }
   };
 
@@ -103,15 +121,23 @@ function AddCustomBook() {
           </div>
 
           <div className="form-group">
-            <label>Cover Image URL</label>
-            <input
-              type="url"
-              name="coverUrl"
-              value={formData.coverUrl}
-              onChange={handleChange}
-              placeholder="https://example.com/cover.jpg"
-            />
-            <small>Optional: Link to a cover image</small>
+            <label>Book Cover</label>
+            <div className="cover-upload-section">
+              {coverPreview && (
+                <img
+                  src={coverPreview}
+                  alt="Cover preview"
+                  className="cover-preview"
+                />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverChange}
+                className="file-input"
+              />
+            </div>
+            <small>Max file size: 5MB</small>
           </div>
 
           <div className="form-group">

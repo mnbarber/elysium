@@ -117,3 +117,36 @@
   margin-bottom: 20px;
   text-align: center;
 }
+
+.avatar-upload-section,
+.cover-upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.avatar-preview {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #667eea;
+}
+
+.cover-preview {
+  width: 200px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.file-input {
+  padding: 10px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.file-input:hover {
+  border-color: #667eea;
+}

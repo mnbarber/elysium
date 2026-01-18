@@ -101,3 +101,93 @@
 .btn-submit:hover {
     background: #5568d3;
 }
+
+.cover-upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cover-preview-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.cover-preview {
+  max-width: 200px;
+  max-height: 300px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  object-fit: cover;
+}
+
+.file-input-wrapper {
+  position: relative;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.file-input-label {
+  display: block;
+  padding: 12px 20px;
+  background: #f8f9fa;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+  color: #667eea;
+}
+
+.file-input-label:hover {
+  border-color: #667eea;
+  background: #f0f2ff;
+}
+
+.file-input:focus + .file-input-label {
+  border-color: #667eea;
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .edit-book-container {
+    padding: 15px;
+  }
+
+  .edit-book-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .edit-book-form {
+    padding: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+  }
+
+  .cover-preview {
+    max-width: 150px;
+  }
+}
