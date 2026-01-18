@@ -150,3 +150,41 @@
 .file-input:hover {
   border-color: #667eea;
 }
+
+.file-upload-box {
+  width: 100%;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+  color: #667eea;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.file-upload-label:hover {
+  border-color: #667eea;
+  background: #f0f2ff;
+}
+
+.upload-icon {
+  font-size: 20px;
+}
+
+.upload-text {
+  font-size: 14px;
+}

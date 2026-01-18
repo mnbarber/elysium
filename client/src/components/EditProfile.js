@@ -143,12 +143,21 @@ function EditProfile() {
                 className="avatar-preview"
               />
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="file-input"
-            />
+            <div className="file-upload-box">
+              <input
+                type="file"
+                id="avatar-file-input"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden-file-input"
+              />
+              <label htmlFor="avatar-file-input" className="file-upload-label">
+                <span className="upload-icon">📁</span>
+                <span className="upload-text">
+                  {avatarFile ? `✓ ${avatarFile.name}` : 'Choose profile picture'}
+                </span>
+              </label>
+            </div>
           </div>
           <small>Max file size: 5MB. Supported formats: JPG, PNG, GIF</small>
         </div>
