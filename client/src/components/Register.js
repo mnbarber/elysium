@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import './Auth.css';
 
@@ -7,6 +8,7 @@ function Register({ onSwitchToLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -78,6 +80,24 @@ function Register({ onSwitchToLogin }) {
               required
             />
           </div>
+
+          <div className="checkbox-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                required
+              />
+              <span>
+                I agree to the{' '}
+                <Link to="/terms" target="_blank">Terms of Service</Link>
+                {' '}and{' '}
+                <Link to="/privacy" target="_blank">Privacy Policy</Link>
+              </span>
+            </label>
+          </div>
+
           <button type="submit" disabled={loading}>
             {loading ? 'Registering...' : 'Register'}
           </button>

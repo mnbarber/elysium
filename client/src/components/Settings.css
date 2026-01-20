@@ -1,0 +1,284 @@
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.settings-container h1 {
+    font-size: 32px;
+    color: #f7f5f5;
+    margin-bottom: 40px;
+}
+
+.settings-section {
+    background: rgb(134, 114, 204);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.settings-section h2 {
+    font-size: 20px;
+    color: #070707;
+    margin: 0 0 20px 0;
+    border-bottom: 2px solid #b0b8fc;
+    padding-bottom: 10px;
+}
+
+.settings-section h3 {
+    font-size: 16px;
+    color: #111111;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+}
+
+.settings-description {
+    color: #131313;
+    font-size: 14px;
+    margin: 0 0 20px 0;
+    line-height: 1.6;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #111111;
+    font-size: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.btn-save,
+.btn-danger,
+.btn-cancel,
+.btn-delete-confirm {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-save {
+    background: #5549c0;
+    color: white;
+}
+
+.btn-save:hover:not(:disabled) {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+.btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.privacy-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.toggle-info {
+    flex: 1;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    flex-shrink: 0;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked+.toggle-slider {
+    background-color: #667eea;
+}
+
+.toggle-switch input:checked+.toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.toggle-switch input:disabled+.toggle-slider {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.danger-zone {
+    border: 2px solid #852b2b;
+    background: rgb(134, 114, 204);
+}
+
+.danger-zone h2 {
+    color: #862828;
+    border-bottom-color: #ffcccc;
+}
+
+.danger-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.btn-danger {
+    background: rgb(116, 25, 25);
+    color: #f8f7f7;
+    border: 2px solid #d32f2f;
+    flex-shrink: 0;
+}
+
+.btn-danger:hover {
+    background: #d32f2f;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.delete-confirm {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    border: 2px solid #d32f2f;
+}
+
+.delete-warning {
+    font-weight: 600;
+    color: #d32f2f;
+    margin: 0 0 15px 0;
+}
+
+.delete-confirm ul {
+    margin: 0 0 20px 0;
+    padding-left: 25px;
+}
+
+.delete-confirm li {
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.delete-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.btn-delete-confirm {
+    background: #d32f2f;
+    color: white;
+    flex: 1;
+}
+
+.btn-delete-confirm:hover:not(:disabled) {
+    background: #b71c1c;
+}
+
+.btn-delete-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 18px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 20px 15px;
+    }
+
+    .settings-container h1 {
+        font-size: 24px;
+    }
+
+    .settings-section {
+        padding: 20px;
+    }
+
+    .privacy-toggle {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .toggle-switch {
+        align-self: flex-start;
+    }
+
+    .danger-content {
+        flex-direction: column;
+    }
+
+    .btn-danger {
+        width: 100%;
+    }
+
+    .delete-actions {
+        flex-direction: column;
+    }
+}

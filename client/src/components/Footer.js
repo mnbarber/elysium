@@ -36,10 +36,13 @@ function Footer() {
 
                 <div className="footer-section">
                     <h4>Support</h4>
-                    <ul>
-                        <Link to="/faq">FAQ</Link>
-                        <Link to="/contact">Contact Us</Link>
-                    </ul>
+                    <div className="footer-links">
+                        <Link to="/terms" className="footer-link">Terms of Service</Link>
+                        <span className="footer-separator">•</span>
+                        <Link to="/privacy" className="footer-link">Privacy Policy</Link>
+                        <span className="footer-separator">•</span>
+                        <Link to="/contact" className="footer-link">Contact</Link>
+                    </div>
                     <a href="https://www.paypal.com/paypalme/megameganx"
                             target="_blank"
                             rel="noopener noreferrer"

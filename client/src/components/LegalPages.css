@@ -1,0 +1,123 @@
+.legal-page-container {
+    min-height: 100vh;
+    background: rgb(44, 33, 83);
+    padding: 40px 20px;
+}
+
+.legal-content {
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgb(188, 171, 250);
+    padding: 60px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legal-content h1 {
+    font-size: 36px;
+    color: #141414;
+    margin: 0 0 10px 0;
+    border-bottom: 4px solid #667eea;
+    padding-bottom: 15px;
+}
+
+.last-updated {
+    color: #1a1919;
+    font-size: 14px;
+    font-style: italic;
+    margin: 0 0 40px 0;
+}
+
+.legal-content section {
+    margin-bottom: 40px;
+}
+
+.legal-content h2 {
+    font-size: 24px;
+    color: #131313;
+    margin: 30px 0 15px 0;
+    padding-top: 20px;
+}
+
+.legal-content h3 {
+    font-size: 18px;
+    color: #181818;
+    margin: 20px 0 10px 0;
+}
+
+.legal-content p {
+    line-height: 1.8;
+    color: #131212;
+    font-weight: bold;
+    margin: 0 0 15px 0;
+}
+
+.legal-content ul {
+    margin: 10px 0 20px 0;
+    padding-left: 30px;
+}
+
+.legal-content li {
+    line-height: 1.8;
+    color: #131313;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.legal-content a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.legal-content a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+.legal-content strong {
+    color: #141414;
+    font-weight: 600;
+}
+
+.back-link {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.back-link a {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.back-link a:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .legal-content {
+        padding: 30px 20px;
+    }
+
+    .legal-content h1 {
+        font-size: 28px;
+    }
+
+    .legal-content h2 {
+        font-size: 20px;
+    }
+
+    .legal-content h3 {
+        font-size: 16px;
+    }
+}

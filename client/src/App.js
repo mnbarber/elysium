@@ -23,6 +23,9 @@ import FAQ from './components/FAQ';
 import Contact from './components/Contact';
 import SearchBooks from './components/SearchBooks';
 import Libraries from './components/Libraries';
+import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import Settings from './components/Settings';
 import Home from './components/Home';
 
 function App() {
@@ -80,6 +83,9 @@ function App() {
           </nav>
           <div className="user-info">
             <span>Welcome, {user.username}!</span>
+            <div className="settings-icon" title="Settings">
+              <Link to={`/settings`}>⛯</Link>
+            </div>
             <button onClick={logout} className="logout-btn">Logout</button>
           </div>
         </header>
@@ -104,6 +110,9 @@ function App() {
           <Route path="/users" element={<UserSearch />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         <Footer />
