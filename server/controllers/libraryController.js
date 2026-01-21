@@ -1,5 +1,5 @@
 const Library = require('../models/library');
-const axios = require('axios');
+const openLibraryApi = require('../utils/openLibraryApi');
 const Activity = require('../models/activity');
 
 // helper function to create activity
@@ -21,7 +21,7 @@ const createActivity = async (userId, activityType, data) => {
 const searchBooks = async (req, res) => {
   try {
     const { q } = req.query;
-    const response = await axios.get(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}`);
+    const response = await openLibraryApi.get(`/search.json?q=${encodeURIComponent(q)}`);
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: 'Error searching books.' });
@@ -89,9 +89,7 @@ const getBookDetails = async (req, res) => {
       }
     }
 
-    const openLibraryUrl = `https://openlibrary.org${bookKey}.json`;
-
-    const response = await axios.get(openLibraryUrl);
+    const response = await openLibraryApi.get(`${bookKey}.json`);
     const bookData = response.data;
 
     let description = 'No description available.';
@@ -107,7 +105,7 @@ const getBookDetails = async (req, res) => {
     if (bookData.authors && bookData.authors.length > 0) {
       const authorPromises = bookData.authors.map(async (author) => {
         try {
-          const authorResponse = await axios.get(`https://openlibrary.org${author.author.key}.json`);
+          const authorResponse = await openLibraryApi.get(`${author.author.key}.json`);
           return authorResponse.data.name;
         } catch (err) {
           return 'Unknown Author';
@@ -152,7 +150,7 @@ const browseByGenre = async (req, res) => {
     const { limit = 40, offset = 0 } = req.query;
 
     const formattedGenre = genre.toLowerCase().replace(/\s+/g, '_');
-    const response = await axios.get(`https://openlibrary.org/subjects/${formattedGenre}.json?limit=${limit}&offset=${offset}`);
+    const response = await openLibraryApi.get(`/subjects/${formattedGenre}.json?limit=${limit}&offset=${offset}`);
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: 'Error browsing books by genre.' });
