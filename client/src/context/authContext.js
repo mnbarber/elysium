@@ -27,6 +27,23 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401 && error.response?.data?.error === 'Token expired') {
+          console.log('Token expired, logging out');
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, []);
+
   const fetchUser = async () => {
     try {
       const response = await axios.get(`${API_URL}/auth/me`);

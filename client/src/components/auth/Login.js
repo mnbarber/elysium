@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/authContext';
 import './Auth.css';
@@ -10,6 +10,12 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  useEffect(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    delete axios.defaults.headers.common['Authorization'];
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

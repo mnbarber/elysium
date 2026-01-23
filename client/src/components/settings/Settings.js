@@ -159,6 +159,16 @@ function Settings() {
         }
     };
 
+    const handleForceLogout = () => {
+        if (window.confirm('This will log you out and clear all local data. Continue?')) {
+            localStorage.clear();
+            sessionStorage.clear();
+            delete axios.defaults.headers.common['Authorization'];
+            logout();
+            window.location.href = '/login';
+        }
+    };
+
     if (loading) {
         return <div className="loading">Loading settings...</div>;
     }
@@ -273,6 +283,16 @@ function Settings() {
                         <span className="toggle-slider"></span>
                     </label>
                 </div>
+            </div>
+
+            <div className="settings-section">
+                <h2>Session Management</h2>
+                <p className="settings-description">
+                    If you're experiencing authentication issues, try clearing your session.
+                </p>
+                <button onClick={handleForceLogout} className="btn-danger">
+                    Clear Session & Logout
+                </button>
             </div>
 
             <div className="settings-section danger-zone">
