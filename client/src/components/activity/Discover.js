@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import SpoilerReview from './SpoilerReview';
+import SpoilerReview from '../books/SpoilerReview';
 import './Discover.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';

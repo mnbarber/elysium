@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import PageProgressModal from './PageProgressModal';
-import Goals from './Goals';
-import SpoilerReview from './SpoilerReview';
+import PageProgressModal from '../books/PageProgressModal';
+import Goals from '../profile/Goals';
+import SpoilerReview from '../books/SpoilerReview';
 import ActivityText from './ActivityText';
 import './Home.css';
 
@@ -197,7 +197,7 @@ function Home() {
                                             <Link to={`/book${book.key}`} className="book-title-link">
                                                 <h4>{book.title}</h4>
                                             </Link>
-                                            <p className="book-author">{book.author}</p>
+                                            <p className="home-book-author">{book.author}</p>
 
                                             {book.numberOfPages && book.numberOfPages > 0 && (
                                                 <div className="mini-progress">
@@ -268,7 +268,7 @@ function Home() {
                     <div className="activity-feed-section">
                         <h2>⏾ Recent Activity</h2>
                         {activityFeed.length > 0 && (
-                            <p className="activity-count">
+                            <p className="home-activity-count">
                                 Showing {indexOfFirstActivity + 1}-{Math.min(indexOfLastActivity, activityFeed.length)} of {activityFeed.length}
                             </p>
                         )}
@@ -277,19 +277,19 @@ function Home() {
                         ) : (
                             <div className="activity-feed">
                                 {currentActivities.map((activity) => (
-                                    <div key={activity._id} className="activity-item">
-                                        <div className="activity-content">
+                                    <div key={activity._id} className="home-activity-item">
+                                        <div className="home-activity-content">
                                             <div className="activity-header">
-                                                <div className="activity-text">
+                                                <div className="home-activity-text">
                                                     <ActivityText activity={activity} />
                                                 </div>
-                                                <span className="activity-time">
+                                                <span className="home-activity-time">
                                                     {formatTimeAgo(activity.createdAt)}
                                                 </span>
                                             </div>
 
                                             {activity.book?.coverUrl && (
-                                                <Link to={`/book${activity.book.key}`} className="activity-book-preview">
+                                                <Link to={`/book${activity.book.key}`} className="home-activity-book-preview">
                                                     <img
                                                         src={activity.book.coverUrl}
                                                         alt={activity.book.title}

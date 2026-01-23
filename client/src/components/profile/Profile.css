@@ -1,0 +1,593 @@
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.profile-header {
+  background: rgb(177, 150, 226);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.profile-header-top {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.profile-avatar {
+  flex-shrink: 0;
+}
+
+.profile-avatar img,
+.avatar-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #667eea;
+}
+
+.avatar-placeholder {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.profile-title-row>div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-info h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+.username {
+  color: #222222;
+  font-size: 16px;
+  margin: 0 0 15px 0;
+}
+
+.bio {
+  color: #131313;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-edit-profile,
+.btn-add-friend,
+.btn-accept-friend,
+.btn-pending,
+.btn-remove-friend,
+.btn-message {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-edit-profile,
+.btn-add-friend,
+.btn-accept-friend,
+.btn-message {
+  background: #5d55da;
+  color: white;
+}
+
+.btn-edit-profile:hover,
+.btn-add-friend:hover,
+.btn-accept-friend:hover,
+.btn-message:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+.btn-pending {
+  background: #9e9e9e;
+  color: white;
+  cursor: not-allowed;
+}
+
+.btn-remove-friend {
+  background: #ff4444;
+  color: white;
+}
+
+.btn-remove-friend:hover {
+  background: #cc0000;
+  transform: translateY(-2px);
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat {
+  background: rgb(177, 150, 226);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.stat:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111111;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.stat-label {
+  color: #1f1e1e;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.profile-tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.profile-tabs::-webkit-scrollbar-track {
+  background: #b1a1ec;
+  border-radius: 3px;
+}
+
+.profile-tabs::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+
+.profile-tabs::-webkit-scrollbar-thumb:hover {
+  background: #5568d3;
+}
+
+.profile-tabs button {
+  padding: 12px 24px;
+  border: 2px solid #b8a3eb;
+  background: rgb(184, 165, 236);
+  cursor: pointer;
+  border-radius: 25px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f0f0f;
+  transition: all 0.3s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.profile-tabs button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.profile-tabs button.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.profile-books {
+  background: rgb(177, 150, 226);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 25px;
+}
+
+.book-card-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.3s;
+}
+
+.book-card-mini:hover {
+  transform: translateY(-5px);
+}
+
+.book-card-mini img {
+  width: 85%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #f5f5f5;
+}
+
+.book-details {
+  flex: 1;
+}
+
+.book-title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.book-details h3 {
+  font-size: 15px;
+  margin: 0 0 6px 0;
+  color: #1a1a1a;
+  font-weight: 600;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.book-title-link:hover h3 {
+  color: #667eea;
+}
+
+.book-details p {
+  color: #111111;
+  font-size: 13px;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.book-rating-display {
+  margin-top: 8px;
+}
+
+.book-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.reread-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #667eea;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.profile-book-review {
+  margin-top: 10px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+}
+
+.profile-book-review .review-label {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #667eea;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.profile-book-review .review-text {
+  color: #333;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.empty-library {
+  text-align: center;
+  color: #999;
+  padding: 60px 20px;
+  font-size: 16px;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error-container {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.error-container h2 {
+  margin-bottom: 20px;
+  color: #d32f2f;
+}
+
+.error-container a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.profile-book-review .review-text.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.profile-book-review .review-text.expanded {
+  display: block;
+}
+
+.review-toggle-btn {
+  margin-top: 8px;
+  padding: 4px 12px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.review-toggle-btn:hover {
+  background: #5568d3;
+}
+
+.error-container a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+  .books-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+  }
+
+  .book-card-mini img {
+    height: 230px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 20px 15px;
+  }
+
+  .profile-header {
+    padding: 24px;
+  }
+
+  .profile-header-top {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    align-self: center;
+  }
+
+  .profile-avatar img,
+  .avatar-placeholder {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+  }
+
+  .profile-title-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-title-row>div:first-child {
+    width: 100%;
+  }
+
+  .profile-info h1 {
+    font-size: 24px;
+  }
+
+  .profile-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-edit-profile,
+  .btn-add-friend,
+  .btn-accept-friend,
+  .btn-pending,
+  .btn-remove-friend,
+  .btn-message {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+  }
+
+  .stat {
+    padding: 16px;
+  }
+
+  .stat-number {
+    font-size: 28px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .profile-books {
+    padding: 20px;
+  }
+
+  .books-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+  }
+
+  .book-card-mini img {
+    height: 200px;
+  }
+
+  .book-details h3 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 15px 10px;
+  }
+
+  .profile-header {
+    padding: 20px;
+  }
+
+  .profile-info h1 {
+    font-size: 20px;
+  }
+
+  .username {
+    font-size: 14px;
+  }
+
+  .bio {
+    font-size: 14px;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-number {
+    font-size: 24px;
+  }
+
+  .profile-tabs {
+    position: relative;
+    padding-right: 40px;
+  }
+
+  .profile-tabs::after {
+    content: '→';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 10px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to right, transparent, white 40%);
+    color: #667eea;
+    font-size: 20px;
+    font-weight: bold;
+    pointer-events: none;
+  }
+
+  .profile-tabs button {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+
+  .books-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .book-card-mini img {
+    height: 180px;
+  }
+
+  .book-details h3 {
+    font-size: 13px;
+  }
+
+  .book-details p {
+    font-size: 12px;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+  }
+
+  .btn-edit-profile,
+  .btn-add-friend,
+  .btn-accept-friend,
+  .btn-pending,
+  .btn-remove-friend,
+  .btn-message {
+    width: 100%;
+  }
+}

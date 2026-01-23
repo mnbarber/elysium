@@ -63,7 +63,7 @@
 
 .username-link,
 .book-link {
-  color: #030303;
+  color: #bca9f1;
   font-weight: 600;
   text-decoration: none;
   transition: color 0.3s;
@@ -87,10 +87,10 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #f8f9fa;
+  background: #b2a6e6;
   border-radius: 8px;
   text-decoration: none;
-  color: #333;
+  color: #141414;
   transition: all 0.3s;
   margin-top: 10px;
 }

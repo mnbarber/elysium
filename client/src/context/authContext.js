@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
+  const isAuthenticated = !!user;
 
   useEffect(() => {
     if (token) {
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.get(`${API_URL}/auth/me`);
       setUser(response.data);
+      localStorage.setItem('userId', response.data._id);
     } catch (error) {
       console.error('Error fetching user:', error);
       logout();
@@ -45,10 +47,10 @@ export const AuthProvider = ({ children }) => {
         email,
         password
       });
-
-      console.log('Registration response:', response.data)
+      console.log('Registration response:', response.data);
       const { token, user } = response.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('userId', user._id);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setToken(token);
       setUser(user);
@@ -66,6 +68,7 @@ export const AuthProvider = ({ children }) => {
       });
       const { token, user } = response.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('userId', user._id);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setToken(token);
       setUser(user);
@@ -77,13 +80,14 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userId');
     delete axios.defaults.headers.common['Authorization'];
     setToken(null);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

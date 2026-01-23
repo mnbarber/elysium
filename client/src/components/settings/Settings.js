@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../context/authContext';
+import { useAuth } from '../../context/authContext';
 import './Settings.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';

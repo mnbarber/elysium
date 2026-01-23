@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import StarRating from './StarRating';
 import ReviewModal from './ReviewModal';
-import CompletionDateModal from './CompletionDateModal';
+import CompletionDateModal from '../library/CompletionDateModal';
 import './BrowseByGenre.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';

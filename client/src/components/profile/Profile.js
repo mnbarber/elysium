@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
-import { useAuth } from '../context/authContext';
-import StarRating from './StarRating';
-import SpoilerReview from './SpoilerReview';
+import { useAuth } from '../../context/authContext';
+import StarRating from '../books/StarRating';
+import SpoilerReview from '../books/SpoilerReview';
 import Goals from './Goals';
 import './Profile.css';
 
@@ -18,6 +18,9 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('to-read');
+  const [expandedReviews, setExpandedReviews] = useState(new Set());
+
+  const isOwnProfile = user && user.username === username;
 
   useEffect(() => {
     fetchProfile();
@@ -87,7 +90,7 @@ function Profile() {
     try {
       const response = await axios.get(`${API_URL}/profile/${username}`);
       const friendUserId = response.data.profile.username;
-      
+
       await axios.delete(`${API_URL}/friends/${friendUserId}`);
       alert('Friend removed');
       fetchFriendshipStatus();
@@ -131,6 +134,18 @@ function Profile() {
     }
   };
 
+  const toggleReview = (bookKey) => {
+    setExpandedReviews(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(bookKey)) {
+        newSet.delete(bookKey);
+      } else {
+        newSet.add(bookKey);
+      }
+      return newSet;
+    });
+  };
+
   if (loading) {
     return <div className="loading">Loading profile...</div>;
   }
@@ -168,15 +183,25 @@ function Profile() {
               <h1>{profile.displayName}</h1>
               <p className="username">@{profile.username}</p>
             </div>
-            {user && user.username === username ? (
+            {isOwnProfile ? (
               <>
-              <Link to={`/profile/${user.username}/edit`} className="btn-edit-profile">
-                Edit Profile
-              </Link>
-              <Link to="/friends" className='btn-edit-profile'>Your Friends</Link>
+                <Link to={`/profile/${user.username}/edit`} className="btn-edit-profile">
+                  Edit Profile
+                </Link>
+                <Link to="/friends" className='btn-edit-profile'>Your Friends</Link>
               </>
             ) : (
-              renderFriendButton()
+              <>
+                {renderFriendButton()}
+                {profileData.profile.userId && (
+                  <Link
+                    to={`/messages/${profileData.profile.userId}`}
+                    className="btn-message"
+                  >
+                    💌
+                  </Link>
+                )}
+              </>
             )}
           </div>
           {profile.bio && <p className="bio">{profile.bio}</p>}
@@ -250,47 +275,57 @@ function Profile() {
             {libraries[activeTab].length === 0 ? (
               <p className="empty-library">No books in this library</p>
             ) : (
-                <div className="books-grid">
-                  {libraries[activeTab].map((book) => (
-                    <div key={book.key} className="book-card-mini">
-                      {book.coverUrl ? (
-                        <img src={book.coverUrl} alt={book.title} />
-                      ) : (
-                        <img src='https://i.imgur.com/GxzWr9n.jpeg' />
-                      )}
-                      <div className="book-details">
-                        <Link to={`/book/${book.key}`} className="book-title-link">
-                          <h3>{book.title}</h3>
-                        </Link>
-                        <p>{book.author}</p>
-                        {activeTab === 'read' && book.rating > 0 && (
-                          <div className="book-rating-display">
-                            <StarRating rating={book.rating} readonly size="small" />
-                          </div>
-                        )}
-                        <div className="book-title-row">
-                          {activeTab === 'currently-reading' && book.readCount > 0 && (
-                            <span className="reread-badge">
-                              {book.readCount === 1 ? 'Re-read' : `Re-read (${book.readCount}x)`}
-                            </span>
-                          )}
+              <div className="books-grid">
+                {libraries[activeTab].map((book) => (
+                  <div key={book.key} className="book-card-mini">
+                    {book.coverUrl ? (
+                      <img src={book.coverUrl} alt={book.title} />
+                    ) : (
+                      <img src='https://i.imgur.com/GxzWr9n.jpeg' alt={book.title} />
+                    )}
+                    <div className="book-details">
+                      <Link to={`/book/${book.key}`} className="book-title-link">
+                        <h3>{book.title}</h3>
+                      </Link>
+                      <p>{book.author}</p>
+                      {activeTab === 'read' && book.rating > 0 && (
+                        <div className="book-rating-display">
+                          <StarRating rating={book.rating} readonly size="small" />
                         </div>
-                        {book.review && (
-                          book.containsSpoilers ? (
-                            <SpoilerReview
-                              review={book.review}
-                              bookTitle={book.title}
-                            />
-                          ) : (
-                            <div className='profile-book-review'>
-                            <p className="review-text">{book.review}</p>
-                            </div>
-                          )
+                      )}
+                      <div className="book-title-row">
+                        {activeTab === 'currently-reading' && book.readCount > 0 && (
+                          <span className="reread-badge">
+                            {book.readCount === 1 ? 'Re-read' : `Re-read (${book.readCount}x)`}
+                          </span>
                         )}
                       </div>
+                      {book.review && (
+                        book.containsSpoilers ? (
+                          <SpoilerReview
+                            review={book.review}
+                            bookTitle={book.title}
+                          />
+                        ) : (
+                          <div className='profile-book-review'>
+                            <p className={`review-text ${expandedReviews.has(book.key) ? 'expanded' : 'collapsed'}`}>
+                              {book.review}
+                            </p>
+                            {book.review.length > 150 && (
+                              <button
+                                onClick={() => toggleReview(book.key)}
+                                className="review-toggle-btn"
+                              >
+                                {expandedReviews.has(book.key) ? 'Show Less' : 'Read More'}
+                              </button>
+                            )}
+                          </div>
+                        )
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </>

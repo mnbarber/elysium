@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './Libraries.css';
-import StarRating from './StarRating';
-import ReviewModal from './ReviewModal';
+import StarRating from '../books/StarRating';
+import ReviewModal from '../books/ReviewModal';
 import CompletionDateModal from './CompletionDateModal';
-import PageProgressModal from './PageProgressModal';
+import PageProgressModal from '../books/PageProgressModal';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 

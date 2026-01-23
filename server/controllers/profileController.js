@@ -81,38 +81,63 @@ const searchUsers = async (req, res) => {
 
 // get public profile by username
 const getPublicProfile = async (req, res) => {
-    console.log('=== getPublicProfile called for username:', req.params.username);
     try {
-        const user = await User.findOne({ username: req.params.username });
+        const { username } = req.params;
+
+        const user = await User.findOne({ username })
+            .select('username profile');
+
         if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
+            return res.status(404).json({ error: 'User not found' });
         }
 
-        if (!user.profile.isPublic) {
-            return res.status(403).json({ error: 'This profile is private.' });
+        const isPublic = user.profile?.isPublic !== false;
+        const currentUserId = req.userId;
+
+        if (!isPublic && currentUserId) {
+            const areFriends = await Friendship.exists({
+                $or: [
+                    { user1: currentUserId, user2: user._id, status: 'accepted' },
+                    { user1: user._id, user2: currentUserId, status: 'accepted' }
+                ]
+            });
+
+            if (!areFriends && currentUserId !== user._id.toString()) {
+                return res.status(403).json({ error: 'This profile is private' });
+            }
         }
-        
+
         const library = await Library.findOne({ userId: user._id });
 
+        const stats = {
+            toReadCount: library?.toRead?.length || 0,
+            currentlyReadingCount: library?.currentlyReading?.length || 0,
+            readCount: library?.read?.length || 0,
+            pausedCount: library?.paused?.length || 0,
+            dnfCount: library?.dnf?.length || 0
+        };
+
         res.json({
-            profile: user.getPublicProfile(),
-            stats: {
-                toReadCount: library?.toRead.length || 0,
-                currentlyReadingCount: library?.currentlyReading.length || 0,
-                readCount: library?.read.length || 0,
-                pausedCount: library?.paused.length || 0,
-                dnfCount: library?.dnf.length || 0
+            profile: {
+                username: user.username,
+                displayName: user.profile?.displayName || user.username,
+                bio: user.profile?.bio || '',
+                avatarUrl: user.profile?.avatarUrl || '',
+                isPublic: user.profile?.isPublic !== false,
+                userId: user._id
             },
-            libraries: user.profile.isPublic ? {
+            stats,
+            libraries: {
                 'to-read': library?.toRead || [],
                 'currently-reading': library?.currentlyReading || [],
                 'read': library?.read || [],
                 'paused': library?.paused || [],
                 'dnf': library?.dnf || []
-            } : null
+            }
         });
     } catch (error) {
-        res.status(500).json({ error: 'Server error fetching public profile.' });
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ error: 'Error fetching profile' });
     }
 };
 

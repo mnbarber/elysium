@@ -1,123 +1,74 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import './App.css';
-import { useAuth } from './context/authContext';
-import Login from './components/Login';
-import Register from './components/Register';
-import Profile from './components/Profile';
-import EditProfile from './components/EditProfile';
-import UserSearch from './components/UserSearch';
-import Friends from './components/Friends';
-import Discover from './components/Discover';
-import BrowseByGenre from './components/BrowseByGenre';
-import ReadingStats from './components/ReadingStats';
-import BookDetails from './components/BookDetails';
-import AddCustomBook from './components/AddCustomBook';
-import MyLists from './components/MyLists';
-import ListDetail from './components/ListDetail';
-import BrowseLists from './components/BrowseLists';
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
-import Footer from './components/Footer';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/authContext';
+import { SocketProvider } from './context/socketContext';
+import Navbar from './components/Navbar';
+import Home from './components/activity/Home';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import SearchBooks from './components/books/SearchBooks';
+import Libraries from './components/library/Libraries';
+import BookDetails from './components/books/BookDetails';
+import ReadingStats from './components/profile/ReadingStats';
+import Profile from './components/profile/Profile';
+import EditProfile from './components/profile/EditProfile';
+import AddCustomBook from './components/books/AddCustomBook';
+import Discover from './components/activity/Discover';
+import Settings from './components/settings/Settings';
+import ForgotPassword from './components/auth/ForgotPassword';
+import ResetPassword from './components/auth/ResetPassword';
+import BrowseByGenre from './components/books/BrowseByGenre';
+import BrowseLists from './components/books/BrowseLists';
+import ListDetail from './components/books/ListDetail';
+import UserSearch from './components/social/UserSearch';
+import Friends from './components/social/Friends';
 import FAQ from './components/FAQ';
 import Contact from './components/Contact';
-import SearchBooks from './components/SearchBooks';
-import Libraries from './components/Libraries';
-import TermsOfService from './components/TermsOfService';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import Settings from './components/Settings';
-import Home from './components/Home';
+import Footer from './components/Footer';
+import TermsOfService from './components/legal/TermsOfService';
+import PrivacyPolicy from './components/legal/PrivacyPolicy';
+import MessagesLayout from './components/messaging/MessagesLayout';
+import './App.css';
 
 function App() {
-  const { user, logout, loading: authLoading } = useAuth();
-  const [showRegister, setShowRegister] = useState(false);
-
-  if (authLoading) {
-    return <div className="loading-screen">Loading...</div>;
-  }
-
-  if (!user) {
-    return (
-      <Router>
-        <Routes>
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route
-            path="*"
-            element={
-              showRegister ? (
-                <Register
-                  onSwitchToLogin={() => setShowRegister(false)}
-                  setShowRegister={setShowRegister}
-                />
-              ) : (
-                <Login
-                  onSwitchToRegister={() => setShowRegister(true)}
-                  setShowRegister={setShowRegister}
-                />
-              )
-            }
-          />
-        </Routes>
-      </Router>
-    );
-  }
-
   return (
-    <Router>
-      <div className="App">
-        <header>
-          <Link to="/" className="logo">
-            <h1>elysium</h1>
-          </Link>
-          <nav className="header-nav">
-            <Link to="/search">Search</Link>
-            <Link to="/browse">Browse</Link>
-            <Link to="/lists/browse">Lists</Link>
-            <Link to="/discover">Discover</Link>
-            <Link to="/users">Find Users</Link>
-            <Link to="/libraries">My Libraries</Link>
-            <Link to={`/profile/${user.username}`}>Profile</Link>
-            <Link to="/lists">My Lists</Link>
-            <Link to="/stats">My Stats</Link>
-          </nav>
-          <div className="user-info">
-            <span>Welcome, {user.username}!</span>
-            <div className="settings-icon" title="Settings">
-              <Link to={`/settings`}>⛯</Link>
-            </div>
-            <button onClick={logout} className="logout-btn">Logout</button>
+    <AuthProvider>
+      <SocketProvider>
+        <Router>
+          <div className="App">
+            <Navbar />
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<SearchBooks />} />
+              <Route path="/browse" element={<BrowseByGenre />} />
+              <Route path="/book/*" element={<BookDetails />} />
+              <Route path="/add-book" element={<AddCustomBook />} />
+              <Route path="/lists/browse" element={<BrowseLists />} />
+              <Route path="/lists/:listId" element={<ListDetail />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/friends" element={<Friends />} />
+              <Route path="/libraries" element={<Libraries />} />
+              <Route path="/profile/:username" element={<Profile />} />
+              <Route path="/profile/:username/edit" element={<EditProfile />} />
+              <Route path="/stats" element={<ReadingStats />} />
+              <Route path="/users" element={<UserSearch />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/messages" element={<MessagesLayout />} />
+              <Route path="/messages/:userId" element={<MessagesLayout />} />
+            </Routes>
+            <Footer />
           </div>
-        </header>
-
-        <Routes>
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/search" element={<SearchBooks />} />
-          <Route path="/browse" element={<BrowseByGenre />} />
-          <Route path="/book/*" element={<BookDetails />} />
-          <Route path="/add-book" element={<AddCustomBook />} />
-          <Route path="/lists" element={<MyLists />} />
-          <Route path="/lists/browse" element={<BrowseLists />} />
-          <Route path="/lists/:listId" element={<ListDetail />} />
-          <Route path="/discover" element={<Discover />} />
-          <Route path="/friends" element={<Friends />} />
-          <Route path="/libraries" element={<Libraries />} />
-          <Route path="/profile/:username" element={<Profile />} />
-          <Route path="/profile/:username/edit" element={<EditProfile />} />
-          <Route path="/stats" element={<ReadingStats />} />
-          <Route path="/users" element={<UserSearch />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/terms" element={<TermsOfService />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-        <Footer />
-      </div>
-    </Router>
+        </Router>
+      </SocketProvider>
+    </AuthProvider>
   );
 }
 
