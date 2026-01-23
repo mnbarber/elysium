@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useSocket } from '../../context/socketContext';
 import ConversationsList from './ConversationsList';
 import ChatWindow from './ChatWindow';
+import NewMessageModal from './NewMessageModal';
 import './MessagesLayout.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -16,6 +17,7 @@ function MessagesLayout() {
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showNewMessageModal, setShowNewMessageModal] = useState(false);
 
     useEffect(() => {
         fetchConversations();
@@ -85,6 +87,7 @@ function MessagesLayout() {
                 conversations={conversations}
                 selectedConversation={selectedConversation}
                 onSelectConversation={handleSelectConversation}
+                onNewMessage={() => setShowNewMessageModal(true)}
                 loading={loading}
             />
 
@@ -92,6 +95,10 @@ function MessagesLayout() {
                 conversation={selectedConversation}
                 onMessageSent={fetchConversations}
             />
+
+            {showNewMessageModal && (
+                <NewMessageModal onClose={() => setShowNewMessageModal(false)} />
+            )}
         </div>
     );
 }

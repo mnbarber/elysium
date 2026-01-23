@@ -54,8 +54,13 @@ function ChatWindow({ conversation, onMessageSent }) {
     }, [socket, conversation]);
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        if (messages.length > 0 && !loading) {
+            const timer = setTimeout(() => {
+                scrollToBottom();
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [messages.length]);
 
     const fetchMessages = async () => {
         try {
@@ -147,7 +152,13 @@ function ChatWindow({ conversation, onMessageSent }) {
     };
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'end',
+                inline: 'nearest'
+            });
+        }
     };
 
     const formatTime = (date) => {

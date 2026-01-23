@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './SearchBooks.css';
@@ -7,9 +8,18 @@ import StarRating from './StarRating';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 function SearchBooks() {
+    const [searchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const urlQuery = searchParams.get('q');
+        if (urlQuery) {
+            setSearchQuery(urlQuery);
+            searchBooks(urlQuery);
+        }
+    }, [searchParams]);
 
     const searchBooks = async (e) => {
         e.preventDefault();

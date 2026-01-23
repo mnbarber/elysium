@@ -17,6 +17,9 @@
 .conversations-header {
     padding: 20px;
     border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .conversations-header h2 {
@@ -445,4 +448,61 @@
     .message-bubble {
         max-width: 80%;
     }
+}
+
+.btn-new-message {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #667eea;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-new-message:hover {
+    background: #5568d3;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-start-conversation {
+    margin-top: 16px;
+    padding: 12px 24px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-start-conversation:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+.conversations-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.conversations-empty p {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.empty-subtitle {
+    font-size: 14px;
+    color: #999;
+    margin-top: 8px;
 }

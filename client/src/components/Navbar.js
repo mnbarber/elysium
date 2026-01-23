@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import axios from 'axios';
+import UnifiedSearch from './UnifiedSearch';
 import './Navbar.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -49,6 +50,12 @@ function Navbar() {
                 ☾⋆｡ elysium
             </Link>
 
+            {isAuthenticated && (
+                <div className="navbar-search-wrapper">
+                    <UnifiedSearch />
+                </div>
+            )}
+
             {isAuthenticated ? (
                 <>
                     <button
@@ -60,13 +67,13 @@ function Navbar() {
                     </button>
 
                     <div className={`navbar-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-                        <Link to="/search" onClick={closeMobileMenu}>Search</Link>
+                        <Link to="/search" onClick={closeMobileMenu}>Search Books</Link>
                         <Link to="/browse" onClick={closeMobileMenu}>Browse</Link>
                         <Link to="/lists/browse" onClick={closeMobileMenu}>Lists</Link>
                         <Link to="/discover" onClick={closeMobileMenu}>Discover</Link>
-                        <Link to="/users" onClick={closeMobileMenu}>Find Users</Link>
                         <Link to="/libraries" onClick={closeMobileMenu}>Libraries</Link>
                         <Link to={`/profile/${user.username}`} onClick={closeMobileMenu}>Profile</Link>
+                        <Link to="/friends" onClick={closeMobileMenu}>Friends</Link>
                         <Link to="/stats" onClick={closeMobileMenu}>Stats</Link>
                         <Link to="/messages" className="messages-link" onClick={closeMobileMenu}>
                             Chat

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSocket } from '../../context/socketContext';
 
-function ConversationsList({ conversations, selectedConversation, onSelectConversation, loading }) {
+function ConversationsList({ conversations, selectedConversation, onSelectConversation, onNewMessage, loading }) {
     const { onlineUsers } = useSocket();
 
     const formatTime = (date) => {
@@ -27,6 +27,9 @@ function ConversationsList({ conversations, selectedConversation, onSelectConver
             <div className="conversations-sidebar">
                 <div className="conversations-header">
                     <h2>Messages</h2>
+                    <button className="btn-new-message" onClick={onNewMessage}>
+                        ✚
+                    </button>
                 </div>
                 <div className="conversations-loading">Loading...</div>
             </div>
@@ -37,12 +40,17 @@ function ConversationsList({ conversations, selectedConversation, onSelectConver
         <div className="conversations-sidebar">
             <div className="conversations-header">
                 <h2>Messages</h2>
+                <button className="btn-new-message" onClick={onNewMessage} title="New message">
+                    ✚
+                </button>
             </div>
 
             {conversations.length === 0 ? (
                 <div className="conversations-empty">
                     <p>No conversations yet</p>
-                    <p className="empty-subtitle">Visit a friend's profile to start chatting!</p>
+                    <button onClick={onNewMessage} className="btn-start-conversation">
+                        Start a conversation
+                    </button>
                 </div>
             ) : (
                 <div className="conversations-list">

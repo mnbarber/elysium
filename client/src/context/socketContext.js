@@ -17,17 +17,25 @@ export const SocketProvider = ({ children }) => {
         const token = localStorage.getItem('token');
 
         if (!token) {
+            console.log('No token, skipping socket connection');
             return;
         }
+
+        console.log('Connecting to socket at:', API_URL);
 
         const newSocket = io(API_URL, {
             auth: {
                 token
-            }
+            },
+            transports: ['websocket', 'polling'],
+            reconnectionDelay: 1000,
+            reconnection: true,
+            reconnectionAttempts: 10,
+            timeout: 10000
         });
 
         newSocket.on('connect', () => {
-            console.log('Socket connected');
+            console.log('✅ Socket connected successfully');
         });
 
         newSocket.on('user-online', (userId) => {
@@ -43,12 +51,17 @@ export const SocketProvider = ({ children }) => {
         });
 
         newSocket.on('connect_error', (error) => {
-            console.error('Socket connection error:', error);
+            console.error('Socket connection error:', error.message);
+        });
+
+        newSocket.on('disconnect', (reason) => {
+            console.log('Socket disconnected:', reason);
         });
 
         setSocket(newSocket);
 
         return () => {
+            console.log('Cleaning up socket connection');
             newSocket.close();
         };
     }, []);
