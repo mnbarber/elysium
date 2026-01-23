@@ -72,7 +72,7 @@ function AddCustomBook() {
         firstPublishYear: parseInt(formData.firstPublishYear) || null
       };
 
-      await axios.post(`${API_URL}/custom-books`, bookData);
+      await axios.post(`${API_URL}/books/custom`, bookData);
       alert('Book added successfully!');
       navigate('/libraries');
     } catch (error) {
