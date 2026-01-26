@@ -100,10 +100,12 @@ function SearchBooks() {
                 </button>
             </form>
 
-            <div className="cant-find-book">
-                <Link to="/add-book" className="add-book-link">
-                    Can't find your book? Add it yourself here →
-                </Link>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
+                <div className="cant-find-book">
+                    <Link to="/add-book" className="add-book-link">
+                        Can't find your book? Add it yourself here →
+                    </Link>
+                </div>
             </div>
 
             {loading && <div className="loading">Searching...</div>}
