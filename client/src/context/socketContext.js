@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { useAuth } from './authContext';
 
 const SocketContext = createContext();
 
@@ -10,14 +11,19 @@ export const useSocket = () => {
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
 export const SocketProvider = ({ children }) => {
+    const { user, loading: authLoading } = useAuth();
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState(new Set());
 
     useEffect(() => {
+        if (authLoading) {
+            return;
+        }
+
         const token = localStorage.getItem('token');
 
-        if (!token) {
-            console.log('No token, skipping socket connection');
+        if (!token || !user) {
+            console.log('No token or user, skipping socket connection');
             return;
         }
 

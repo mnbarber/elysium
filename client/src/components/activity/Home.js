@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../../context/authContext';
 import PageProgressModal from '../books/PageProgressModal';
 import Goals from '../profile/Goals';
 import SpoilerReview from '../books/SpoilerReview';
@@ -10,7 +11,8 @@ import './Home.css';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 function Home() {
-    const [user, setUser] = useState(null);
+    const { user, loading: authLoading } = useAuth();
+    const [error, setError] = useState('');
     const [currentlyReading, setCurrentlyReading] = useState([]);
     const [activityFeed, setActivityFeed] = useState([]);
     const [goals, setGoals] = useState([]);
@@ -21,15 +23,17 @@ function Home() {
     const activitiesPerPage = 20;
 
     useEffect(() => {
-        fetchHomeData();
-    }, []);
+        if (!authLoading && user) {
+            fetchHomeData();
+        } else if (!authLoading && !user) {
+            setLoading(false);
+            setError('Please log in to view your home page');
+        }
+    }, [authLoading, user]);
 
     const fetchHomeData = async () => {
         try {
             setLoading(true);
-
-            const userResponse = await axios.get(`${API_URL}/auth/me`);
-            setUser(userResponse.data);
 
             const librariesResponse = await axios.get(`${API_URL}/libraries`);
             setCurrentlyReading(librariesResponse.data['currently-reading'] || []);
@@ -140,7 +144,6 @@ function Home() {
     const nextPage = () => {
         if (currentPage < totalPages) {
             setCurrentPage(currentPage + 1);
-            // Scroll to top of activity feed
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
@@ -169,8 +172,41 @@ function Home() {
         return activityDate.toLocaleDateString();
     };
 
-    if (loading) {
+    if (authLoading) {
         return <div className="loading">Loading...</div>;
+    }
+
+    if (!user) {
+        return (
+            <div className="home-container">
+                <div className="error-container">
+                    <h2>Not Authenticated</h2>
+                    <p>Please <Link to="/login">log in</Link> to view your home page.</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="home-container">
+                <div className="loading">Loading your reading activity...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="home-container">
+                <div className="error-container">
+                    <h2>Error</h2>
+                    <p>{error}</p>
+                    <button onClick={fetchHomeData} className="btn-retry">
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
     }
 
     return (

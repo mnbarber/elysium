@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/authContext';
+import { AuthProvider, useAuth } from './context/authContext';
 import { SocketProvider } from './context/socketContext';
 import Navbar from './components/Navbar';
 import Home from './components/activity/Home';
@@ -30,11 +30,14 @@ import PrivacyPolicy from './components/legal/PrivacyPolicy';
 import MessagesLayout from './components/messaging/MessagesLayout';
 import './App.css';
 
-function App() {
+function AppContent() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <div className="loading">Loading Elysium...</div>;
+  }
+
   return (
-    <AuthProvider>
-      <SocketProvider>
-        <Router>
           <div className="App">
             <Navbar />
             <Routes>
@@ -66,8 +69,17 @@ function App() {
             </Routes>
             <Footer />
           </div>
-        </Router>
-      </SocketProvider>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <SocketProvider>
+          <AppContent />
+        </SocketProvider>
+      </Router>
     </AuthProvider>
   );
 }

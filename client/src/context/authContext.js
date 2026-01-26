@@ -19,10 +19,12 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = !!user;
 
   useEffect(() => {
+    console.log('AuthContext initializing, token exists:', !!token);
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchUser();
     } else {
+      console.log('No token found, setting loading to false');
       setLoading(false);
     }
   }, [token]);
@@ -45,13 +47,19 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const fetchUser = async () => {
+    console.log('Fetching user data with token');
     try {
       const response = await axios.get(`${API_URL}/auth/me`);
+      console.log('User data received:', response.data);
       setUser(response.data);
       localStorage.setItem('userId', response.data._id);
     } catch (error) {
-      console.error('Error fetching user:', error);
-      logout();
+      console.error('Error fetching user:', error.response?.status, error.response?.data);
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      delete axios.defaults.headers.common['Authorization'];
+      setToken(null);
+      setUser(null);
     } finally {
       setLoading(false);
     }
