@@ -6,6 +6,7 @@ import PageProgressModal from '../books/PageProgressModal';
 import Goals from '../profile/Goals';
 import SpoilerReview from '../books/SpoilerReview';
 import ActivityText from './ActivityText';
+import RandomQuote from './RandomQuote';
 import './Home.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -298,6 +299,7 @@ function Home() {
                 <main className="home-main">
                     <div className="welcome-header">
                         <h1>Welcome back, {user?.username}!</h1>
+                        <RandomQuote />
                         <p className="welcome-subtitle">See what your friends are reading!</p>
                     </div>
 

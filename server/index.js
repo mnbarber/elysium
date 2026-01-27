@@ -66,6 +66,7 @@ const contactRoutes = require('./routes/contactRoutes');
 const goalRoutes = require('./routes/goalRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const quoteRoutes = require('./routes/quoteRoutes');
 
 // Health check
 app.get('/', (req, res) => {
@@ -82,6 +83,7 @@ app.use('/api', contactRoutes);
 app.use('/api', goalRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/quotes', quoteRoutes);
 
 const jwt = require('jsonwebtoken');
 

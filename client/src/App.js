@@ -28,6 +28,8 @@ import Footer from './components/Footer';
 import TermsOfService from './components/legal/TermsOfService';
 import PrivacyPolicy from './components/legal/PrivacyPolicy';
 import MessagesLayout from './components/messaging/MessagesLayout';
+import SubmitQuote from './components/activity/SubmitQuote';
+import AdminQuotes from './components/activity/AdminQuotes';
 import './App.css';
 
 function AppContent() {
@@ -64,6 +66,8 @@ function AppContent() {
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/submit-quote" element={<SubmitQuote />} />
+              <Route path="/admin/quotes" element={<AdminQuotes />} />
               <Route path="/messages" element={<MessagesLayout />} />
               <Route path="/messages/:userId" element={<MessagesLayout />} />
             </Routes>

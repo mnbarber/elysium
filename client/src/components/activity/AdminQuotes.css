@@ -1,0 +1,134 @@
+.admin-quotes-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.admin-quotes-container h1 {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.no-pending {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+.quotes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.quote-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #667eea;
+}
+
+.quote-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.submitted-by {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.submitted-date {
+  font-size: 13px;
+  color: #999;
+}
+
+.quote-text {
+  margin: 15px 0;
+  font-size: 16px;
+  line-height: 1.6;
+  font-style: italic;
+  color: #333;
+}
+
+.quote-details {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.quote-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.quote-actions button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-approve {
+    background: #d4edda;
+    color: #155724;
+}
+
+.btn-approve:hover {
+    background: #c3e6cb;
+    transform: translateY(-2px);
+}
+
+.btn-reject {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.btn-reject:hover {
+    background: #f5c6cb;
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-delete:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .admin-quotes-container {
+        padding: 20px 15px;
+    }
+
+    .admin-quotes-container h1 {
+        font-size: 24px;
+    }
+
+    .quote-card {
+        padding: 20px;
+    }
+
+    .quote-actions {
+        flex-direction: column;
+    }
+
+    .quote-actions button {
+        width: 100%;
+    }
+}

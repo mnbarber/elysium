@@ -1,0 +1,74 @@
+.random-quote {
+    background: rgb(156, 162, 252);
+    color: rgb(8, 8, 8);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.random-quote::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.quote-text {
+    font-size: 18px;
+    line-height: 1;
+    font-weight: bold;
+    font-style: normal;
+    position: relative;
+    z-index: 1;
+}
+
+.quote-attribution {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    opacity: 0.95;
+    position: relative;
+    z-index: 1;
+}
+
+.quote-book {
+    font-weight: 600;
+}
+
+.quote-author {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.quote-actions {
+    margin-top: 15px;
+    float: inline-end;
+    text-decoration: none;
+}
+
+.random-quote.loading {
+    text-align: center;
+    padding: 20px;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .random-quote {
+        padding: 20px;
+    }
+
+    .quote-text {
+        font-size: 16px;
+    }
+
+    .quote-icon {
+        font-size: 24px;
+    }
+}

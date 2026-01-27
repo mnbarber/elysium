@@ -1,0 +1,272 @@
+.submit-quote-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.submit-quote-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.submit-quote-header h1 {
+    font-size: 32px;
+    color: #fcfbfb;
+    margin: 0 0 10px 0;
+}
+
+.subtitle {
+    color: #e4e3e3;
+    font-size: 18px;
+    margin: 0;
+}
+
+.success-message,
+.error-message {
+    max-width: 800px;
+    margin: 0 auto 30px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.submit-quote-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.quote-form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.quote-form {
+    background: rgb(190, 171, 241);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #0f0f0f;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.char-count {
+    position: absolute;
+    bottom: -20px;
+    right: 0;
+    font-size: 12px;
+    color: #999;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: #7a66ea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+.btn-submit:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.quote-guidelines {
+    background: rgb(190, 171, 241);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.quote-guidelines h3 {
+    margin: 0 0 15px 0;
+    color: #0e0d0d;
+    font-size: 18px;
+}
+
+.quote-guidelines ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.quote-guidelines li {
+    margin-bottom: 10px;
+    color: #0f0f0f;
+    line-height: 1.5;
+}
+
+.my-submissions-section {
+    background: rgb(190, 171, 241);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.my-submissions-section h2 {
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    color: #0e0d0d;
+}
+
+.no-submissions {
+    text-align: center;
+    padding: 40px 20px;
+    color: #272727;
+}
+
+.submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.submission-item {
+    padding: 20px;
+    background: #b9bdf8;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.submission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.submission-date {
+    font-size: 12px;
+    color: #2b2a2a;
+}
+
+.submission-item blockquote {
+    margin: 0 0 10px 0;
+    font-style: italic;
+    color: #141414;
+    line-height: 1.6;
+}
+
+.submission-attribution {
+    font-size: 14px;
+    color: #1a1919;
+}
+
+.back-link {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.back-link a {
+    color: #f8f9fa;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.back-link a:hover {
+    color: #5568d3;
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .submit-quote-container {
+        padding: 20px 15px;
+    }
+
+    .submit-quote-header h1 {
+        font-size: 24px;
+    }
+
+    .submit-quote-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .quote-form,
+    .my-submissions-section {
+        padding: 20px;
+    }
+
+    .quote-guidelines {
+        padding: 20px;
+    }
+}
