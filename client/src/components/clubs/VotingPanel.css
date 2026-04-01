@@ -1,0 +1,445 @@
+.voting-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    background: rgb(177, 150, 226);
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.voting-panel h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 10px 0;
+}
+
+.voting-panel__subheading {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 16px 0;
+}
+
+.voting-panel__month {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #5d55da;
+    background: rgb(184, 165, 236);
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.nominations {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.voting-panel__empty {
+    text-align: center;
+    padding: 36px 20px;
+    background: rgb(184, 165, 236);
+    border-radius: 12px;
+    color: #222222;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.voting-panel__empty svg {
+    opacity: 0.4;
+    color: #5d55da;
+}
+
+.nomination-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgb(184, 165, 236);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.nomination-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.2);
+}
+
+.nomination-card--leading {
+    border: 2px solid #667eea;
+}
+
+.nomination-card__cover {
+    width: 56px;
+    height: 80px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #b8a3eb, #9b7fc7);
+}
+
+.nomination-card__cover-placeholder {
+    width: 56px;
+    height: 80px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 24px;
+    color: #fff;
+    font-weight: 700;
+    opacity: 0.7;
+}
+
+.nomination-card__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.nomination-card__title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 3px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nomination-card__author {
+    font-size: 13px;
+    color: #222222;
+    margin: 0 0 6px 0;
+}
+
+.nomination-card__nominated-by {
+    font-size: 12px;
+    color: #131313;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nomination-card__nominated-by img,
+.nomination-card__nominated-by-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.nomination-card__nominated-by-avatar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nomination-card__vote-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 16px;
+    border: 2px solid #b8a3eb;
+    border-radius: 10px;
+    background: rgb(177, 150, 226);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    transition: all 0.3s;
+    flex-shrink: 0;
+    min-width: 60px;
+}
+
+.nomination-card__vote-btn:hover:not(:disabled) {
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-2px);
+}
+
+.nomination-card__vote-btn--voted {
+    background: #667eea;
+    border-color: #667eea;
+    color: #fff;
+}
+
+.nomination-card__vote-btn--voted:hover:not(:disabled) {
+    background: #5568d3;
+    border-color: #5568d3;
+    color: #fff;
+}
+
+.nomination-card__vote-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.nomination-card__vote-count {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.nomination-card__vote-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+}
+
+.voting-panel__nominate {
+    background: rgb(184, 165, 236);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.voting-panel__search-row {
+    display: flex;
+    gap: 10px;
+}
+
+.voting-panel__search-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #b8a3eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1a1a1a;
+    background: rgb(177, 150, 226);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.voting-panel__search-input::placeholder {
+    color: #555;
+}
+
+.voting-panel__search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.voting-panel__search-btn {
+    padding: 10px 22px;
+    background: #5d55da;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.3s, transform 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.voting-panel__search-btn:hover:not(:disabled) {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+.voting-panel__search-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.voting-panel__results {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.voting-panel__result {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgb(177, 150, 226);
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.voting-panel__result:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.18);
+}
+
+.voting-panel__result-cover {
+    width: 40px;
+    height: 56px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #b8a3eb, #9b7fc7);
+}
+
+.voting-panel__result-cover-placeholder {
+    width: 40px;
+    height: 56px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    opacity: 0.65;
+}
+
+.voting-panel__result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.voting-panel__result-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.voting-panel__result-author {
+    font-size: 12px;
+    color: #222222;
+    margin: 0 0 2px 0;
+}
+
+.voting-panel__result-year {
+    font-size: 11px;
+    color: #131313;
+    margin: 0;
+}
+
+.voting-panel__nominate-btn {
+    padding: 8px 16px;
+    background: #5d55da;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.voting-panel__nominate-btn:hover:not(:disabled) {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+.voting-panel__nominate-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.voting-panel__error {
+    background: #fdecea;
+    border: 1px solid #f5c6c2;
+    color: #cc0000;
+    font-size: 13px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.voting-panel__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 50px 20px;
+    font-size: 15px;
+    color: #5d55da;
+}
+
+.voting-spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgb(184, 165, 236);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: vs-spin 0.65s linear infinite;
+}
+
+@keyframes vs-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.voting-panel__closed {
+    text-align: center;
+    padding: 30px 20px;
+    background: rgb(184, 165, 236);
+    border-radius: 12px;
+    font-size: 14px;
+    color: #222222;
+    font-weight: 600;
+}
+
+.voting-panel__winner {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+@media (max-width: 600px) {
+    .voting-panel__nominate {
+        padding: 18px;
+    }
+
+    .voting-panel__search-row {
+        flex-direction: column;
+    }
+
+    .nomination-card {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .nomination-card__vote-btn {
+        flex-direction: row;
+        gap: 6px;
+        width: 100%;
+        justify-content: center;
+    }
+}
