@@ -126,7 +126,6 @@ export default function BookClubPage() {
                         </span>
                     </div>
 
-                    {/* Owner actions */}
                     {isOwner && (
                         <div className="book-club-page__actions">
                             <button className="book-club-page__btn book-club-page__btn--secondary" onClick={openEdit}>
@@ -140,20 +139,18 @@ export default function BookClubPage() {
                 </div>
             </div>
 
-            {/* Tabs */}
-            <nav className="book-club-page__tabs">
+            <nav className="club-tabs">
                 {['discussion', 'voting', 'members'].map(t => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
-                        className={`book-club-page__tab ${tab === t ? 'book-club-page__tab--active' : ''}`}
+                        className={`club-tabs ${tab === t ? 'club-tabs--active' : ''}`}
                     >
                         {t.charAt(0).toUpperCase() + t.slice(1)}
                     </button>
                 ))}
             </nav>
 
-            {/* Tab panels */}
             <div className="book-club-page__panel">
                 {tab === 'discussion' && <DiscussionBoard clubId={id} />}
                 {tab === 'voting'     && <VotingPanel clubId={id} />}
@@ -182,7 +179,6 @@ export default function BookClubPage() {
                 )}
             </div>
 
-            {/* ── Edit Modal ────────────────────────────────────────────────── */}
             {editOpen && (
                 <div className="club-modal-overlay" onClick={() => setEditOpen(false)}>
                     <div className="club-modal" onClick={e => e.stopPropagation()}>
@@ -258,7 +254,6 @@ export default function BookClubPage() {
                 </div>
             )}
 
-            {/* ── Delete Confirm Modal ──────────────────────────────────────── */}
             {deleteConfirmOpen && (
                 <div className="club-modal-overlay" onClick={() => setDeleteConfirmOpen(false)}>
                     <div className="club-modal club-modal--narrow" onClick={e => e.stopPropagation()}>
