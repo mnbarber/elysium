@@ -57,11 +57,9 @@ function EditBookModal({ book, onClose, onSubmit }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        let coverUrl = formData.coverUrl;
 
         try {
-            let coverUrl = formData.coverUrl;
-
-            // Upload new cover if selected
             if (coverFile) {
                 const uploadFormData = new FormData();
                 uploadFormData.append('image', coverFile);
@@ -86,6 +84,7 @@ function EditBookModal({ book, onClose, onSubmit }) {
 
         const updatedData = {
             ...formData,
+            coverUrl,
             numberOfPages: formData.numberOfPages ? parseInt(formData.numberOfPages) : null,
             firstPublishYear: formData.firstPublishYear ? parseInt(formData.firstPublishYear) : null
         };
