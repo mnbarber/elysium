@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { uploadProfilePicture, uploadBookCover } = require('../utils/s3Upload');
+const { uploadProfilePicture, uploadBookCover, uploadClubCover } = require('../utils/s3Upload');
 
 router.post('/profile-picture', auth, uploadProfilePicture.single('image'), (req, res) => {
     try {
@@ -34,5 +34,22 @@ router.post('/book-cover', auth, uploadBookCover.single('image'), (req, res) => 
         res.status(500).json({ error: 'Error uploading image' });
     }
 });
+
+router.post('/club-cover', auth, uploadClubCover.single('image'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        res.json({
+            message: 'Club cover uploaded successfully',
+            imageUrl: req.file.location
+        });
+        console.log('Club cover uploaded:', req.file.location);
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ error: 'Error uploading image' });
+    }
+});
+
 
 module.exports = router;

@@ -8,11 +8,7 @@ const nominationSchema = new mongoose.Schema({
         cover: String,
         year: String,
     },
-    nominatedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    votes: [{
+    nominatedBy: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
@@ -29,14 +25,16 @@ const voteSessionSchema = new mongoose.Schema({
         required: true
     },
     nominations: [nominationSchema],
-    isOpen: {
-        type: Boolean,
-        default: true
+    status: {
+        type: String,
+        enum: ['open', 'closed', 'winner_selected'],
+        default: 'open'
     },
     winner: {
         openLibraryId: String,
         title: String,
         author: String,
+        cover: String,
     },
 }, { timestamps: true });
 

@@ -5,6 +5,8 @@ const VoteSession = require('../models/vote');
 const ClubPost = require('../models/clubPost');
 const auth = require('../middleware/auth');
 
+const NOMINATION_LIMIT = 3;
+
 // GET /api/bookclubs — all public clubs, sorted by lastActivity
 router.get('/', async (req, res) => {
     try {
@@ -34,9 +36,6 @@ router.post('/', auth, async (req, res) => {
             owner: req.userId,
             members: [req.userId],
         });
-
-        console.log(`Created book club: ${club.name} (ID: ${club._id}) by user ${req.userId}`);
-
         const populated = await club.populate('owner', 'username displayName avatar');
         res.status(201).json(populated);
     } catch (err) {
@@ -52,10 +51,14 @@ router.get('/:id', auth, async (req, res) => {
             .populate('owner', 'username displayName avatar');
         if (!club) return res.status(404).json({ error: 'Club not found' });
         const isMember = club.members.some(m => m._id.toString() === req.userId);
+        const isOwner = club.owner._id.toString() === req.userId;
         if (club.isPrivate && !isMember) {
             return res.status(403).json({ error: 'This club is private.' });
         }
-        res.json(club);
+        // owner can invite
+        const clubObj = club.toObject();
+        if (!isOwner) delete clubObj.inviteToken;
+        res.json(clubObj);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch club' });
     }
@@ -73,7 +76,7 @@ router.patch('/:id', auth, async (req, res) => {
         if (name !== undefined) club.name = name.trim();
         if (description !== undefined) club.description = description.trim();
         if (isPrivate !== undefined) club.isPrivate = !!isPrivate;
-        if (coverImage !== undefined) club.coverImage = coverImage.trim() || undefined;
+        if (coverImage !== undefined) club.coverImage = coverImage;
         await club.save();
         res.json(club);
     } catch (err) {
@@ -81,7 +84,7 @@ router.patch('/:id', auth, async (req, res) => {
     }
 });
 
-// DELETE /api/bookclubs/:id — delete club (owner only)
+// DELETE /api/bookclubs/:id — owner only
 router.delete('/:id', auth, async (req, res) => {
     try {
         const club = await BookClub.findById(req.params.id);
@@ -89,14 +92,11 @@ router.delete('/:id', auth, async (req, res) => {
         if (club.owner.toString() !== req.userId) {
             return res.status(403).json({ error: 'Only the club owner can delete this.' });
         }
-
-        // delete the club and all associated data
         await Promise.all([
             BookClub.findByIdAndDelete(req.params.id),
             VoteSession.deleteMany({ club: req.params.id }),
             ClubPost.deleteMany({ club: req.params.id }),
         ]);
-
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: 'Failed to delete club' });
@@ -128,7 +128,7 @@ router.post('/:id/leave', auth, async (req, res) => {
         const club = await BookClub.findById(req.params.id);
         if (!club) return res.status(404).json({ error: 'Club not found' });
         if (club.owner.toString() === req.userId) {
-            return res.status(400).json({ error: 'The club owner cannot leave. Transfer ownership or delete the club.' });
+            return res.status(400).json({ error: 'The owner cannot leave. Transfer ownership or delete the club.' });
         }
         club.members = club.members.filter(m => m.toString() !== req.userId);
         await club.save();
@@ -138,12 +138,58 @@ router.post('/:id/leave', auth, async (req, res) => {
     }
 });
 
-// ── Voting ─────────────────────────────────────────────────────────────────────
+// GET /api/bookclubs/invite/:token — get club info by invite token
+router.get('/invite/:token', auth, async (req, res) => {
+    try {
+        const club = await BookClub.findOne({ inviteToken: req.params.token })
+            .populate('owner', 'username displayName avatar')
+            .populate('members', '_id');
+        if (!club) return res.status(404).json({ error: 'Invalid or expired invite link, please speak to club owner to request a new one!' });
+        const { inviteToken, ...safe } = club.toObject();
+        res.json(safe);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch club by invite token' });
+    }
+});
+
+// POST /api/bookclubs/invite/:token/join — join club via invite token
+router.post('/invite/:token/join', auth, async (req, res) => {
+    try {
+        const club = await BookClub.findOne({ inviteToken: req.params.token });
+        if (!club) return res.status(404).json({ error: 'Invalid or expired invite link, please speak to club owner to request a new one!' });
+        const alreadyMember = club.members.some(m => m.toString() === req.userId);
+        if (!alreadyMember) {
+            club.members.push(req.userId);
+            club.lastActivity = new Date();
+            await club.save();
+        }
+        res.json({ clubId: club._id });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to join club by invite token' });
+    }
+});
+
+// POST /api/bookclubs/:id/invite/regenerate — owner regenerates invite token
+router.post('/:id/invite/regenerate', auth, async (req, res) => {
+    try {
+        const club = await BookClub.findById(req.params.id);
+        if (!club) return res.status(404).json({ error: 'Club not found' });
+        if (club.owner.toString() !== req.userId) {
+            return res.status(403).json({ error: 'Only the club owner can regenerate the invite link.' });
+        }
+        const crypto = require('crypto');
+        club.inviteToken = crypto.randomBytes(20).toString('hex');
+        await club.save();
+        res.json({ inviteToken: club.inviteToken });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to regenerate invite token' });
+    }
+});
 
 // GET /api/bookclubs/:id/votes/current
 router.get('/:id/votes/current', auth, async (req, res) => {
     try {
-        const month = new Date().toISOString().slice(0, 7); // e.g. "2026-03"
+        const month = new Date().toISOString().slice(0, 7);
         let session = await VoteSession.findOne({ club: req.params.id, month })
             .populate('nominations.nominatedBy', 'username displayName avatar');
         if (!session) {
@@ -159,11 +205,11 @@ router.get('/:id/votes/current', auth, async (req, res) => {
 router.post('/:id/votes/nominate', auth, async (req, res) => {
     try {
         const month = new Date().toISOString().slice(0, 7);
-        const { book } = req.body; // { openLibraryId, title, author, coverUrl, firstPublishYear }
+        const { book } = req.body;
         if (!book?.openLibraryId || !book?.title) {
             return res.status(400).json({ error: 'Book data is required.' });
         }
-        // Verify requester is a member
+
         const club = await BookClub.findById(req.params.id);
         if (!club) return res.status(404).json({ error: 'Club not found' });
         const isMember = club.members.some(m => m.toString() === req.userId);
@@ -173,14 +219,35 @@ router.post('/:id/votes/nominate', auth, async (req, res) => {
         if (!session) {
             session = await VoteSession.create({ club: req.params.id, month, nominations: [] });
         }
-        if (!session.isOpen) return res.status(400).json({ error: 'Voting is closed for this month.' });
-        const alreadyNominated = session.nominations.some(n => n.book.openLibraryId === book.openLibraryId);
-        if (alreadyNominated) return res.status(400).json({ error: 'This book has already been nominated.' });
 
-        session.nominations.push({ book, nominatedBy: req.userId, votes: [] });
+        if (session.status !== 'open') {
+            return res.status(400).json({ error: 'Nominations are closed for this month.' });
+        }
+
+        const userNomCount = session.nominations.filter(n =>
+            n.nominatedBy.some(uid => uid.toString() === req.userId)
+        ).length;
+        if (userNomCount >= NOMINATION_LIMIT) {
+            return res.status(400).json({ error: `You can only nominate ${NOMINATION_LIMIT} books per month.` });
+        }
+
+        const existingNomination = session.nominations.find(n =>
+            n.book.openLibraryId === book.openLibraryId
+        );
+        if (existingNomination) {
+            const alreadyNominatedByUser = existingNomination.nominatedBy.some(
+                uid => uid.toString() === req.userId
+            );
+            if (alreadyNominatedByUser) {
+                return res.status(400).json({ error: 'You already nominated this book.' });
+            }
+            existingNomination.nominatedBy.push(req.userId);
+        } else {
+            session.nominations.push({ book, nominatedBy: [req.userId] });
+        }
+
         await session.save();
         await BookClub.findByIdAndUpdate(req.params.id, { lastActivity: new Date() });
-
         await session.populate('nominations.nominatedBy', 'username displayName avatar');
         res.json(session);
     } catch (err) {
@@ -188,32 +255,65 @@ router.post('/:id/votes/nominate', auth, async (req, res) => {
     }
 });
 
-// POST /api/bookclubs/:id/votes/:nominationId/vote
-router.post('/:id/votes/:nominationId/vote', auth, async (req, res) => {
+// PATCH /api/bookclubs/:id/votes/current/close — owner closes nominations
+router.patch('/:id/votes/current/close', auth, async (req, res) => {
     try {
+        const club = await BookClub.findById(req.params.id);
+        if (!club) return res.status(404).json({ error: 'Club not found' });
+        if (club.owner.toString() !== req.userId) {
+            return res.status(403).json({ error: 'Only the club owner can close nominations.' });
+        }
+
         const month = new Date().toISOString().slice(0, 7);
         const session = await VoteSession.findOne({ club: req.params.id, month });
-        if (!session) return res.status(404).json({ error: 'No active vote session.' });
-        if (!session.isOpen) return res.status(400).json({ error: 'Voting is closed.' });
+        if (!session) return res.status(404).json({ error: 'No active session found.' });
+        if (session.nominations.length === 0) {
+            return res.status(400).json({ error: 'Cannot close nominations — no books have been nominated yet.' });
+        }
 
-        // Remove existing vote from all nominations (one vote per user)
-        session.nominations.forEach(n => {
-            n.votes = n.votes.filter(v => v.toString() !== req.userId);
-        });
-        const nomination = session.nominations.id(req.params.nominationId);
-        if (!nomination) return res.status(404).json({ error: 'Nomination not found.' });
-        nomination.votes.push(req.userId);
+        session.status = 'closed';
         await session.save();
-        await BookClub.findByIdAndUpdate(req.params.id, { lastActivity: new Date() });
-
         await session.populate('nominations.nominatedBy', 'username displayName avatar');
         res.json(session);
     } catch (err) {
-        res.status(500).json({ error: 'Failed to cast vote' });
+        res.status(500).json({ error: 'Failed to close nominations' });
     }
 });
 
-// ── Discussion Posts ───────────────────────────────────────────────────────────
+// POST /api/bookclubs/:id/votes/current/winner — owner saves the spin result
+router.post('/:id/votes/current/winner', auth, async (req, res) => {
+    try {
+        const club = await BookClub.findById(req.params.id);
+        if (!club) return res.status(404).json({ error: 'Club not found' });
+        if (club.owner.toString() !== req.userId) {
+            return res.status(403).json({ error: 'Only the club owner can confirm the winner.' });
+        }
+
+        const { openLibraryId } = req.body;
+        if (!openLibraryId) return res.status(400).json({ error: 'Winner book ID is required.' });
+
+        const month = new Date().toISOString().slice(0, 7);
+        const session = await VoteSession.findOne({ club: req.params.id, month });
+        if (!session) return res.status(404).json({ error: 'No active session found.' });
+        if (session.status !== 'closed') {
+            return res.status(400).json({ error: 'Nominations must be closed before selecting a winner.' });
+        }
+
+        const winningNomination = session.nominations.find(n =>
+            n.book.openLibraryId === openLibraryId
+        );
+        if (!winningNomination) return res.status(404).json({ error: 'Winning book not found in nominations.' });
+
+        session.winner = winningNomination.book;
+        session.status = 'winner_selected';
+        await session.save();
+        await BookClub.findByIdAndUpdate(req.params.id, { lastActivity: new Date() });
+        await session.populate('nominations.nominatedBy', 'username displayName avatar');
+        res.json(session);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to save winner' });
+    }
+});
 
 // GET /api/bookclubs/:id/posts
 router.get('/:id/posts', auth, async (req, res) => {
@@ -222,7 +322,6 @@ router.get('/:id/posts', auth, async (req, res) => {
         if (!club) return res.status(404).json({ error: 'Club not found' });
         const isMember = club.members.some(m => m.toString() === req.userId);
         if (club.isPrivate && !isMember) return res.status(403).json({ error: 'Private club.' });
-
         const posts = await ClubPost.find({ club: req.params.id })
             .sort({ createdAt: -1 })
             .populate('author', 'username displayName avatar')
@@ -239,13 +338,10 @@ router.post('/:id/posts', auth, async (req, res) => {
         const { title, content } = req.body;
         if (!title?.trim()) return res.status(400).json({ error: 'Title is required.' });
         if (!content?.trim()) return res.status(400).json({ error: 'Content is required.' });
-
-        // Verify membership
         const club = await BookClub.findById(req.params.id);
         if (!club) return res.status(404).json({ error: 'Club not found' });
         const isMember = club.members.some(m => m.toString() === req.userId);
         if (!isMember) return res.status(403).json({ error: 'You must be a member to post.' });
-
         const post = await ClubPost.create({
             club: req.params.id,
             author: req.userId,
@@ -265,20 +361,15 @@ router.post('/:id/posts/:postId/reply', auth, async (req, res) => {
     try {
         const { content } = req.body;
         if (!content?.trim()) return res.status(400).json({ error: 'Reply content is required.' });
-
-        // Verify membership
         const club = await BookClub.findById(req.params.id);
         if (!club) return res.status(404).json({ error: 'Club not found' });
         const isMember = club.members.some(m => m.toString() === req.userId);
         if (!isMember) return res.status(403).json({ error: 'You must be a member to reply.' });
-
         const post = await ClubPost.findById(req.params.postId);
         if (!post) return res.status(404).json({ error: 'Post not found.' });
-
         post.replies.push({ author: req.userId, content: content.trim() });
         await post.save();
         await BookClub.findByIdAndUpdate(req.params.id, { lastActivity: new Date() });
-
         await post.populate('author', 'username displayName avatar');
         await post.populate('replies.author', 'username displayName avatar');
         res.json(post);

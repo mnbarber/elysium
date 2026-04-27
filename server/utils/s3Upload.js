@@ -69,6 +69,26 @@ const uploadBookCover = multer({
     }
 });
 
+const uploadClubCover = multer({
+    storage: multerS3({
+        s3: s3,
+        bucket: process.env.AWS_S3_BUCKET,
+        contentType: multerS3.AUTO_CONTENT_TYPE,
+        metadata: function (req, file, cb) {
+            cb(null, { fieldName: file.fieldname });
+        },
+        key: function (req, file, cb) {
+            const fileExtension = file.mimetype.split('/')[1];
+            const fileName = `club-covers/${uuidv4()}.${fileExtension}`;
+            cb(null, fileName);
+        }
+    }),
+    fileFilter: imageFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    }
+});
+
 const deleteFromS3 = async (fileUrl) => {
     try {
         const url = new URL(fileUrl);
@@ -90,6 +110,7 @@ const deleteFromS3 = async (fileUrl) => {
 module.exports = {
     uploadProfilePicture,
     uploadBookCover,
+    uploadClubCover,
     deleteFromS3,
     s3
 };

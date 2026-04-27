@@ -113,6 +113,21 @@
     display: inline-block;
 }
 
+.btn-join-club {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+    background-color: #7255da;
+    color: white;
+}
+
 .book-club-page__btn--primary {
     background: #5d55da;
     color: #fff;

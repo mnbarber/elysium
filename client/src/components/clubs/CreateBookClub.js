@@ -9,7 +9,8 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 export default function CreateBookClubPage() {
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
-
+    const [imagePreview, setImagePreview] = useState('');
+    const [imageFile, setImageFile] = useState(null);
     const [form, setForm] = useState({
         name: '',
         description: '',
@@ -37,9 +38,6 @@ export default function CreateBookClubPage() {
         else if (form.name.trim().length < 3) errs.name = 'Name must be at least 3 characters.';
         else if (form.name.trim().length > 80) errs.name = 'Name must be 80 characters or fewer.';
         if (form.description.length > 500) errs.description = 'Description must be 500 characters or fewer.';
-        if (form.coverImage && !/^https?:\/\/.+/.test(form.coverImage.trim())) {
-            errs.coverImage = 'Cover image must be a valid URL starting with http:// or https://';
-        }
         return errs;
     };
 
@@ -49,6 +47,24 @@ export default function CreateBookClubPage() {
         if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const errs = validate();
@@ -56,11 +72,22 @@ export default function CreateBookClubPage() {
         setSubmitting(true);
         setServerError('');
         try {
+            let coverImage = form.coverImage;
+
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('image', imageFile);
+
+                const uploadRes = await axios.post(`${API_URL}/upload/club-cover`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                coverImage = uploadRes.data.imageUrl;
+            }
             const res = await axios.post(`${API_URL}/bookclubs`, {
                 name: form.name.trim(),
                 description: form.description.trim(),
                 isPrivate: form.isPrivate,
-                coverImage: form.coverImage.trim() || undefined,
+                coverImage,
             });
             console.log('Book club created successfully:', res.data);
             navigate(`/bookclubs/${res.data._id}`);
@@ -141,28 +168,31 @@ export default function CreateBookClubPage() {
                         {errors.description && <span className="create-club-field-error">{errors.description}</span>}
                     </div>
 
-                    <div className={`create-club-field ${errors.coverImage ? 'create-club-field--error' : ''}`}>
-                        <label className="create-club-label" htmlFor="coverImage">Cover Image URL</label>
-                        <input
-                            id="coverImage"
-                            name="coverImage"
-                            type="url"
-                            className="create-club-input"
-                            placeholder="https://..."
-                            value={form.coverImage}
-                            onChange={handleChange}
-                        />
-                        {errors.coverImage && <span className="create-club-field-error">{errors.coverImage}</span>}
-                        {form.coverImage && !errors.coverImage && (
-                            <div className="create-club-cover-preview">
-                                <img
-                                    src={form.coverImage}
-                                    alt="Cover preview"
-                                    onError={e => { e.target.style.display = 'none'; }}
-                                />
+                    <div className="club-modal__field">
+                                <label className="club-modal__label">Cover Image</label>
+                                <div className='image-upload-section'>
+                                    {(imagePreview || form.coverImage) && (
+                                        <img
+                                            src={imagePreview || form.coverImage}
+                                            alt="Cover preview"
+                                            className="image-preview"
+                                        />
+                                    )}
+                                    <div className="file-upload-box">
+                                        <input
+                                            type="file"
+                                            id="cover-file-input"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="hidden-file-input"
+                                        />
+                                        <label htmlFor="cover-file-input" className="file-upload-label">
+                                            <span className="upload-icon">📁</span>
+                                            <span className="upload-text">Choose Image</span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
-                        )}
-                    </div>
 
                     <div className="create-club-field">
                         <label className="create-club-label">Visibility</label>

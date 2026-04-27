@@ -27,7 +27,11 @@ const bookClubSchema = new mongoose.Schema({
     lastActivity: {
         type: Date,
         default: Date.now
-    }
+    },
+    inviteToken: {
+        type: String,
+        default: () => require('crypto').randomBytes(20).toString('hex')
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('BookClub', bookClubSchema);

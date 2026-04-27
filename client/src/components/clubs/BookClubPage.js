@@ -19,6 +19,8 @@ export default function BookClubPage() {
     const [error, setError] = useState('');
     const [editOpen, setEditOpen] = useState(false);
     const [editForm, setEditForm] = useState({ name: '', description: '', isPrivate: false, coverImage: '' });
+    const [imagePreview, setImagePreview] = useState('');
+    const [imageFile, setImageFile] = useState(null);
     const [editSubmitting, setEditSubmitting] = useState(false);
     const [editError, setEditError] = useState('');
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -51,20 +53,50 @@ export default function BookClubPage() {
         setEditForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         if (!editForm.name.trim()) { setEditError('Club name is required.'); return; }
         setEditSubmitting(true);
         setEditError('');
         try {
+
+            let coverImage = editForm.coverImage;
+
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('image', imageFile);
+
+                const uploadRes = await axios.post(`${API_URL}/upload/club-cover`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                coverImage = uploadRes.data.imageUrl;
+            }
+
             const res = await axios.patch(`${API_URL}/bookclubs/${id}`, {
-                name: editForm.name.trim(),
-                description: editForm.description.trim(),
-                isPrivate: editForm.isPrivate,
-                coverImage: editForm.coverImage.trim() || undefined,
+                ...editForm,
+                coverImage
             });
             setClub(res.data);
             setEditOpen(false);
+            console.log('Selected image file uploaded successfully!');
         } catch (err) {
             setEditError(err.response?.data?.error || 'Failed to update club.');
         } finally {
@@ -81,6 +113,15 @@ export default function BookClubPage() {
         } catch (err) {
             setDeleteError(err.response?.data?.error || 'Failed to delete club.');
             setDeleteSubmitting(false);
+        }
+    };
+
+    const joinClub = async () => {
+        try {
+            await axios.post(`${API_URL}/bookclubs/${id}/join`);
+            alert('Successfully joined the club!');
+        } catch (err) {
+            alert(err.response?.data?.error || 'Error joining club');
         }
     };
 
@@ -125,6 +166,11 @@ export default function BookClubPage() {
                             👥 {club.members.length} {club.members.length === 1 ? 'member' : 'members'}
                         </span>
                     </div>
+                    <div>
+                        <button className="btn-join-club" onClick={joinClub} disabled={!user || club.members.some(m => m._id === user._id)}>
+                            Join Club
+                        </button>
+                    </div>
 
                     {isOwner && (
                         <div className="book-club-page__actions">
@@ -153,7 +199,7 @@ export default function BookClubPage() {
 
             <div className="book-club-page__panel">
                 {tab === 'discussion' && <DiscussionBoard clubId={id} />}
-                {tab === 'voting'     && <VotingPanel clubId={id} />}
+                {tab === 'voting'     && <VotingPanel clubId={id} isOwner={isOwner} />}
                 {tab === 'members'    && (
                     <>
                         <h2 className="book-club-page__members-heading">Members</h2>
@@ -219,15 +265,29 @@ export default function BookClubPage() {
                             </div>
 
                             <div className="club-modal__field">
-                                <label className="club-modal__label">Cover Image URL</label>
-                                <input
-                                    name="coverImage"
-                                    type="url"
-                                    className="club-modal__input"
-                                    value={editForm.coverImage}
-                                    onChange={handleEditChange}
-                                    placeholder="https://..."
-                                />
+                                <label className="club-modal__label">Cover Image</label>
+                                <div className='image-upload-section'>
+                                    {(imagePreview || editForm.coverImage) && (
+                                        <img
+                                            src={imagePreview || editForm.coverImage}
+                                            alt="Cover preview"
+                                            className="image-preview"
+                                        />
+                                    )}
+                                    <div className="file-upload-box">
+                                        <input
+                                            type="file"
+                                            id="cover-file-input"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="hidden-file-input"
+                                        />
+                                        <label htmlFor="cover-file-input" className="file-upload-label">
+                                            <span className="upload-icon">📁</span>
+                                            <span className="upload-text">Choose Image</span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="club-modal__field club-modal__field--row">
