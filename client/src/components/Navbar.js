@@ -70,6 +70,7 @@ function Navbar() {
                         <Link to="/search" onClick={closeMobileMenu}>Search Books</Link>
                         <Link to="/browse" onClick={closeMobileMenu}>Browse</Link>
                         <Link to="/lists/browse" onClick={closeMobileMenu}>Lists</Link>
+                        <Link to="/bookclubs" onClick={closeMobileMenu}>Book Clubs</Link>
                         <Link to="/discover" onClick={closeMobileMenu}>Discover</Link>
                         <Link to="/libraries" onClick={closeMobileMenu}>Libraries</Link>
                         <Link to={`/profile/${user.username}`} onClick={closeMobileMenu}>Profile</Link>

@@ -1,0 +1,246 @@
+.post-thread {
+    background: rgb(184, 165, 236);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.post-thread:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.18);
+}
+
+.post-thread__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.post-avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.post-avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 50%;
+}
+
+.post-thread__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.post-thread__author {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.post-thread__time {
+    font-size: 12px;
+    color: #131313;
+}
+
+.post-thread__body {
+    margin-bottom: 16px;
+}
+
+.post-thread__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 8px;
+    line-height: 1.35;
+}
+
+.post-thread__content {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #222222;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.post-thread__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #5d55da;
+    padding: 6px 0;
+    border-radius: 4px;
+    transition: opacity 0.2s;
+}
+
+.post-thread__toggle:hover {
+    opacity: 0.7;
+}
+
+.post-thread__replies {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(102, 126, 234, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.replies-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.reply {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.reply__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.reply__meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.reply__author {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.reply__time {
+    font-size: 11px;
+    color: #131313;
+}
+
+.reply__content {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #222222;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.reply-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.reply-form__input-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.reply-form__textarea {
+    width: 100%;
+    padding: 9px 13px;
+    border: 2px solid #b8a3eb;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: #1a1a1a;
+    background: rgb(177, 150, 226);
+    resize: none;
+    overflow: hidden;
+    min-height: 38px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.reply-form__textarea::placeholder {
+    color: #444;
+}
+
+.reply-form__textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.reply-form__error {
+    font-size: 12px;
+    color: #cc0000;
+}
+
+.reply-form__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reply-form__char {
+    font-size: 11px;
+    color: #131313;
+}
+
+.reply-form__submit {
+    padding: 7px 18px;
+    background: #5d55da;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    height: 32px;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.reply-form__submit:hover:not(:disabled) {
+    background: #5568d3;
+    transform: translateY(-1px);
+}
+
+.reply-form__submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.reply-form__signin-note {
+    font-size: 13px;
+    color: #222222;
+    margin: 0;
+}
+
+.reply-spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: reply-spin 0.65s linear infinite;
+}
+
+@keyframes reply-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

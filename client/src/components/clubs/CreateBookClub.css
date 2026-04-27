@@ -1,0 +1,318 @@
+.create-club-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.create-club-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.create-club-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #5d55da;
+    text-decoration: none;
+    margin-bottom: 24px;
+    transition: color 0.2s;
+}
+
+.create-club-back:hover {
+    color: #764ba2;
+}
+
+.create-club-auth-gate {
+    text-align: center;
+    padding: 60px 20px;
+    color: #222222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.create-club-header {
+    background: rgb(177, 150, 226);
+    padding: 32px 40px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.create-club-header__icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+.create-club-header__title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 4px;
+}
+
+.create-club-header__subtitle {
+    font-size: 14px;
+    color: #222222;
+    margin: 0;
+}
+
+.create-club-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    background: rgb(177, 150, 226);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.create-club-error-banner {
+    background: #fdecea;
+    border: 1px solid #f5c6c2;
+    color: #cc0000;
+    font-size: 13px;
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+
+.create-club-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.create-club-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.create-club-required {
+    color: #667eea;
+}
+
+.create-club-char-count {
+    font-weight: 400;
+    font-size: 12px;
+    color: #131313;
+    transition: color 0.2s;
+}
+
+.create-club-input,
+.create-club-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #b8a3eb;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1a1a1a;
+    background: rgb(184, 165, 236);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.create-club-input::placeholder,
+.create-club-textarea::placeholder {
+    color: #444;
+}
+
+.create-club-input:focus,
+.create-club-textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.create-club-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.create-club-field--error .create-club-input,
+.create-club-field--error .create-club-textarea {
+    border-color: #cc0000;
+}
+
+.create-club-field-error {
+    font-size: 12px;
+    color: #cc0000;
+}
+
+.create-club-cover-preview {
+    margin-top: 8px;
+    width: 100%;
+    height: 140px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #b8a3eb;
+}
+
+.create-club-cover-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.create-club-visibility {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.visibility-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    border: 2px solid #b8a3eb;
+    border-radius: 8px;
+    background: rgb(184, 165, 236);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s, background 0.2s;
+    color: #1a1a1a;
+}
+
+.visibility-option:hover {
+    border-color: #667eea;
+}
+
+.visibility-option--active {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.visibility-option svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #5d55da;
+}
+
+.visibility-option div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.visibility-option strong {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.visibility-option span {
+    font-size: 12px;
+    color: #222222;
+    line-height: 1.4;
+}
+
+.create-club-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 6px;
+}
+
+.create-club-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    transition: background 0.3s, transform 0.3s;
+    white-space: nowrap;
+}
+
+.create-club-btn:active {
+    transform: scale(0.98);
+}
+
+.create-club-btn--primary {
+    background: #5d55da;
+    color: #fff;
+}
+
+.create-club-btn--primary:hover:not(:disabled) {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+.create-club-btn--primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.create-club-btn--secondary {
+    background: transparent;
+    color: #222222;
+    border: 2px solid #b8a3eb;
+}
+
+.create-club-btn--secondary:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.create-club-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: cc-spin 0.65s linear infinite;
+}
+
+@keyframes cc-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 500px) {
+    .create-club-form {
+        padding: 22px;
+    }
+
+    .create-club-header {
+        padding: 22px;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .create-club-visibility {
+        grid-template-columns: 1fr;
+    }
+
+    .create-club-actions {
+        flex-direction: column-reverse;
+    }
+
+    .create-club-btn {
+        justify-content: center;
+    }
+}

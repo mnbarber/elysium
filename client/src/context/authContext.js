@@ -50,7 +50,6 @@ export const AuthProvider = ({ children }) => {
     console.log('Fetching user data with token');
     try {
       const response = await axios.get(`${API_URL}/auth/me`);
-      console.log('User data received:', response.data);
       setUser(response.data);
       localStorage.setItem('userId', response.data._id);
     } catch (error) {
