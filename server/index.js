@@ -8,41 +8,46 @@ const { Server } = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3001',
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
-});
-
 // ===== MIDDLEWARE =====
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'https://elysiumbooks.app/',
+  // Capacitor Android/iOS apps load the bundle from these origins, not a real domain
+  'https://localhost',
+  'capacitor://localhost',
   process.env.CLIENT_URL
 ].filter(Boolean);
 
 console.log('Allowed origins:', allowedOrigins);
 
+const corsOriginCheck = function(origin, callback) {
+  if (!origin) return callback(null, true);
+
+  const isAllowed = allowedOrigins.some(allowedOrigin => {
+    const normalizedAllowed = allowedOrigin.replace(/\/$/, '');
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    return normalizedAllowed === normalizedOrigin;
+  });
+
+  if (isAllowed) {
+    return callback(null, true);
+  }
+
+  console.log('CORS blocked origin:', origin);
+  return callback(new Error('Not allowed by CORS'), false);
+};
+
+const io = new Server(server, {
+  cors: {
+    origin: corsOriginCheck,
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      const normalizedAllowed = allowedOrigin.replace(/\/$/, '');
-      const normalizedOrigin = origin.replace(/\/$/, '');
-      return normalizedAllowed === normalizedOrigin;
-    });
-    
-    if (isAllowed) {
-      return callback(null, true);
-    }
-    
-    console.log('CORS blocked origin:', origin);
-    return callback(new Error('Not allowed by CORS'), false);
-  },
+  origin: corsOriginCheck,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
